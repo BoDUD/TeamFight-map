@@ -251,12 +251,38 @@ def is_inside_repo(path: Path) -> bool:
         return False
 
 
-def ensure_evidence_path_is_outside_repo(path: Path) -> None:
+def ensure_path_is_outside_repo(path: Path, label: str) -> None:
     if is_inside_repo(path):
-        raise SystemExit(f"Refusing to write map_setting round-trip evidence inside the repository: {path}")
+        raise SystemExit(f"Refusing to use repository-internal {label} path for map_setting round-trip: {path}")
 
 
-def build_manifest(input_path: Path, output_path: Path, data: bytes, encoded: bytes, document: MapSettingDocument) -> dict[str, Any]:
+def paths_are_same_existing_file(left: Path, right: Path) -> bool:
+    if not left.exists() or not right.exists():
+        return False
+    try:
+        return left.samefile(right)
+    except OSError:
+        return False
+
+
+def ensure_distinct_round_trip_paths(paths: dict[str, Path]) -> None:
+    labels = list(paths)
+    for index, left_label in enumerate(labels):
+        left = paths[left_label]
+        for right_label in labels[index + 1 :]:
+            right = paths[right_label]
+            if left == right or paths_are_same_existing_file(left, right):
+                raise SystemExit("Input, output, and manifest paths must be distinct.")
+
+
+def build_manifest(
+    input_path: Path,
+    output_path: Path,
+    manifest_path: Path,
+    data: bytes,
+    encoded: bytes,
+    document: MapSettingDocument,
+) -> dict[str, Any]:
     diff = first_difference(data, encoded)
     byte_identical = diff is None
     return {
@@ -264,6 +290,7 @@ def build_manifest(input_path: Path, output_path: Path, data: bytes, encoded: by
         "result": "pass" if byte_identical else "fail",
         "input_path": str(input_path),
         "output_path": str(output_path),
+        "manifest_path": str(manifest_path),
         "input_size": len(data),
         "output_size": len(encoded),
         "input_sha256": sha256_bytes(data),
@@ -278,8 +305,9 @@ def build_manifest(input_path: Path, output_path: Path, data: bytes, encoded: by
             "trailing_bytes": 0,
         },
         "safety": {
-            "raw_input_committed_to_repository": False,
-            "raw_output_committed_to_repository": False,
+            "input_path_inside_repository": is_inside_repo(input_path),
+            "output_path_inside_repository": is_inside_repo(output_path),
+            "manifest_path_inside_repository": is_inside_repo(manifest_path),
             "field_mutations": False,
             "decode_scope": "structural framing only: chunked binary layer plus packed4 layer envelopes; gameplay fields remain uninterpreted",
         },
@@ -299,8 +327,11 @@ def round_trip_file(
     output_path = (output_path or evidence_dir / "map_setting.roundtrip.map_setting").resolve()
     manifest_path = (manifest_path or evidence_dir / "map_setting_round_trip_manifest.json").resolve()
 
-    ensure_evidence_path_is_outside_repo(output_path)
-    ensure_evidence_path_is_outside_repo(manifest_path)
+    ensure_path_is_outside_repo(input_path, "input")
+    ensure_path_is_outside_repo(output_path, "output")
+    ensure_path_is_outside_repo(manifest_path, "manifest")
+    ensure_distinct_round_trip_paths({"input": input_path, "output": output_path, "manifest": manifest_path})
+
     evidence_dir.mkdir(parents=True, exist_ok=True)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -314,8 +345,9 @@ def round_trip_file(
     document = decode_map_setting(data)
     encoded = encode_map_setting(document)
     output_path.write_bytes(encoded)
+    persisted = output_path.read_bytes()
 
-    manifest = build_manifest(input_path, output_path, data, encoded, document)
+    manifest = build_manifest(input_path, output_path, manifest_path, data, persisted, document)
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
 
     if not manifest["byte_identical"]:

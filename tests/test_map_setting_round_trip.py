@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import struct
 import tempfile
 import unittest
@@ -120,6 +121,9 @@ class MapSettingRoundTripTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(), output.read_bytes())
             self.assertTrue(manifest["byte_identical"])
             self.assertFalse(manifest["safety"]["field_mutations"])
+            self.assertFalse(manifest["safety"]["input_path_inside_repository"])
+            self.assertFalse(manifest["safety"]["output_path_inside_repository"])
+            self.assertFalse(manifest["safety"]["manifest_path_inside_repository"])
             self.assertEqual("pass", json.loads(manifest_path.read_text(encoding="utf-8"))["result"])
 
     def test_first_difference_reports_offset_and_context(self) -> None:
@@ -131,6 +135,17 @@ class MapSettingRoundTripTests(unittest.TestCase):
         self.assertEqual(6, diff["input_size"])
         self.assertEqual("61 62 63 64 65 66", diff["input_context_hex"])
         self.assertEqual("61 62 63 78 65 66", diff["output_context_hex"])
+
+    def test_round_trip_refuses_repo_internal_input(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(SystemExit) as raised:
+                map_setting_round_trip.round_trip_file(
+                    input_path=map_setting_round_trip.REPO_ROOT / "README.md",
+                    evidence_dir=Path(temp_dir) / "evidence",
+                    expected_sha256=None,
+                )
+
+            self.assertIn("repository-internal input path", str(raised.exception))
 
     def test_round_trip_refuses_repo_evidence_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -144,7 +159,67 @@ class MapSettingRoundTripTests(unittest.TestCase):
                     expected_sha256=map_setting_round_trip.sha256_file(source),
                 )
 
-            self.assertIn("inside the repository", str(raised.exception))
+            self.assertIn("repository-internal output path", str(raised.exception))
+
+    def assert_path_conflict_preserves_input(
+        self,
+        output_name: str,
+        manifest_name: str,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "map_setting"
+            evidence_dir = root / "evidence"
+            output_path = source if output_name == "input" else root / output_name
+            manifest_path = source if manifest_name == "input" else root / manifest_name
+            original = synthetic_map_setting()
+            source.write_bytes(original)
+
+            with self.assertRaises(SystemExit) as raised:
+                map_setting_round_trip.round_trip_file(
+                    input_path=source,
+                    evidence_dir=evidence_dir,
+                    output_path=output_path,
+                    manifest_path=manifest_path,
+                    expected_sha256=map_setting_round_trip.sha256_file(source),
+                )
+
+            self.assertIn("must be distinct", str(raised.exception))
+            self.assertEqual(original, source.read_bytes())
+
+    def test_round_trip_refuses_output_input_conflict(self) -> None:
+        self.assert_path_conflict_preserves_input("input", "manifest.json")
+
+    def test_round_trip_refuses_manifest_input_conflict(self) -> None:
+        self.assert_path_conflict_preserves_input("out.bin", "input")
+
+    def test_round_trip_refuses_manifest_output_conflict(self) -> None:
+        self.assert_path_conflict_preserves_input("result.bin", "result.bin")
+
+    def test_round_trip_refuses_existing_hardlink_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "map_setting"
+            hardlink = root / "map_setting_hardlink"
+            manifest = root / "manifest.json"
+            original = synthetic_map_setting()
+            source.write_bytes(original)
+            try:
+                os.link(source, hardlink)
+            except OSError as exc:
+                self.skipTest(f"hardlinks are not available in this environment: {exc}")
+
+            with self.assertRaises(SystemExit) as raised:
+                map_setting_round_trip.round_trip_file(
+                    input_path=source,
+                    evidence_dir=root / "evidence",
+                    output_path=hardlink,
+                    manifest_path=manifest,
+                    expected_sha256=map_setting_round_trip.sha256_file(source),
+                )
+
+            self.assertIn("must be distinct", str(raised.exception))
+            self.assertEqual(original, source.read_bytes())
 
 
 if __name__ == "__main__":

@@ -1,0 +1,512 @@
+{
+  "schema_version": 1,
+  "map_id": "tfm2_lol_like_dual_core_river_four_quadrant_jungle",
+  "version": "0.1.0-graybox",
+  "design_source": {
+    "title": "《团战经理2》类 LOL 地图重构设计书",
+    "date": "2026-06-25",
+    "implementation_stage": "MVP graybox"
+  },
+  "coordinate_system": {
+    "origin": "top_left",
+    "unit": "normalized_0_100",
+    "bounds": {
+      "min": [0, 0],
+      "max": [100, 100]
+    },
+    "symmetry": "rotational_180"
+  },
+  "hard_constraints": {
+    "preserve_square_frame": true,
+    "preserve_base_centers": true,
+    "preserve_lane_centers_within_cells": 1,
+    "preserve_pit_centers": true,
+    "functional_brush_groups_min": 10,
+    "functional_brush_groups_max": 12,
+    "lane_to_river_gates_min": 6,
+    "lane_to_river_gates_max": 8,
+    "jungle_to_river_gates_per_half_jungle": 1,
+    "pit_entrances_per_pit": 2,
+    "target_average_match_minutes": [9, 12]
+  },
+  "runtime_requirements": {
+    "status": "not_implemented",
+    "original_map_baseline_required": [
+      "collision_mask",
+      "walkable_area",
+      "wall_polygons",
+      "brush_gameplay_mask",
+      "world_to_texture_transform"
+    ],
+    "target_max_total_passable_area_delta_pct": 8
+  },
+  "anchors": {
+    "BASE_BLUE": {
+      "name_zh": "蓝方基地",
+      "center": [8, 92],
+      "pair": "BASE_RED"
+    },
+    "BASE_RED": {
+      "name_zh": "红方基地",
+      "center": [92, 8],
+      "pair": "BASE_BLUE"
+    },
+    "BRIDGE_MID": {
+      "name_zh": "中路桥区",
+      "center": [50, 50],
+      "visibility": "open_public"
+    },
+    "PIT_MORGARD": {
+      "name_zh": "上河道目标坑",
+      "center": [28, 28],
+      "pair": "PIT_SERPEN"
+    },
+    "PIT_SERPEN": {
+      "name_zh": "下河道目标坑",
+      "center": [72, 72],
+      "pair": "PIT_MORGARD"
+    }
+  },
+  "lanes": [
+    {
+      "id": "LANE_TOP",
+      "name_zh": "上路",
+      "role": "solo_lane_resource_side",
+      "centerline": [[8, 92], [8, 8], [92, 8]],
+      "tower_ids": ["TOWER_BLUE_TOP_T2", "TOWER_BLUE_TOP_T1", "TOWER_RED_TOP_T1", "TOWER_RED_TOP_T2"],
+      "functional_brush_ids": ["BRUSH_TOP_BLUE_SIDE", "BRUSH_TOP_RED_SIDE"],
+      "region_links": ["BASE_BLUE", "JUNGLE_BLUE_TOP", "RIVER_TOP", "JUNGLE_RED_TOP", "BASE_RED"]
+    },
+    {
+      "id": "LANE_MID",
+      "name_zh": "中路",
+      "role": "shortest_support_axis",
+      "centerline": [[8, 92], [50, 50], [92, 8]],
+      "tower_ids": ["TOWER_BLUE_MID_T2", "TOWER_BLUE_MID_T1", "TOWER_RED_MID_T1", "TOWER_RED_MID_T2"],
+      "functional_brush_ids": [],
+      "region_links": ["BASE_BLUE", "JUNGLE_BLUE_TOP", "JUNGLE_BLUE_BOT", "BRIDGE_MID", "JUNGLE_RED_TOP", "JUNGLE_RED_BOT", "BASE_RED"],
+      "notes": ["Bridge center stays open and does not use functional brush."]
+    },
+    {
+      "id": "LANE_BOTTOM",
+      "name_zh": "下路",
+      "role": "duo_lane_serpen_side",
+      "centerline": [[8, 92], [92, 92], [92, 8]],
+      "tower_ids": ["TOWER_BLUE_BOT_T2", "TOWER_BLUE_BOT_T1", "TOWER_RED_BOT_T1", "TOWER_RED_BOT_T2"],
+      "functional_brush_ids": ["BRUSH_BOT_BLUE_SIDE", "BRUSH_BOT_RED_SIDE"],
+      "region_links": ["BASE_BLUE", "JUNGLE_BLUE_BOT", "RIVER_BOTTOM", "JUNGLE_RED_BOT", "BASE_RED"]
+    }
+  ],
+  "river": {
+    "main_axis": [[16, 15], [50, 50], [84, 85]],
+    "classification": "River",
+    "movement_bonus": {
+      "default": 0,
+      "optional_jungler_noncombat": 0.03
+    },
+    "zones": [
+      {
+        "id": "RIVER_TOP",
+        "name_zh": "上河道",
+        "center": [37, 37],
+        "pair": "RIVER_BOTTOM"
+      },
+      {
+        "id": "RIVER_BOTTOM",
+        "name_zh": "下河道",
+        "center": [63, 63],
+        "pair": "RIVER_TOP"
+      }
+    ],
+    "entrances": [
+      {
+        "id": "RIVER_ENTRY_BLUE_TOP_LANE",
+        "from": "LANE_TOP",
+        "to": "RIVER_TOP",
+        "center": [16, 36],
+        "pair": "RIVER_ENTRY_RED_BOTTOM_LANE"
+      },
+      {
+        "id": "RIVER_ENTRY_BLUE_MID_TOP",
+        "from": "LANE_MID",
+        "to": "RIVER_TOP",
+        "center": [43, 48],
+        "pair": "RIVER_ENTRY_RED_MID_BOTTOM"
+      },
+      {
+        "id": "RIVER_ENTRY_RED_TOP_LANE",
+        "from": "LANE_TOP",
+        "to": "RIVER_TOP",
+        "center": [64, 16],
+        "pair": "RIVER_ENTRY_BLUE_BOTTOM_LANE"
+      },
+      {
+        "id": "RIVER_ENTRY_RED_MID_TOP",
+        "from": "LANE_MID",
+        "to": "RIVER_TOP",
+        "center": [52, 43],
+        "pair": "RIVER_ENTRY_BLUE_MID_BOTTOM"
+      },
+      {
+        "id": "RIVER_ENTRY_BLUE_BOTTOM_LANE",
+        "from": "LANE_BOTTOM",
+        "to": "RIVER_BOTTOM",
+        "center": [36, 84],
+        "pair": "RIVER_ENTRY_RED_TOP_LANE"
+      },
+      {
+        "id": "RIVER_ENTRY_BLUE_MID_BOTTOM",
+        "from": "LANE_MID",
+        "to": "RIVER_BOTTOM",
+        "center": [48, 57],
+        "pair": "RIVER_ENTRY_RED_MID_TOP"
+      },
+      {
+        "id": "RIVER_ENTRY_RED_BOTTOM_LANE",
+        "from": "LANE_BOTTOM",
+        "to": "RIVER_BOTTOM",
+        "center": [84, 64],
+        "pair": "RIVER_ENTRY_BLUE_TOP_LANE"
+      },
+      {
+        "id": "RIVER_ENTRY_RED_MID_BOTTOM",
+        "from": "LANE_MID",
+        "to": "RIVER_BOTTOM",
+        "center": [57, 52],
+        "pair": "RIVER_ENTRY_BLUE_MID_TOP"
+      }
+    ]
+  },
+  "gates": [
+    {"id": "RIVER_ENTRY_BLUE_TOP_LANE", "kind": "lane_to_river", "from": "LANE_TOP", "to": "RIVER_TOP", "center": [16, 36], "width": 6, "pair": "RIVER_ENTRY_RED_BOTTOM_LANE"},
+    {"id": "RIVER_ENTRY_BLUE_MID_TOP", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_TOP", "center": [43, 48], "width": 7, "pair": "RIVER_ENTRY_RED_MID_BOTTOM"},
+    {"id": "RIVER_ENTRY_RED_TOP_LANE", "kind": "lane_to_river", "from": "LANE_TOP", "to": "RIVER_TOP", "center": [64, 16], "width": 6, "pair": "RIVER_ENTRY_BLUE_BOTTOM_LANE"},
+    {"id": "RIVER_ENTRY_RED_MID_TOP", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_TOP", "center": [52, 43], "width": 7, "pair": "RIVER_ENTRY_BLUE_MID_BOTTOM"},
+    {"id": "RIVER_ENTRY_BLUE_BOTTOM_LANE", "kind": "lane_to_river", "from": "LANE_BOTTOM", "to": "RIVER_BOTTOM", "center": [36, 84], "width": 6, "pair": "RIVER_ENTRY_RED_TOP_LANE"},
+    {"id": "RIVER_ENTRY_BLUE_MID_BOTTOM", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_BOTTOM", "center": [48, 57], "width": 7, "pair": "RIVER_ENTRY_RED_MID_TOP"},
+    {"id": "RIVER_ENTRY_RED_BOTTOM_LANE", "kind": "lane_to_river", "from": "LANE_BOTTOM", "to": "RIVER_BOTTOM", "center": [84, 64], "width": 6, "pair": "RIVER_ENTRY_BLUE_TOP_LANE"},
+    {"id": "RIVER_ENTRY_RED_MID_BOTTOM", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_BOTTOM", "center": [57, 52], "width": 7, "pair": "RIVER_ENTRY_BLUE_MID_TOP"},
+    {"id": "GATE_BLUE_TOP_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_BLUE_TOP", "to": "LANE_TOP", "center": [11, 54], "width": 5, "pair": "GATE_RED_BOT_LANE"},
+    {"id": "GATE_BLUE_TOP_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_BLUE_TOP", "to": "RIVER_TOP", "center": [34, 49], "width": 5, "pair": "GATE_RED_BOT_RIVER"},
+    {"id": "GATE_BLUE_BOT_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_BLUE_BOT", "to": "LANE_BOTTOM", "center": [52, 92], "width": 5, "pair": "GATE_RED_TOP_LANE"},
+    {"id": "GATE_BLUE_BOT_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_BLUE_BOT", "to": "RIVER_BOTTOM", "center": [56, 72], "width": 5, "pair": "GATE_RED_TOP_RIVER"},
+    {"id": "GATE_RED_TOP_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_RED_TOP", "to": "LANE_TOP", "center": [48, 8], "width": 5, "pair": "GATE_BLUE_BOT_LANE"},
+    {"id": "GATE_RED_TOP_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_RED_TOP", "to": "RIVER_TOP", "center": [44, 28], "width": 5, "pair": "GATE_BLUE_BOT_RIVER"},
+    {"id": "GATE_RED_BOT_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_RED_BOT", "to": "LANE_BOTTOM", "center": [89, 46], "width": 5, "pair": "GATE_BLUE_TOP_LANE"},
+    {"id": "GATE_RED_BOT_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_RED_BOT", "to": "RIVER_BOTTOM", "center": [66, 51], "width": 5, "pair": "GATE_BLUE_TOP_RIVER"},
+    {"id": "GATE_MORGARD_RIVER", "kind": "pit_entry", "from": "RIVER_TOP", "to": "PIT_MORGARD", "center": [35, 32], "width": 6, "pair": "GATE_SERPEN_RIVER"},
+    {"id": "GATE_MORGARD_LANE", "kind": "pit_entry", "from": "LANE_TOP", "to": "PIT_MORGARD", "center": [23, 19], "width": 4, "pair": "GATE_SERPEN_LANE"},
+    {"id": "GATE_SERPEN_RIVER", "kind": "pit_entry", "from": "RIVER_BOTTOM", "to": "PIT_SERPEN", "center": [65, 68], "width": 6, "pair": "GATE_MORGARD_RIVER"},
+    {"id": "GATE_SERPEN_LANE", "kind": "pit_entry", "from": "LANE_BOTTOM", "to": "PIT_SERPEN", "center": [77, 81], "width": 4, "pair": "GATE_MORGARD_LANE"}
+  ],
+  "jungle": {
+    "camps_per_team": 4,
+    "half_jungles": [
+      {
+        "id": "JUNGLE_BLUE_TOP",
+        "name_zh": "蓝方上半野区",
+        "team": "blue",
+        "center": [24, 61],
+        "pair": "JUNGLE_RED_BOT",
+        "main_loop": [[14, 75], [18, 58], [34, 49], [39, 63], [28, 73], [14, 75]],
+        "closed": true,
+        "min_path_width": 4,
+        "exits": [
+          {"gate_id": "GATE_BLUE_TOP_LANE", "to": "LANE_TOP", "center": [11, 54]},
+          {"gate_id": "GATE_BLUE_TOP_RIVER", "to": "RIVER_TOP", "center": [34, 49]}
+        ],
+        "adjacent_regions": ["LANE_MID"],
+        "camp_ids": ["CAMP_BLUE_TOP_ECON", "CAMP_BLUE_COMBAT_CORE"],
+        "invasion_shortcut_id": "INVASION_RED_BOT_TO_BLUE_TOP",
+        "dead_ends_allowed": false
+      },
+      {
+        "id": "JUNGLE_BLUE_BOT",
+        "name_zh": "蓝方下半野区",
+        "team": "blue",
+        "center": [48, 82],
+        "pair": "JUNGLE_RED_TOP",
+        "main_loop": [[31, 86], [46, 72], [60, 78], [56, 90], [40, 94], [31, 86]],
+        "closed": true,
+        "min_path_width": 4,
+        "exits": [
+          {"gate_id": "GATE_BLUE_BOT_LANE", "to": "LANE_BOTTOM", "center": [52, 92]},
+          {"gate_id": "GATE_BLUE_BOT_RIVER", "to": "RIVER_BOTTOM", "center": [56, 72]}
+        ],
+        "adjacent_regions": ["LANE_MID"],
+        "camp_ids": ["CAMP_BLUE_BOT_ECON", "CAMP_BLUE_SPIRIT_CORE"],
+        "invasion_shortcut_id": "INVASION_RED_TOP_TO_BLUE_BOT",
+        "dead_ends_allowed": false
+      },
+      {
+        "id": "JUNGLE_RED_TOP",
+        "name_zh": "红方上半野区",
+        "team": "red",
+        "center": [52, 18],
+        "pair": "JUNGLE_BLUE_BOT",
+        "main_loop": [[69, 14], [54, 28], [40, 22], [44, 10], [60, 6], [69, 14]],
+        "closed": true,
+        "min_path_width": 4,
+        "exits": [
+          {"gate_id": "GATE_RED_TOP_LANE", "to": "LANE_TOP", "center": [48, 8]},
+          {"gate_id": "GATE_RED_TOP_RIVER", "to": "RIVER_TOP", "center": [44, 28]}
+        ],
+        "adjacent_regions": ["LANE_MID"],
+        "camp_ids": ["CAMP_RED_TOP_ECON", "CAMP_RED_SPIRIT_CORE"],
+        "invasion_shortcut_id": "INVASION_BLUE_BOT_TO_RED_TOP",
+        "dead_ends_allowed": false
+      },
+      {
+        "id": "JUNGLE_RED_BOT",
+        "name_zh": "红方下半野区",
+        "team": "red",
+        "center": [76, 39],
+        "pair": "JUNGLE_BLUE_TOP",
+        "main_loop": [[86, 25], [82, 42], [66, 51], [61, 37], [72, 27], [86, 25]],
+        "closed": true,
+        "min_path_width": 4,
+        "exits": [
+          {"gate_id": "GATE_RED_BOT_LANE", "to": "LANE_BOTTOM", "center": [89, 46]},
+          {"gate_id": "GATE_RED_BOT_RIVER", "to": "RIVER_BOTTOM", "center": [66, 51]}
+        ],
+        "adjacent_regions": ["LANE_MID"],
+        "camp_ids": ["CAMP_RED_BOT_ECON", "CAMP_RED_COMBAT_CORE"],
+        "invasion_shortcut_id": "INVASION_BLUE_TOP_TO_RED_BOT",
+        "dead_ends_allowed": false
+      }
+    ],
+    "camps": [
+      {"id": "CAMP_BLUE_TOP_ECON", "team": "blue", "kind": "economy", "center": [22, 63], "respawn_seconds": 75, "pair": "CAMP_RED_BOT_ECON"},
+      {"id": "CAMP_BLUE_BOT_ECON", "team": "blue", "kind": "economy", "center": [48, 84], "respawn_seconds": 75, "pair": "CAMP_RED_TOP_ECON"},
+      {"id": "CAMP_BLUE_COMBAT_CORE", "team": "blue", "kind": "combat_core", "center": [31, 56], "buff_seconds": 90, "pair": "CAMP_RED_BOT_COMBAT_CORE"},
+      {"id": "CAMP_BLUE_SPIRIT_CORE", "team": "blue", "kind": "spirit_core", "center": [55, 79], "buff_seconds": 90, "pair": "CAMP_RED_TOP_SPIRIT_CORE"},
+      {"id": "CAMP_RED_TOP_ECON", "team": "red", "kind": "economy", "center": [52, 16], "respawn_seconds": 75, "pair": "CAMP_BLUE_BOT_ECON"},
+      {"id": "CAMP_RED_BOT_ECON", "team": "red", "kind": "economy", "center": [78, 37], "respawn_seconds": 75, "pair": "CAMP_BLUE_TOP_ECON"},
+      {"id": "CAMP_RED_TOP_SPIRIT_CORE", "team": "red", "kind": "spirit_core", "center": [45, 21], "buff_seconds": 90, "pair": "CAMP_BLUE_SPIRIT_CORE"},
+      {"id": "CAMP_RED_BOT_COMBAT_CORE", "team": "red", "kind": "combat_core", "center": [69, 44], "buff_seconds": 90, "pair": "CAMP_BLUE_COMBAT_CORE"}
+    ],
+    "invasion_shortcuts": [
+      {
+        "id": "INVASION_RED_BOT_TO_BLUE_TOP",
+        "from": "JUNGLE_RED_BOT",
+        "to": "JUNGLE_BLUE_TOP",
+        "centerline": [[66, 51], [50, 50], [34, 49]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_BLUE_TOP_TO_RED_BOT"
+      },
+      {
+        "id": "INVASION_BLUE_TOP_TO_RED_BOT",
+        "from": "JUNGLE_BLUE_TOP",
+        "to": "JUNGLE_RED_BOT",
+        "centerline": [[34, 49], [50, 50], [66, 51]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_RED_BOT_TO_BLUE_TOP"
+      },
+      {
+        "id": "INVASION_RED_TOP_TO_BLUE_BOT",
+        "from": "JUNGLE_RED_TOP",
+        "to": "JUNGLE_BLUE_BOT",
+        "centerline": [[44, 28], [50, 50], [56, 72]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_BLUE_BOT_TO_RED_TOP"
+      },
+      {
+        "id": "INVASION_BLUE_BOT_TO_RED_TOP",
+        "from": "JUNGLE_BLUE_BOT",
+        "to": "JUNGLE_RED_TOP",
+        "centerline": [[56, 72], [50, 50], [44, 28]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_RED_TOP_TO_BLUE_BOT"
+      }
+    ]
+  },
+  "objectives": [
+    {
+      "id": "PIT_MORGARD",
+      "name_zh": "上河道坑：先锋/Morgard",
+      "objective_role": "timed_push_pressure",
+      "center": [28, 28],
+      "pair": "PIT_SERPEN",
+      "entrances": [
+        {"gate_id": "GATE_MORGARD_RIVER", "from": "RIVER_TOP", "center": [35, 32]},
+        {"gate_id": "GATE_MORGARD_LANE", "from": "LANE_TOP", "center": [23, 19]}
+      ],
+      "timeline": {
+        "vanguard_spawn_seconds": 150,
+        "vanguard_end_seconds": 320,
+        "morgard_spawn_seconds": 330,
+        "morgard_respawn_seconds": 180,
+        "push_buff_seconds": 60
+      },
+      "reward": {
+        "vanguard": "siege_mark_next_wave",
+        "morgard": "nearby_minion_push_buff"
+      }
+    },
+    {
+      "id": "PIT_SERPEN",
+      "name_zh": "下河道坑：Serpen",
+      "objective_role": "permanent_growth",
+      "center": [72, 72],
+      "pair": "PIT_MORGARD",
+      "entrances": [
+        {"gate_id": "GATE_SERPEN_RIVER", "from": "RIVER_BOTTOM", "center": [65, 68]},
+        {"gate_id": "GATE_SERPEN_LANE", "from": "LANE_BOTTOM", "center": [77, 81]}
+      ],
+      "timeline": {
+        "first_spawn_seconds": 120,
+        "respawn_seconds": 150
+      },
+      "reward": {
+        "stack_cap": 3,
+        "stack_sequence": ["durability", "damage", "mobility"],
+        "after_cap": "soul_mark_or_objective_bounty",
+        "underdog_bonus": "instant_team_gold_only"
+      }
+    }
+  ],
+  "towers": [
+    {"id": "TOWER_BLUE_TOP_T2", "team": "blue", "lane": "top", "tier": 2, "center": [8, 76], "pair": "TOWER_RED_BOT_T2"},
+    {"id": "TOWER_BLUE_TOP_T1", "team": "blue", "lane": "top", "tier": 1, "center": [8, 45], "pair": "TOWER_RED_BOT_T1"},
+    {"id": "TOWER_RED_TOP_T1", "team": "red", "lane": "top", "tier": 1, "center": [55, 8], "pair": "TOWER_BLUE_BOT_T1"},
+    {"id": "TOWER_RED_TOP_T2", "team": "red", "lane": "top", "tier": 2, "center": [76, 8], "pair": "TOWER_BLUE_BOT_T2"},
+    {"id": "TOWER_BLUE_MID_T2", "team": "blue", "lane": "mid", "tier": 2, "center": [19, 81], "pair": "TOWER_RED_MID_T2"},
+    {"id": "TOWER_BLUE_MID_T1", "team": "blue", "lane": "mid", "tier": 1, "center": [35, 65], "pair": "TOWER_RED_MID_T1"},
+    {"id": "TOWER_RED_MID_T1", "team": "red", "lane": "mid", "tier": 1, "center": [65, 35], "pair": "TOWER_BLUE_MID_T1"},
+    {"id": "TOWER_RED_MID_T2", "team": "red", "lane": "mid", "tier": 2, "center": [81, 19], "pair": "TOWER_BLUE_MID_T2"},
+    {"id": "TOWER_BLUE_BOT_T2", "team": "blue", "lane": "bottom", "tier": 2, "center": [24, 92], "pair": "TOWER_RED_TOP_T2"},
+    {"id": "TOWER_BLUE_BOT_T1", "team": "blue", "lane": "bottom", "tier": 1, "center": [45, 92], "pair": "TOWER_RED_TOP_T1"},
+    {"id": "TOWER_RED_BOT_T1", "team": "red", "lane": "bottom", "tier": 1, "center": [92, 55], "pair": "TOWER_BLUE_TOP_T1"},
+    {"id": "TOWER_RED_BOT_T2", "team": "red", "lane": "bottom", "tier": 2, "center": [92, 24], "pair": "TOWER_BLUE_TOP_T2"},
+    {"id": "TOWER_BLUE_BASE_GUARD_A", "team": "blue", "lane": "base", "tier": "base_guard", "center": [14, 88], "pair": "TOWER_RED_BASE_GUARD_A"},
+    {"id": "TOWER_BLUE_BASE_GUARD_B", "team": "blue", "lane": "base", "tier": "base_guard", "center": [20, 94], "pair": "TOWER_RED_BASE_GUARD_B"},
+    {"id": "TOWER_RED_BASE_GUARD_A", "team": "red", "lane": "base", "tier": "base_guard", "center": [86, 12], "pair": "TOWER_BLUE_BASE_GUARD_A"},
+    {"id": "TOWER_RED_BASE_GUARD_B", "team": "red", "lane": "base", "tier": "base_guard", "center": [80, 6], "pair": "TOWER_BLUE_BASE_GUARD_B"}
+  ],
+  "tower_rules": {
+    "t1_plating": {
+      "active_until_seconds": 240,
+      "plates": 3,
+      "single_hit_multi_plate_break": false,
+      "reward_scope": "local"
+    },
+    "t2_lane_seal": {
+      "enhanced_minion_seconds": 90,
+      "tower_respawns": false,
+      "later_wave_frequency": "reduced"
+    }
+  },
+  "functional_brush": [
+    {"id": "BRUSH_TOP_BLUE_SIDE", "role": "lane_trade_retreat", "center": [13, 51], "size": [5, 8], "pair": "BRUSH_TOP_RED_SIDE"},
+    {"id": "BRUSH_TOP_RED_SIDE", "role": "lane_trade_retreat", "center": [87, 49], "size": [5, 8], "pair": "BRUSH_TOP_BLUE_SIDE"},
+    {"id": "BRUSH_BOT_BLUE_SIDE", "role": "duo_lane_trade_retreat", "center": [51, 87], "size": [8, 5], "pair": "BRUSH_BOT_RED_SIDE"},
+    {"id": "BRUSH_BOT_RED_SIDE", "role": "duo_lane_trade_retreat", "center": [49, 13], "size": [8, 5], "pair": "BRUSH_BOT_BLUE_SIDE"},
+    {"id": "BRUSH_MORGARD_RIVER", "role": "objective_setup", "center": [24, 37], "size": [7, 4], "pair": "BRUSH_SERPEN_RIVER"},
+    {"id": "BRUSH_MORGARD_LANE", "role": "objective_flank", "center": [37, 24], "size": [4, 7], "pair": "BRUSH_SERPEN_LANE"},
+    {"id": "BRUSH_SERPEN_RIVER", "role": "objective_setup", "center": [76, 63], "size": [7, 4], "pair": "BRUSH_MORGARD_RIVER"},
+    {"id": "BRUSH_SERPEN_LANE", "role": "objective_flank", "center": [63, 76], "size": [4, 7], "pair": "BRUSH_MORGARD_LANE"},
+    {"id": "BRUSH_MID_BLUE_RIVER", "role": "river_entry_info", "center": [43, 57], "size": [6, 4], "pair": "BRUSH_MID_RED_RIVER"},
+    {"id": "BRUSH_MID_RED_RIVER", "role": "river_entry_info", "center": [57, 43], "size": [6, 4], "pair": "BRUSH_MID_BLUE_RIVER"},
+    {"id": "BRUSH_BLUE_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [29, 66], "size": [5, 5], "pair": "BRUSH_RED_DEEP_INVASION"},
+    {"id": "BRUSH_RED_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [71, 34], "size": [5, 5], "pair": "BRUSH_BLUE_DEEP_INVASION"}
+  ],
+  "vision_slots": [
+    {"id": "VISION_MORGARD_ENTRANCE", "priority": "objective", "center": [34, 34], "pair": "VISION_SERPEN_ENTRANCE"},
+    {"id": "VISION_SERPEN_ENTRANCE", "priority": "objective", "center": [66, 66], "pair": "VISION_MORGARD_ENTRANCE"},
+    {"id": "VISION_BLUE_MID_RIVER", "priority": "river", "center": [43, 53], "pair": "VISION_RED_MID_RIVER"},
+    {"id": "VISION_RED_MID_RIVER", "priority": "river", "center": [57, 47], "pair": "VISION_BLUE_MID_RIVER"},
+    {"id": "VISION_BLUE_DEEP_TOP", "priority": "defensive", "center": [28, 58], "pair": "VISION_RED_DEEP_BOT"},
+    {"id": "VISION_RED_DEEP_BOT", "priority": "defensive", "center": [72, 42], "pair": "VISION_BLUE_DEEP_TOP"},
+    {"id": "VISION_BLUE_BOT_RIVER", "priority": "protect_bottom", "center": [58, 76], "pair": "VISION_RED_TOP_RIVER"},
+    {"id": "VISION_RED_TOP_RIVER", "priority": "protect_bottom", "center": [42, 24], "pair": "VISION_BLUE_BOT_RIVER"}
+  ],
+  "region_codes": [
+    "LANE_TOP",
+    "LANE_MID",
+    "LANE_BOTTOM",
+    "RIVER_TOP",
+    "RIVER_BOTTOM",
+    "PIT_MORGARD",
+    "PIT_SERPEN",
+    "JUNGLE_BLUE_TOP",
+    "JUNGLE_BLUE_BOT",
+    "JUNGLE_RED_TOP",
+    "JUNGLE_RED_BOT",
+    "BASE_BLUE",
+    "BASE_RED"
+  ],
+  "topology": {
+    "edges": [
+      ["BASE_BLUE", "LANE_TOP"],
+      ["BASE_BLUE", "LANE_MID"],
+      ["BASE_BLUE", "LANE_BOTTOM"],
+      ["LANE_MID", "BRIDGE_MID"],
+      ["RIVER_TOP", "BRIDGE_MID"],
+      ["BRIDGE_MID", "RIVER_BOTTOM"],
+      ["LANE_TOP", "RIVER_ENTRY_BLUE_TOP_LANE"],
+      ["RIVER_ENTRY_BLUE_TOP_LANE", "RIVER_TOP"],
+      ["LANE_MID", "RIVER_ENTRY_BLUE_MID_TOP"],
+      ["RIVER_ENTRY_BLUE_MID_TOP", "RIVER_TOP"],
+      ["LANE_TOP", "RIVER_ENTRY_RED_TOP_LANE"],
+      ["RIVER_ENTRY_RED_TOP_LANE", "RIVER_TOP"],
+      ["LANE_MID", "RIVER_ENTRY_RED_MID_TOP"],
+      ["RIVER_ENTRY_RED_MID_TOP", "RIVER_TOP"],
+      ["LANE_BOTTOM", "RIVER_ENTRY_BLUE_BOTTOM_LANE"],
+      ["RIVER_ENTRY_BLUE_BOTTOM_LANE", "RIVER_BOTTOM"],
+      ["LANE_MID", "RIVER_ENTRY_BLUE_MID_BOTTOM"],
+      ["RIVER_ENTRY_BLUE_MID_BOTTOM", "RIVER_BOTTOM"],
+      ["LANE_BOTTOM", "RIVER_ENTRY_RED_BOTTOM_LANE"],
+      ["RIVER_ENTRY_RED_BOTTOM_LANE", "RIVER_BOTTOM"],
+      ["LANE_MID", "RIVER_ENTRY_RED_MID_BOTTOM"],
+      ["RIVER_ENTRY_RED_MID_BOTTOM", "RIVER_BOTTOM"],
+      ["JUNGLE_BLUE_TOP", "GATE_BLUE_TOP_LANE"],
+      ["GATE_BLUE_TOP_LANE", "LANE_TOP"],
+      ["JUNGLE_BLUE_TOP", "GATE_BLUE_TOP_RIVER"],
+      ["GATE_BLUE_TOP_RIVER", "RIVER_TOP"],
+      ["JUNGLE_BLUE_BOT", "GATE_BLUE_BOT_LANE"],
+      ["GATE_BLUE_BOT_LANE", "LANE_BOTTOM"],
+      ["JUNGLE_BLUE_BOT", "GATE_BLUE_BOT_RIVER"],
+      ["GATE_BLUE_BOT_RIVER", "RIVER_BOTTOM"],
+      ["JUNGLE_RED_TOP", "GATE_RED_TOP_LANE"],
+      ["GATE_RED_TOP_LANE", "LANE_TOP"],
+      ["JUNGLE_RED_TOP", "GATE_RED_TOP_RIVER"],
+      ["GATE_RED_TOP_RIVER", "RIVER_TOP"],
+      ["JUNGLE_RED_BOT", "GATE_RED_BOT_LANE"],
+      ["GATE_RED_BOT_LANE", "LANE_BOTTOM"],
+      ["JUNGLE_RED_BOT", "GATE_RED_BOT_RIVER"],
+      ["GATE_RED_BOT_RIVER", "RIVER_BOTTOM"],
+      ["RIVER_TOP", "GATE_MORGARD_RIVER"],
+      ["GATE_MORGARD_RIVER", "PIT_MORGARD"],
+      ["LANE_TOP", "GATE_MORGARD_LANE"],
+      ["GATE_MORGARD_LANE", "PIT_MORGARD"],
+      ["RIVER_BOTTOM", "GATE_SERPEN_RIVER"],
+      ["GATE_SERPEN_RIVER", "PIT_SERPEN"],
+      ["LANE_BOTTOM", "GATE_SERPEN_LANE"],
+      ["GATE_SERPEN_LANE", "PIT_SERPEN"],
+      ["LANE_TOP", "BASE_RED"],
+      ["LANE_MID", "BASE_RED"],
+      ["LANE_BOTTOM", "BASE_RED"]
+    ]
+  },
+  "ai_rules": {
+    "navigation_layers": ["region_graph", "local_grid"],
+    "ordinary_movement_commit_seconds": [1.2, 1.8],
+    "objective_low_hp_finish_threshold": 0.2,
+    "max_equal_rank_regions_per_junction": 3,
+    "target_pit_entrances": 2,
+    "half_jungle_main_loops": 1,
+    "continuous_narrow_gates_allowed": false,
+    "brush_entry_min_collision_width_multiplier": 2
+  },
+  "pace": {
+    "target_average_match_minutes": [9, 12],
+    "first_wave_seconds": 20,
+    "basic_camp_spawn_seconds": 30,
+    "camp_respawn_seconds": 75,
+    "core_buff_seconds": 90
+  }
+}

@@ -4,6 +4,7 @@ import json
 import tempfile
 import struct
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from tools import install_runtime_spike_mod
@@ -92,6 +93,14 @@ class RuntimeSpikeTests(unittest.TestCase):
             self.assertEqual(install_runtime_spike_mod.sha256_file(game_root / "TeamfightManager2.exe"), manifest["game_exe_sha256"])
             self.assertTrue(manifest["byte_equal"])
             self.assertFalse(manifest["committed_to_repository"])
+
+    def test_clean_install_refuses_to_delete_repository_source_mod(self) -> None:
+        with mock.patch.object(install_runtime_spike_mod.shutil, "rmtree") as mocked_rmtree:
+            with self.assertRaises(SystemExit) as raised:
+                install_runtime_spike_mod.copy_mod(REPO_ROOT, clean=True)
+
+            self.assertIn("repository source mod package", str(raised.exception))
+            mocked_rmtree.assert_not_called()
 
 
 if __name__ == "__main__":

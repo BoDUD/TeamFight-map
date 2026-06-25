@@ -30,7 +30,7 @@ To install the runtime spike into a local Teamfight Manager 2 folder that contai
 python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
 ```
 
-For the next local-only `map_setting` equivalent remap gate, pass an extracted original binary source. The source and staged copy stay outside the repository; the installed copy is written as `setting/map_setting.map_setting` so the mod asset scanner can index it as `asset/tfm2_lol_map_spike/setting/map_setting`:
+To reproduce the completed local-only `map_setting` equivalent-remap test, pass an extracted original binary source. The source and staged copy stay outside the repository; the installed copy is written as `setting/map_setting.map_setting` so the mod asset scanner can index it as `asset/tfm2_lol_map_spike/setting/map_setting`:
 
 ```powershell
 python .\tools\install_runtime_spike_mod.py `

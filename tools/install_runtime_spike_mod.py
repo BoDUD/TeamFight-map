@@ -30,6 +30,8 @@ def ensure_target_is_safe(game_root: Path, target: Path) -> None:
     expected_parent = (resolved_root / "mods").resolve()
     if resolved_target.name != MOD_ID or resolved_target.parent != expected_parent:
         raise SystemExit(f"Refusing to modify unexpected target: {resolved_target}")
+    if resolved_target == SOURCE_MOD.resolve():
+        raise SystemExit("Refusing to install over the repository source mod package.")
 
 
 def copy_mod(game_root: Path, clean: bool) -> Path:

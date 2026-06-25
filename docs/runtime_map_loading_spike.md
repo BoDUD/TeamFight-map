@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | Visual layer overrides leave native AI/pathing intact. `asset/base/setting/map_setting` is the main candidate, but it is a binary asset and must be proven through an unmodified equivalent remap before mutation. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader accepts a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`, but no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | Public SDK probes found `ServerModContext.database.map_setting` exposes only `visible_view` and `path`; obvious `objectives`, `objective_spawns`, `jungle_camps`, `spawn`, and neutral objective fields were not exposed. |
 
 ## Minimal Mod Package
@@ -64,8 +64,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | Date | Probe | Evidence | Result |
 | --- | --- | --- | --- |
 | 2026-06-25 | `tfm2_lol_map_spike` overriding `asset/base/aseprite_resources/ingame/5v5/background_5v5` | Screenshot stored outside the repository at `D:\steam\steamapps\common\Teamfight Manager2\stage_runtime_spike_evidence\runtime_map_loading_spike\background_override_verified_20260625-201420.png`; `1919x1079`, `374534` bytes, SHA-256 `17E20C7AFD4A0DDBAC17E69C10EE7D79811C94B9EDA2DAD68672C3446DA8DA8D` | Pass. Diagnostic background appears in match. Units, minion waves, towers, jungle monsters, and AI routes have no observed abnormalities. |
+| 2026-06-25 | Q2a byte-equivalent `asset/base/setting/map_setting` remap staged only in the installed game copy | Summary stored outside the repository at `D:\steam\steamapps\common\Teamfight Manager2\stage_runtime_spike_evidence\runtime_map_loading_spike\q2a_b1_summary.json`; cold start screenshots `q2a_b1_coldstart1_live_20260625-223645.png` SHA-256 `7582051d44254b05ca19f0eefb7281d04baaa2ab32fe138aa3dc6578cfadfc59` and `q2a_b1_coldstart2_live_20260625-224248.png` SHA-256 `a503b89fdd3afc99a1f25d07fe1dcc50305a6ae6067a0c5a486d3ac648544048`; staged `map_setting.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Pass for loader takeover only. Two cold starts reached live 5v5 with the diagnostic background visible and no `source not found` or partial-override warning in the game log. Units, minions, towers, and AI routes remained visibly normal. This does not prove `map_setting` can be safely decoded, re-encoded, or mutated. |
 
-This proves the background visual asset can be overridden through `mod.override_info`. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
+This proves the background visual asset can be overridden through `mod.override_info`, and that the loader accepts a byte-equivalent `map_setting` takeover when staged with the `.map_setting` file extension. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
 
 ## Resource Audit
 
@@ -84,7 +85,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, prior local size `1451980` bytes | Candidate for path/collision/spawn/placement. Must not be mutated until equivalent remap loads. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap loads when the installed file is staged as `setting/map_setting.map_setting`. Candidate for path/collision/spawn/placement, but must not be mutated until a byte-identical decode/re-encode round trip succeeds. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | SDK field plus binary tables | Public field exists, but full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | SDK field plus binary tables | Public `path` exists, but safe replacement workflow is not proven. |
@@ -100,8 +101,9 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 2. Done: confirm the game recognizes `mod.mod_info`.
 3. Done: enter a 5v5 match and confirm the solid-color `background_5v5` probe is visible.
 4. Done: confirm units, minions, towers, jungle camps, and AI routes remain native and stable.
-5. Next: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
-6. Later: only after equivalent remap passes, try one tiny collision/path/spawn mutation in a separate branch or PR.
+5. Done: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
+6. Next: decode `map_setting`, re-encode without field edits, and prove the output is byte-identical to the original.
+7. Later: only after byte-identical round trip passes, try one tiny collision/path/spawn mutation in a separate branch or PR.
 
 ## Q2a Equivalent Remap Gate
 
@@ -142,6 +144,8 @@ B pass criteria:
 - Source and staged target size and SHA-256 match, and byte-for-byte comparison passes.
 
 If B passes, record only loader takeover success. It still does not prove `map_setting` can be safely modified.
+
+Result on 2026-06-25: B passed for loader takeover. The staged file was `mods/tfm2_lol_map_spike/setting/map_setting.map_setting`, both source and staged copy were `1451980` bytes with SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`, and two cold starts reached live 5v5 without loader warnings. The first no-extension attempt remains a recorded failure and should not be repeated.
 
 The next gate after B is:
 

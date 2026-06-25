@@ -154,8 +154,8 @@ def main() -> int:
     layout = load_layout(args.layout)
     args.svg.parent.mkdir(parents=True, exist_ok=True)
     args.topology.parent.mkdir(parents=True, exist_ok=True)
-    args.svg.write_text(build_svg(layout), encoding="utf-8")
-    args.topology.write_text(build_topology(layout), encoding="utf-8")
+    args.svg.write_text(build_svg(layout), encoding="utf-8", newline="\n")
+    args.topology.write_text(build_topology(layout), encoding="utf-8", newline="\n")
     print(f"Wrote {args.svg}")
     print(f"Wrote {args.topology}")
     return 0

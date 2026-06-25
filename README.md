@@ -1,11 +1,11 @@
 # TeamFight-map
 
-Graybox implementation of the Teamfight Manager 2 LOL-like map refactor.
+Non-runtime graybox specification for the Teamfight Manager 2 LOL-like map refactor.
 
-This repository stores the first playable design layer as data plus validators:
+This repository stores the first design/specification layer as data plus validators:
 
 - `data/map/tfm2_lol_like_map.json` is the normalized map layout.
-- `assets/generated/tfm2_lol_like_map_imagegen_v1.png` is the image-gen map concept art.
+- `docs/concept/tfm2_lol_like_map_imagegen_v1.png` is image-gen concept art for visual direction only.
 - `tools/validate_map_design.py` checks the design-book constraints.
 - `tools/build_graybox_map.py` renders the validation/debug graybox and topology preview.
 - `docs/design_compliance.md` maps the implementation back to the design book.
@@ -21,15 +21,21 @@ python -m unittest discover -s tests
 
 Generated validation previews are written to `assets/graybox/`. These are not the map art; they exist to make the coordinate data reviewable.
 
-The visual map concept is stored at:
+The visual concept reference is stored at:
 
 ```text
-assets/generated/tfm2_lol_like_map_imagegen_v1.png
+docs/concept/tfm2_lol_like_map_imagegen_v1.png
 ```
+
+## Runtime Status
+
+This is not yet a Teamfight Manager 2 runtime mod. It does not include `mod.mod_info`, `mod.override_info`, runtime DLL hooks, game map data replacement, collision masks, walkable masks, brush gameplay masks, minimap export, spawn data, or an in-game navigation graph.
+
+The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
 ## Scope
 
-The current PR implements the MVP/graybox layer:
+The current PR implements the MVP/graybox specification layer:
 
 1. Keep the square outer frame, base anchors, three lane identity, and two pit centers.
 2. Convert the northwest to southeast water band into a continuous tactical river axis.

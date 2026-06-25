@@ -67,10 +67,21 @@ def build_svg(layout: dict[str, Any]) -> str:
         parts.append(label(lane["name_zh"], [mid[0], mid[1] - 2], 3))
 
     for half in layout["jungle"]["half_jungles"]:
-        loop = half["main_loop"] + [half["main_loop"][0]]
+        loop = half["main_loop"]
+        if loop[0] != loop[-1]:
+            loop = loop + [loop[0]]
         color = "#4d8b57" if half["team"] == "blue" else "#9c5c55"
         parts.append(polyline(loop, fill="none", stroke=color, stroke_width="1.4", stroke_dasharray="2 1", opacity="0.9"))
         parts.append(label(half["name_zh"], half["center"], 2, color))
+
+    for gate in layout["gates"]:
+        color = {
+            "lane_to_river": "#ffffff",
+            "jungle_lane_exit": "#f0c36b",
+            "jungle_to_river": "#9fe0ff",
+            "pit_entry": "#fff07a"
+        }[gate["kind"]]
+        parts.append(circle(gate["center"], 0.75, fill=color, stroke="#313844", stroke_width="0.2", opacity="0.9"))
 
     for objective in layout["objectives"]:
         fill = "#8ab6d8" if objective["id"] == "PIT_MORGARD" else "#90b66f"
@@ -126,6 +137,7 @@ def build_topology(layout: dict[str, Any]) -> str:
     lines = ["flowchart LR"]
     labels = {code: code for code in layout["region_codes"]}
     labels["BRIDGE_MID"] = "BRIDGE_MID"
+    labels.update({gate["id"]: gate["id"] for gate in layout["gates"]})
     for edge in layout["topology"]["edges"]:
         a, b = edge
         lines.append(f"    {a}[{labels[a]}] --- {b}[{labels[b]}]")

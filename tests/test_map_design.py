@@ -35,6 +35,19 @@ class MapDesignTests(unittest.TestCase):
         self.assertEqual("timed_push_pressure", roles["PIT_MORGARD"])
         self.assertEqual("permanent_growth", roles["PIT_SERPEN"])
 
+    def test_objective_pits_use_two_explicit_gate_nodes(self) -> None:
+        edges = {tuple(edge) for edge in self.layout["topology"]["edges"]}
+        for objective in self.layout["objectives"]:
+            gate_ids = {entrance["gate_id"] for entrance in objective["entrances"]}
+            self.assertEqual(2, len(gate_ids))
+            for gate_id in gate_ids:
+                self.assertIn((gate_id, objective["id"]), edges)
+
+    def test_jungle_mid_relationship_is_adjacency_not_exit(self) -> None:
+        for half in self.layout["jungle"]["half_jungles"]:
+            self.assertIn("LANE_MID", half["adjacent_regions"])
+            self.assertNotIn("LANE_MID", {exit_info["to"] for exit_info in half["exits"]})
+
 
 if __name__ == "__main__":
     unittest.main()

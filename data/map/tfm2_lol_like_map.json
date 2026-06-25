@@ -21,13 +21,24 @@
     "preserve_base_centers": true,
     "preserve_lane_centers_within_cells": 1,
     "preserve_pit_centers": true,
-    "max_total_passable_area_delta_pct": 8,
     "functional_brush_groups_min": 10,
     "functional_brush_groups_max": 12,
-    "river_entrances_min": 6,
-    "river_entrances_max": 8,
+    "lane_to_river_gates_min": 6,
+    "lane_to_river_gates_max": 8,
+    "jungle_to_river_gates_per_half_jungle": 1,
     "pit_entrances_per_pit": 2,
     "target_average_match_minutes": [9, 12]
+  },
+  "runtime_requirements": {
+    "status": "not_implemented",
+    "original_map_baseline_required": [
+      "collision_mask",
+      "walkable_area",
+      "wall_polygons",
+      "brush_gameplay_mask",
+      "world_to_texture_transform"
+    ],
+    "target_max_total_passable_area_delta_pct": 8
   },
   "anchors": {
     "BASE_BLUE": {
@@ -166,6 +177,28 @@
       }
     ]
   },
+  "gates": [
+    {"id": "RIVER_ENTRY_BLUE_TOP_LANE", "kind": "lane_to_river", "from": "LANE_TOP", "to": "RIVER_TOP", "center": [16, 36], "width": 6, "pair": "RIVER_ENTRY_RED_BOTTOM_LANE"},
+    {"id": "RIVER_ENTRY_BLUE_MID_TOP", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_TOP", "center": [43, 48], "width": 7, "pair": "RIVER_ENTRY_RED_MID_BOTTOM"},
+    {"id": "RIVER_ENTRY_RED_TOP_LANE", "kind": "lane_to_river", "from": "LANE_TOP", "to": "RIVER_TOP", "center": [64, 16], "width": 6, "pair": "RIVER_ENTRY_BLUE_BOTTOM_LANE"},
+    {"id": "RIVER_ENTRY_RED_MID_TOP", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_TOP", "center": [52, 43], "width": 7, "pair": "RIVER_ENTRY_BLUE_MID_BOTTOM"},
+    {"id": "RIVER_ENTRY_BLUE_BOTTOM_LANE", "kind": "lane_to_river", "from": "LANE_BOTTOM", "to": "RIVER_BOTTOM", "center": [36, 84], "width": 6, "pair": "RIVER_ENTRY_RED_TOP_LANE"},
+    {"id": "RIVER_ENTRY_BLUE_MID_BOTTOM", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_BOTTOM", "center": [48, 57], "width": 7, "pair": "RIVER_ENTRY_RED_MID_TOP"},
+    {"id": "RIVER_ENTRY_RED_BOTTOM_LANE", "kind": "lane_to_river", "from": "LANE_BOTTOM", "to": "RIVER_BOTTOM", "center": [84, 64], "width": 6, "pair": "RIVER_ENTRY_BLUE_TOP_LANE"},
+    {"id": "RIVER_ENTRY_RED_MID_BOTTOM", "kind": "lane_to_river", "from": "LANE_MID", "to": "RIVER_BOTTOM", "center": [57, 52], "width": 7, "pair": "RIVER_ENTRY_BLUE_MID_TOP"},
+    {"id": "GATE_BLUE_TOP_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_BLUE_TOP", "to": "LANE_TOP", "center": [11, 54], "width": 5, "pair": "GATE_RED_BOT_LANE"},
+    {"id": "GATE_BLUE_TOP_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_BLUE_TOP", "to": "RIVER_TOP", "center": [34, 49], "width": 5, "pair": "GATE_RED_BOT_RIVER"},
+    {"id": "GATE_BLUE_BOT_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_BLUE_BOT", "to": "LANE_BOTTOM", "center": [52, 92], "width": 5, "pair": "GATE_RED_TOP_LANE"},
+    {"id": "GATE_BLUE_BOT_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_BLUE_BOT", "to": "RIVER_BOTTOM", "center": [56, 72], "width": 5, "pair": "GATE_RED_TOP_RIVER"},
+    {"id": "GATE_RED_TOP_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_RED_TOP", "to": "LANE_TOP", "center": [48, 8], "width": 5, "pair": "GATE_BLUE_BOT_LANE"},
+    {"id": "GATE_RED_TOP_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_RED_TOP", "to": "RIVER_TOP", "center": [44, 28], "width": 5, "pair": "GATE_BLUE_BOT_RIVER"},
+    {"id": "GATE_RED_BOT_LANE", "kind": "jungle_lane_exit", "from": "JUNGLE_RED_BOT", "to": "LANE_BOTTOM", "center": [89, 46], "width": 5, "pair": "GATE_BLUE_TOP_LANE"},
+    {"id": "GATE_RED_BOT_RIVER", "kind": "jungle_to_river", "from": "JUNGLE_RED_BOT", "to": "RIVER_BOTTOM", "center": [66, 51], "width": 5, "pair": "GATE_BLUE_TOP_RIVER"},
+    {"id": "GATE_MORGARD_RIVER", "kind": "pit_entry", "from": "RIVER_TOP", "to": "PIT_MORGARD", "center": [35, 32], "width": 6, "pair": "GATE_SERPEN_RIVER"},
+    {"id": "GATE_MORGARD_LANE", "kind": "pit_entry", "from": "LANE_TOP", "to": "PIT_MORGARD", "center": [23, 19], "width": 4, "pair": "GATE_SERPEN_LANE"},
+    {"id": "GATE_SERPEN_RIVER", "kind": "pit_entry", "from": "RIVER_BOTTOM", "to": "PIT_SERPEN", "center": [65, 68], "width": 6, "pair": "GATE_MORGARD_RIVER"},
+    {"id": "GATE_SERPEN_LANE", "kind": "pit_entry", "from": "LANE_BOTTOM", "to": "PIT_SERPEN", "center": [77, 81], "width": 4, "pair": "GATE_MORGARD_LANE"}
+  ],
   "jungle": {
     "camps_per_team": 4,
     "half_jungles": [
@@ -175,11 +208,14 @@
         "team": "blue",
         "center": [24, 61],
         "pair": "JUNGLE_RED_BOT",
-        "main_loop": [[14, 75], [18, 58], [34, 49], [39, 63], [28, 73]],
+        "main_loop": [[14, 75], [18, 58], [34, 49], [39, 63], [28, 73], [14, 75]],
+        "closed": true,
+        "min_path_width": 4,
         "exits": [
-          {"to": "LANE_TOP", "center": [11, 54]},
-          {"to": "RIVER_TOP", "center": [34, 49]}
+          {"gate_id": "GATE_BLUE_TOP_LANE", "to": "LANE_TOP", "center": [11, 54]},
+          {"gate_id": "GATE_BLUE_TOP_RIVER", "to": "RIVER_TOP", "center": [34, 49]}
         ],
+        "adjacent_regions": ["LANE_MID"],
         "camp_ids": ["CAMP_BLUE_TOP_ECON", "CAMP_BLUE_COMBAT_CORE"],
         "invasion_shortcut_id": "INVASION_RED_BOT_TO_BLUE_TOP",
         "dead_ends_allowed": false
@@ -190,11 +226,14 @@
         "team": "blue",
         "center": [48, 82],
         "pair": "JUNGLE_RED_TOP",
-        "main_loop": [[31, 86], [46, 72], [60, 78], [56, 90], [40, 94]],
+        "main_loop": [[31, 86], [46, 72], [60, 78], [56, 90], [40, 94], [31, 86]],
+        "closed": true,
+        "min_path_width": 4,
         "exits": [
-          {"to": "LANE_BOTTOM", "center": [52, 92]},
-          {"to": "RIVER_BOTTOM", "center": [56, 72]}
+          {"gate_id": "GATE_BLUE_BOT_LANE", "to": "LANE_BOTTOM", "center": [52, 92]},
+          {"gate_id": "GATE_BLUE_BOT_RIVER", "to": "RIVER_BOTTOM", "center": [56, 72]}
         ],
+        "adjacent_regions": ["LANE_MID"],
         "camp_ids": ["CAMP_BLUE_BOT_ECON", "CAMP_BLUE_SPIRIT_CORE"],
         "invasion_shortcut_id": "INVASION_RED_TOP_TO_BLUE_BOT",
         "dead_ends_allowed": false
@@ -205,11 +244,14 @@
         "team": "red",
         "center": [52, 18],
         "pair": "JUNGLE_BLUE_BOT",
-        "main_loop": [[69, 14], [54, 28], [40, 22], [44, 10], [60, 6]],
+        "main_loop": [[69, 14], [54, 28], [40, 22], [44, 10], [60, 6], [69, 14]],
+        "closed": true,
+        "min_path_width": 4,
         "exits": [
-          {"to": "LANE_TOP", "center": [48, 8]},
-          {"to": "RIVER_TOP", "center": [44, 28]}
+          {"gate_id": "GATE_RED_TOP_LANE", "to": "LANE_TOP", "center": [48, 8]},
+          {"gate_id": "GATE_RED_TOP_RIVER", "to": "RIVER_TOP", "center": [44, 28]}
         ],
+        "adjacent_regions": ["LANE_MID"],
         "camp_ids": ["CAMP_RED_TOP_ECON", "CAMP_RED_SPIRIT_CORE"],
         "invasion_shortcut_id": "INVASION_BLUE_BOT_TO_RED_TOP",
         "dead_ends_allowed": false
@@ -220,11 +262,14 @@
         "team": "red",
         "center": [76, 39],
         "pair": "JUNGLE_BLUE_TOP",
-        "main_loop": [[86, 25], [82, 42], [66, 51], [61, 37], [72, 27]],
+        "main_loop": [[86, 25], [82, 42], [66, 51], [61, 37], [72, 27], [86, 25]],
+        "closed": true,
+        "min_path_width": 4,
         "exits": [
-          {"to": "LANE_BOTTOM", "center": [89, 46]},
-          {"to": "RIVER_BOTTOM", "center": [66, 51]}
+          {"gate_id": "GATE_RED_BOT_LANE", "to": "LANE_BOTTOM", "center": [89, 46]},
+          {"gate_id": "GATE_RED_BOT_RIVER", "to": "RIVER_BOTTOM", "center": [66, 51]}
         ],
+        "adjacent_regions": ["LANE_MID"],
         "camp_ids": ["CAMP_RED_BOT_ECON", "CAMP_RED_COMBAT_CORE"],
         "invasion_shortcut_id": "INVASION_BLUE_TOP_TO_RED_BOT",
         "dead_ends_allowed": false
@@ -239,6 +284,44 @@
       {"id": "CAMP_RED_BOT_ECON", "team": "red", "kind": "economy", "center": [78, 37], "respawn_seconds": 75, "pair": "CAMP_BLUE_TOP_ECON"},
       {"id": "CAMP_RED_TOP_SPIRIT_CORE", "team": "red", "kind": "spirit_core", "center": [45, 21], "buff_seconds": 90, "pair": "CAMP_BLUE_SPIRIT_CORE"},
       {"id": "CAMP_RED_BOT_COMBAT_CORE", "team": "red", "kind": "combat_core", "center": [69, 44], "buff_seconds": 90, "pair": "CAMP_BLUE_COMBAT_CORE"}
+    ],
+    "invasion_shortcuts": [
+      {
+        "id": "INVASION_RED_BOT_TO_BLUE_TOP",
+        "from": "JUNGLE_RED_BOT",
+        "to": "JUNGLE_BLUE_TOP",
+        "centerline": [[66, 51], [50, 50], [34, 49]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_BLUE_TOP_TO_RED_BOT"
+      },
+      {
+        "id": "INVASION_BLUE_TOP_TO_RED_BOT",
+        "from": "JUNGLE_BLUE_TOP",
+        "to": "JUNGLE_RED_BOT",
+        "centerline": [[34, 49], [50, 50], [66, 51]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_RED_BOT_TO_BLUE_TOP"
+      },
+      {
+        "id": "INVASION_RED_TOP_TO_BLUE_BOT",
+        "from": "JUNGLE_RED_TOP",
+        "to": "JUNGLE_BLUE_BOT",
+        "centerline": [[44, 28], [50, 50], [56, 72]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_BLUE_BOT_TO_RED_TOP"
+      },
+      {
+        "id": "INVASION_BLUE_BOT_TO_RED_TOP",
+        "from": "JUNGLE_BLUE_BOT",
+        "to": "JUNGLE_RED_TOP",
+        "centerline": [[56, 72], [50, 50], [44, 28]],
+        "width": 3,
+        "state": "graybox_candidate",
+        "pair": "INVASION_RED_TOP_TO_BLUE_BOT"
+      }
     ]
   },
   "objectives": [
@@ -249,8 +332,8 @@
       "center": [28, 28],
       "pair": "PIT_SERPEN",
       "entrances": [
-        {"id": "MORGARD_SAFE_ENTRY", "from": "RIVER_TOP", "center": [35, 32]},
-        {"id": "MORGARD_RISK_ENTRY", "from": "LANE_TOP", "center": [23, 19]}
+        {"gate_id": "GATE_MORGARD_RIVER", "from": "RIVER_TOP", "center": [35, 32]},
+        {"gate_id": "GATE_MORGARD_LANE", "from": "LANE_TOP", "center": [23, 19]}
       ],
       "timeline": {
         "vanguard_spawn_seconds": 150,
@@ -271,8 +354,8 @@
       "center": [72, 72],
       "pair": "PIT_MORGARD",
       "entrances": [
-        {"id": "SERPEN_SAFE_ENTRY", "from": "RIVER_BOTTOM", "center": [65, 68]},
-        {"id": "SERPEN_DUO_ENTRY", "from": "LANE_BOTTOM", "center": [77, 81]}
+        {"gate_id": "GATE_SERPEN_RIVER", "from": "RIVER_BOTTOM", "center": [65, 68]},
+        {"gate_id": "GATE_SERPEN_LANE", "from": "LANE_BOTTOM", "center": [77, 81]}
       ],
       "timeline": {
         "first_spawn_seconds": 120,
@@ -328,8 +411,8 @@
     {"id": "BRUSH_SERPEN_LANE", "role": "objective_flank", "center": [63, 76], "size": [4, 7], "pair": "BRUSH_MORGARD_LANE"},
     {"id": "BRUSH_MID_BLUE_RIVER", "role": "river_entry_info", "center": [43, 57], "size": [6, 4], "pair": "BRUSH_MID_RED_RIVER"},
     {"id": "BRUSH_MID_RED_RIVER", "role": "river_entry_info", "center": [57, 43], "size": [6, 4], "pair": "BRUSH_MID_BLUE_RIVER"},
-    {"id": "BRUSH_BLUE_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [34, 67], "size": [5, 5], "pair": "BRUSH_RED_DEEP_INVASION"},
-    {"id": "BRUSH_RED_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [66, 33], "size": [5, 5], "pair": "BRUSH_BLUE_DEEP_INVASION"}
+    {"id": "BRUSH_BLUE_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [29, 66], "size": [5, 5], "pair": "BRUSH_RED_DEEP_INVASION"},
+    {"id": "BRUSH_RED_DEEP_INVASION", "role": "deep_jungle_invasion", "center": [71, 34], "size": [5, 5], "pair": "BRUSH_BLUE_DEEP_INVASION"}
   ],
   "vision_slots": [
     {"id": "VISION_MORGARD_ENTRANCE", "priority": "objective", "center": [34, 34], "pair": "VISION_SERPEN_ENTRANCE"},
@@ -361,25 +444,49 @@
       ["BASE_BLUE", "LANE_TOP"],
       ["BASE_BLUE", "LANE_MID"],
       ["BASE_BLUE", "LANE_BOTTOM"],
-      ["LANE_TOP", "RIVER_TOP"],
-      ["LANE_TOP", "JUNGLE_BLUE_TOP"],
-      ["LANE_TOP", "JUNGLE_RED_TOP"],
-      ["LANE_MID", "JUNGLE_BLUE_TOP"],
-      ["LANE_MID", "JUNGLE_BLUE_BOT"],
       ["LANE_MID", "BRIDGE_MID"],
-      ["LANE_MID", "JUNGLE_RED_TOP"],
-      ["LANE_MID", "JUNGLE_RED_BOT"],
-      ["LANE_BOTTOM", "JUNGLE_BLUE_BOT"],
-      ["LANE_BOTTOM", "RIVER_BOTTOM"],
-      ["LANE_BOTTOM", "JUNGLE_RED_BOT"],
-      ["RIVER_TOP", "PIT_MORGARD"],
       ["RIVER_TOP", "BRIDGE_MID"],
       ["BRIDGE_MID", "RIVER_BOTTOM"],
-      ["RIVER_BOTTOM", "PIT_SERPEN"],
-      ["JUNGLE_BLUE_TOP", "RIVER_TOP"],
-      ["JUNGLE_BLUE_BOT", "RIVER_BOTTOM"],
-      ["JUNGLE_RED_TOP", "RIVER_TOP"],
-      ["JUNGLE_RED_BOT", "RIVER_BOTTOM"],
+      ["LANE_TOP", "RIVER_ENTRY_BLUE_TOP_LANE"],
+      ["RIVER_ENTRY_BLUE_TOP_LANE", "RIVER_TOP"],
+      ["LANE_MID", "RIVER_ENTRY_BLUE_MID_TOP"],
+      ["RIVER_ENTRY_BLUE_MID_TOP", "RIVER_TOP"],
+      ["LANE_TOP", "RIVER_ENTRY_RED_TOP_LANE"],
+      ["RIVER_ENTRY_RED_TOP_LANE", "RIVER_TOP"],
+      ["LANE_MID", "RIVER_ENTRY_RED_MID_TOP"],
+      ["RIVER_ENTRY_RED_MID_TOP", "RIVER_TOP"],
+      ["LANE_BOTTOM", "RIVER_ENTRY_BLUE_BOTTOM_LANE"],
+      ["RIVER_ENTRY_BLUE_BOTTOM_LANE", "RIVER_BOTTOM"],
+      ["LANE_MID", "RIVER_ENTRY_BLUE_MID_BOTTOM"],
+      ["RIVER_ENTRY_BLUE_MID_BOTTOM", "RIVER_BOTTOM"],
+      ["LANE_BOTTOM", "RIVER_ENTRY_RED_BOTTOM_LANE"],
+      ["RIVER_ENTRY_RED_BOTTOM_LANE", "RIVER_BOTTOM"],
+      ["LANE_MID", "RIVER_ENTRY_RED_MID_BOTTOM"],
+      ["RIVER_ENTRY_RED_MID_BOTTOM", "RIVER_BOTTOM"],
+      ["JUNGLE_BLUE_TOP", "GATE_BLUE_TOP_LANE"],
+      ["GATE_BLUE_TOP_LANE", "LANE_TOP"],
+      ["JUNGLE_BLUE_TOP", "GATE_BLUE_TOP_RIVER"],
+      ["GATE_BLUE_TOP_RIVER", "RIVER_TOP"],
+      ["JUNGLE_BLUE_BOT", "GATE_BLUE_BOT_LANE"],
+      ["GATE_BLUE_BOT_LANE", "LANE_BOTTOM"],
+      ["JUNGLE_BLUE_BOT", "GATE_BLUE_BOT_RIVER"],
+      ["GATE_BLUE_BOT_RIVER", "RIVER_BOTTOM"],
+      ["JUNGLE_RED_TOP", "GATE_RED_TOP_LANE"],
+      ["GATE_RED_TOP_LANE", "LANE_TOP"],
+      ["JUNGLE_RED_TOP", "GATE_RED_TOP_RIVER"],
+      ["GATE_RED_TOP_RIVER", "RIVER_TOP"],
+      ["JUNGLE_RED_BOT", "GATE_RED_BOT_LANE"],
+      ["GATE_RED_BOT_LANE", "LANE_BOTTOM"],
+      ["JUNGLE_RED_BOT", "GATE_RED_BOT_RIVER"],
+      ["GATE_RED_BOT_RIVER", "RIVER_BOTTOM"],
+      ["RIVER_TOP", "GATE_MORGARD_RIVER"],
+      ["GATE_MORGARD_RIVER", "PIT_MORGARD"],
+      ["LANE_TOP", "GATE_MORGARD_LANE"],
+      ["GATE_MORGARD_LANE", "PIT_MORGARD"],
+      ["RIVER_BOTTOM", "GATE_SERPEN_RIVER"],
+      ["GATE_SERPEN_RIVER", "PIT_SERPEN"],
+      ["LANE_BOTTOM", "GATE_SERPEN_LANE"],
+      ["GATE_SERPEN_LANE", "PIT_SERPEN"],
       ["LANE_TOP", "BASE_RED"],
       ["LANE_MID", "BASE_RED"],
       ["LANE_BOTTOM", "BASE_RED"]

@@ -3,10 +3,10 @@
 Generated asset:
 
 ```text
-assets/generated/tfm2_lol_like_map_imagegen_v1.png
+docs/concept/tfm2_lol_like_map_imagegen_v1.png
 ```
 
-Original generated-image source was produced by the built-in image generation tool and copied into the repository. The original file remains under the Codex generated-images folder.
+Original generated-image source was produced by the built-in image generation tool and copied into the repository as concept art. The original file remains under the Codex generated-images folder.
 
 ## Prompt
 

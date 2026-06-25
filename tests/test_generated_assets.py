@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-IMAGEGEN_MAP = REPO_ROOT / "assets" / "generated" / "tfm2_lol_like_map_imagegen_v1.png"
+IMAGEGEN_MAP = REPO_ROOT / "docs" / "concept" / "tfm2_lol_like_map_imagegen_v1.png"
 
 
 class GeneratedAssetTests(unittest.TestCase):

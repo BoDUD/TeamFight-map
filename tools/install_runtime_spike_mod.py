@@ -14,6 +14,7 @@ SOURCE_MOD = REPO_ROOT / "mods" / MOD_ID
 BASE_BACKGROUND_ASSET = "asset/base/aseprite_resources/ingame/5v5/background_5v5"
 MAP_SETTING_ASSET = "asset/base/setting/map_setting"
 MAP_SETTING_REMAP = f"asset/{MOD_ID}/setting/map_setting"
+MAP_SETTING_STAGED_RELATIVE_PATH = Path("setting") / "map_setting.map_setting"
 
 
 def infer_game_root() -> Path:
@@ -80,7 +81,7 @@ def stage_map_setting_equivalent(game_root: Path, installed_mod: Path, source: P
     if not source.is_file():
         raise SystemExit(f"map_setting source is not a file: {source}")
 
-    target = installed_mod / "setting" / "map_setting"
+    target = installed_mod / MAP_SETTING_STAGED_RELATIVE_PATH
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source, target)
 

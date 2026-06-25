@@ -66,7 +66,7 @@ class RuntimeSpikeTests(unittest.TestCase):
             installed = install_runtime_spike_mod.copy_mod(game_root, clean=True)
             manifest_path = install_runtime_spike_mod.stage_map_setting_equivalent(game_root, installed, source)
 
-            target = installed / "setting" / "map_setting"
+            target = installed / "setting" / "map_setting.map_setting"
             self.assertEqual(source.read_bytes(), target.read_bytes())
             self.assertTrue(install_runtime_spike_mod.files_are_byte_equal(source, target))
 

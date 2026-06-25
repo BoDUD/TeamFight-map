@@ -55,7 +55,9 @@ python .\tools\install_runtime_spike_mod.py `
   --map-setting-source "D:\path\to\original\map_setting"
 ```
 
-This mode does not modify the repository's `mods/tfm2_lol_map_spike/mod.override_info`. It copies the binary source unchanged into the installed game mod at `mods/tfm2_lol_map_spike/setting/map_setting`, injects the temporary override only into that installed copy, validates byte size, SHA-256, and byte-for-byte equality, and writes a manifest outside the repository under `stage_runtime_spike_evidence/runtime_map_loading_spike/`.
+This mode does not modify the repository's `mods/tfm2_lol_map_spike/mod.override_info`. It copies the binary source unchanged into the installed game mod at `mods/tfm2_lol_map_spike/setting/map_setting.map_setting`, injects the temporary override only into that installed copy, validates byte size, SHA-256, and byte-for-byte equality, and writes a manifest outside the repository under `stage_runtime_spike_evidence/runtime_map_loading_spike/`. The asset remap remains extensionless: `asset/tfm2_lol_map_spike/setting/map_setting`.
+
+The first no-extension staging attempt on 2026-06-25 failed before gameplay validation: the game reported `Only 1/2 asset override(s) were applied`, and `log.log` recorded `Override source 'asset/tfm2_lol_map_spike/setting/map_setting' ... was not found`. Use the `.map_setting` staged filename for the next A/B run.
 
 ## Manual QA Evidence
 
@@ -120,7 +122,7 @@ Required non-visual proof for B:
 
 ```text
 Process: TeamfightManager2.exe
-Path: ...\mods\tfm2_lol_map_spike\setting\map_setting...
+Path: ...\mods\tfm2_lol_map_spike\setting\map_setting.map_setting...
 Operation: CreateFile / ReadFile
 Result: SUCCESS
 ```

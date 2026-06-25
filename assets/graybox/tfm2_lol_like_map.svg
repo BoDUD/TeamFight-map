@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1200" height="1200">
+<rect x="0" y="0" width="100" height="100" fill="#edf0e5" stroke="#28313f" stroke-width="0.8" />
+<rect x="2" y="2" width="96" height="96" fill="none" stroke="#6d7888" stroke-width="0.4" stroke-dasharray="1 1" />
+<polyline points="16,15 50,50 84,85" fill="none" stroke="#65aeda" stroke-width="9" stroke-linecap="round" opacity="0.7" />
+<polyline points="16,15 50,50 84,85" fill="none" stroke="#2f77a5" stroke-width="1.2" stroke-dasharray="2 1" opacity="0.85" />
+<polyline points="8,92 8,8 92,8" fill="none" stroke="#b58642" stroke-width="2.2" stroke-linejoin="round" opacity="0.9" />
+<text x="8" y="6" font-size="3" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">上路</text>
+<polyline points="8,92 50,50 92,8" fill="none" stroke="#c06554" stroke-width="2.2" stroke-linejoin="round" opacity="0.9" />
+<text x="50" y="48" font-size="3" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">中路</text>
+<polyline points="8,92 92,92 92,8" fill="none" stroke="#7d9140" stroke-width="2.2" stroke-linejoin="round" opacity="0.9" />
+<text x="92" y="90" font-size="3" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">下路</text>
+<polyline points="14,75 18,58 34,49 39,63 28,73 14,75" fill="none" stroke="#4d8b57" stroke-width="1.4" stroke-dasharray="2 1" opacity="0.9" />
+<text x="24" y="61" font-size="2" font-family="Arial, sans-serif" text-anchor="middle" fill="#4d8b57">蓝方上半野区</text>
+<polyline points="31,86 46,72 60,78 56,90 40,94 31,86" fill="none" stroke="#4d8b57" stroke-width="1.4" stroke-dasharray="2 1" opacity="0.9" />
+<text x="48" y="82" font-size="2" font-family="Arial, sans-serif" text-anchor="middle" fill="#4d8b57">蓝方下半野区</text>
+<polyline points="69,14 54,28 40,22 44,10 60,6 69,14" fill="none" stroke="#9c5c55" stroke-width="1.4" stroke-dasharray="2 1" opacity="0.9" />
+<text x="52" y="18" font-size="2" font-family="Arial, sans-serif" text-anchor="middle" fill="#9c5c55">红方上半野区</text>
+<polyline points="86,25 82,42 66,51 61,37 72,27 86,25" fill="none" stroke="#9c5c55" stroke-width="1.4" stroke-dasharray="2 1" opacity="0.9" />
+<text x="76" y="39" font-size="2" font-family="Arial, sans-serif" text-anchor="middle" fill="#9c5c55">红方下半野区</text>
+<circle cx="28" cy="28" r="5.3" fill="#8ab6d8" stroke="#26313d" stroke-width="0.6" opacity="0.92" />
+<text x="28" y="28.8" font-size="2.4" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">上河道坑：先锋/Morgard</text>
+<circle cx="35" cy="32" r="1.2" fill="#fff9c9" stroke="#4c5565" stroke-width="0.3" />
+<circle cx="23" cy="19" r="1.2" fill="#fff9c9" stroke="#4c5565" stroke-width="0.3" />
+<circle cx="72" cy="72" r="5.3" fill="#90b66f" stroke="#26313d" stroke-width="0.6" opacity="0.92" />
+<text x="72" y="72.8" font-size="2.4" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">下河道坑：Serpen</text>
+<circle cx="65" cy="68" r="1.2" fill="#fff9c9" stroke="#4c5565" stroke-width="0.3" />
+<circle cx="77" cy="81" r="1.2" fill="#fff9c9" stroke="#4c5565" stroke-width="0.3" />
+<rect x="10.5" y="47.0" width="5" height="8" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="84.5" y="45.0" width="5" height="8" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="47.0" y="84.5" width="8" height="5" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="45.0" y="10.5" width="8" height="5" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="20.5" y="35.0" width="7" height="4" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="35.0" y="20.5" width="4" height="7" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="72.5" y="61.0" width="7" height="4" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="61.0" y="72.5" width="4" height="7" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="40.0" y="55.0" width="6" height="4" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="54.0" y="41.0" width="6" height="4" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="31.5" y="64.5" width="5" height="5" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<rect x="63.5" y="30.5" width="5" height="5" fill="#286d3b" stroke="#173d23" stroke-width="0.25" opacity="0.82" />
+<circle cx="34" cy="34" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="66" cy="66" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="43" cy="53" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="57" cy="47" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="28" cy="58" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="72" cy="42" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="58" cy="76" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="42" cy="24" r="1.35" fill="#f3d45b" stroke="#7a5c00" stroke-width="0.25" opacity="0.95" />
+<circle cx="22" cy="63" r="1.8" fill="#deb65b" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="48" cy="84" r="1.8" fill="#deb65b" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="31" cy="56" r="1.8" fill="#d66855" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="55" cy="79" r="1.8" fill="#8d6bd1" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="52" cy="16" r="1.8" fill="#deb65b" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="78" cy="37" r="1.8" fill="#deb65b" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="45" cy="21" r="1.8" fill="#8d6bd1" stroke="#3a3140" stroke-width="0.35" />
+<circle cx="69" cy="44" r="1.8" fill="#d66855" stroke="#3a3140" stroke-width="0.35" />
+<rect x="6.6" y="74.6" width="2.8" height="2.8" fill="#496aa8" stroke="#272c33" stroke-width="0.3" />
+<rect x="6.9" y="43.9" width="2.2" height="2.2" fill="#6f8fc9" stroke="#272c33" stroke-width="0.3" />
+<rect x="53.9" y="6.9" width="2.2" height="2.2" fill="#cf7771" stroke="#272c33" stroke-width="0.3" />
+<rect x="74.6" y="6.6" width="2.8" height="2.8" fill="#a54949" stroke="#272c33" stroke-width="0.3" />
+<rect x="17.6" y="79.6" width="2.8" height="2.8" fill="#496aa8" stroke="#272c33" stroke-width="0.3" />
+<rect x="33.9" y="63.9" width="2.2" height="2.2" fill="#6f8fc9" stroke="#272c33" stroke-width="0.3" />
+<rect x="63.9" y="33.9" width="2.2" height="2.2" fill="#cf7771" stroke="#272c33" stroke-width="0.3" />
+<rect x="79.6" y="17.6" width="2.8" height="2.8" fill="#a54949" stroke="#272c33" stroke-width="0.3" />
+<rect x="22.6" y="90.6" width="2.8" height="2.8" fill="#496aa8" stroke="#272c33" stroke-width="0.3" />
+<rect x="43.9" y="90.9" width="2.2" height="2.2" fill="#6f8fc9" stroke="#272c33" stroke-width="0.3" />
+<rect x="90.9" y="53.9" width="2.2" height="2.2" fill="#cf7771" stroke="#272c33" stroke-width="0.3" />
+<rect x="90.6" y="22.6" width="2.8" height="2.8" fill="#a54949" stroke="#272c33" stroke-width="0.3" />
+<rect x="12.75" y="86.75" width="2.5" height="2.5" fill="#3f65a6" stroke="#272c33" stroke-width="0.3" />
+<rect x="18.75" y="92.75" width="2.5" height="2.5" fill="#3f65a6" stroke="#272c33" stroke-width="0.3" />
+<rect x="84.75" y="10.75" width="2.5" height="2.5" fill="#b04444" stroke="#272c33" stroke-width="0.3" />
+<rect x="78.75" y="4.75" width="2.5" height="2.5" fill="#b04444" stroke="#272c33" stroke-width="0.3" />
+<circle cx="8" cy="92" r="4.2" fill="#315aa4" stroke="#111820" stroke-width="0.5" opacity="0.9" />
+<text x="8" y="92.8" font-size="2.3" font-family="Arial, sans-serif" text-anchor="middle" fill="#ffffff">蓝方基地</text>
+<circle cx="92" cy="8" r="4.2" fill="#a23636" stroke="#111820" stroke-width="0.5" opacity="0.9" />
+<text x="92" y="8.8" font-size="2.3" font-family="Arial, sans-serif" text-anchor="middle" fill="#ffffff">红方基地</text>
+<text x="18" y="4.5" font-size="2.5" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">功能草丛 12 组</text>
+<text x="50" y="4.5" font-size="2.5" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">河道入口 8 个</text>
+<text x="82" y="4.5" font-size="2.5" font-family="Arial, sans-serif" text-anchor="middle" fill="#1d2433">双坑各 2 入口</text>
+</svg>

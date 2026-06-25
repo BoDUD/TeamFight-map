@@ -8,7 +8,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 
 | Question | Current answer | Evidence |
 | --- | --- | --- |
-| Can map visuals be replaced by asset override? | Yes for static visual layers. Keep the next PR focused on a single `background_5v5` probe. | Installed Workshop mods and prior local probes use ordinary `mod.override_info` remaps for `background_5v5`, `wall_5v5`, tower/nexus sheets, shadows, and minimap background. |
+| Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
 | Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | Visual layer overrides leave native AI/pathing intact. `asset/base/setting/map_setting` is the main candidate, but it is a binary asset and must be proven through an unmodified equivalent remap before mutation. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | Public SDK probes found `ServerModContext.database.map_setting` exposes only `visible_view` and `path`; obvious `objectives`, `objective_spawns`, `jungle_camps`, `spawn`, and neutral objective fields were not exposed. |
 
@@ -45,13 +45,21 @@ python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
 
 The script copies the repository package to the game-scanned `mods/tfm2_lol_map_spike/` folder and, when `--enable-exclusive` is used, writes `config/game/mods.json` with only this spike enabled for isolated QA.
 
+## Manual QA Evidence
+
+| Date | Probe | Evidence | Result |
+| --- | --- | --- | --- |
+| 2026-06-25 | `tfm2_lol_map_spike` overriding `asset/base/aseprite_resources/ingame/5v5/background_5v5` | Screenshot stored outside the repository at `D:\steam\steamapps\common\Teamfight Manager2\stage_runtime_spike_evidence\runtime_map_loading_spike\background_override_verified_20260625-201420.png`; `1919x1079`, `374534` bytes, SHA-256 `17E20C7AFD4A0DDBAC17E69C10EE7D79811C94B9EDA2DAD68672C3446DA8DA8D` | Pass. Diagnostic background appears in match. Units, minion waves, towers, jungle monsters, and AI routes have no observed abnormalities. |
+
+This proves the background visual asset can be overridden through `mod.override_info`. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
+
 ## Resource Audit
 
 Only paths, formats, and field surfaces are recorded here. No original game resource payloads are committed.
 
 | Runtime area | Candidate path or field | Format | Current status |
 | --- | --- | --- | --- |
-| Map background / ground texture | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | PNG, native `1280x1280` | Visual override route verified by references; this PR includes a one-asset probe. |
+| Map background / ground texture | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | PNG, native `1280x1280` | Verified in match through `tfm2_lol_map_spike`; diagnostic probe visible and native simulation behavior stable. |
 | Primary wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5` | PNG, native `1280x1280` | Override route verified by references; not included in this minimal spike package. |
 | Foreground wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` | PNG, native `1280x1280` | Candidate visual layer; test separately after background. |
 | Wall shadow visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_shadow_5v5` | PNG, native `1280x1280` | Candidate visual layer; not pathing. |
@@ -74,12 +82,12 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 
 ## Test Order
 
-1. Load this mod package without any DLL or `map_setting` override.
-2. Confirm the game recognizes `mod.mod_info`.
-3. Enter a 5v5 match and confirm the solid-color `background_5v5` probe is visible.
-4. Confirm units, minions, towers, jungle camps, and AI routes remain native and stable.
-5. Only after the visual probe passes, create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
-6. Only after equivalent remap passes, try one tiny collision/path/spawn mutation in a separate branch or PR.
+1. Done: load this mod package without any DLL or `map_setting` override.
+2. Done: confirm the game recognizes `mod.mod_info`.
+3. Done: enter a 5v5 match and confirm the solid-color `background_5v5` probe is visible.
+4. Done: confirm units, minions, towers, jungle camps, and AI routes remain native and stable.
+5. Next: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
+6. Later: only after equivalent remap passes, try one tiny collision/path/spawn mutation in a separate branch or PR.
 
 ## Stop Conditions
 

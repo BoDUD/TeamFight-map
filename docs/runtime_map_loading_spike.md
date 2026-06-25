@@ -37,6 +37,14 @@ The override table follows the installed Workshop schema:
 
 The PNG is a generated solid-color diagnostic asset. It is not image-gen map art and is not intended to ship as a map texture.
 
+Install the spike into the local game folder with:
+
+```powershell
+python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
+```
+
+The script copies the repository package to the game-scanned `mods/tfm2_lol_map_spike/` folder and, when `--enable-exclusive` is used, writes `config/game/mods.json` with only this spike enabled for isolated QA.
+
 ## Resource Audit
 
 Only paths, formats, and field surfaces are recorded here. No original game resource payloads are committed.

@@ -16,8 +16,8 @@ The probe image is a generated solid-color PNG sized to the native `1280x1280` b
 
 ## Smoke Test
 
-1. Sync or copy this folder to the active game `mods/tfm2_lol_map_spike/` folder.
-2. Enable `tfm2_lol_map_spike` as an isolated mod when testing the map loader.
+1. From the repository root, run `python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive`.
+2. Restart Teamfight Manager 2 if it was already running.
 3. Start Teamfight Manager 2 and verify the mod appears in the mod UI.
 4. Enter a 5v5 match.
 5. Confirm the match background changes to the probe color while units, minions, towers, jungle monsters, and AI routes continue to behave like the native 5v5 map.

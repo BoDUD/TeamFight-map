@@ -24,6 +24,12 @@ python -m unittest discover -s tests
 
 Generated validation previews are written to `assets/graybox/`. These are not the map art; they exist to make the coordinate data reviewable.
 
+To install the runtime spike into a local Teamfight Manager 2 folder that contains this checkout:
+
+```powershell
+python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
+```
+
 The visual concept reference is stored at:
 
 ```text

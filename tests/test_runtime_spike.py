@@ -18,7 +18,7 @@ class RuntimeSpikeTests(unittest.TestCase):
         self.assertEqual("tfm2_lol_map_spike", metadata["mod_id"])
         self.assertEqual("TFM2 LOL Map Runtime Spike", metadata["name"])
         self.assertEqual("0.1.0", metadata["version"])
-        self.assertIn({"mod_id": "base", "version": ">=0.4.13, <0.5.0"}, metadata["dependencies"])
+        self.assertIn({"mod_id": "base", "version": ">=0.4.0"}, metadata["dependencies"])
 
     def test_override_table_only_replaces_background_probe(self) -> None:
         overrides = json.loads((SPIKE_MOD / "mod.override_info").read_text(encoding="utf-8"))

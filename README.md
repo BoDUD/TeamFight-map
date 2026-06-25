@@ -40,6 +40,14 @@ python .\tools\install_runtime_spike_mod.py `
   --map-setting-source "D:\path\to\original\map_setting"
 ```
 
+To reproduce the local byte-identical `map_setting` structural round trip, keep both the original input and re-encoded output outside the repository:
+
+```powershell
+python .\tools\map_setting_round_trip.py `
+  --input "D:\path\to\original\map_setting" `
+  --evidence-dir "D:\path\to\round_trip_evidence"
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -54,7 +62,7 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, but safe modification still requires a byte-identical decode/re-encode round trip and then one tiny reversible data mutation. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
+Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, and Q2b proves a structural decode/re-encode can be byte-identical, but safe modification still requires one tiny reversible data mutation. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
 
 ## Scope
 

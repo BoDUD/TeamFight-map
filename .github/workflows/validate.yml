@@ -36,3 +36,6 @@ jobs:
 
       - name: Compile install script
         run: python -m py_compile tools/install_runtime_spike_mod.py
+
+      - name: Compile map_setting round-trip tool
+        run: python -m py_compile tools/map_setting_round_trip.py

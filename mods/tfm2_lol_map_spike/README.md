@@ -32,6 +32,7 @@ The probe image is a generated solid-color PNG sized to the native `1280x1280` b
 ## Guardrails
 
 - Do not add `asset/base/setting/map_setting` to this package until an unmodified equivalent remap is proven safe.
+- If testing an equivalent `map_setting` remap, use `tools/install_runtime_spike_mod.py --stage-map-setting-equivalent`; it stages the binary and temporary override only in the installed game copy.
 - Do not commit original game resources or Workshop resources here.
 - Do not treat this probe as final map art. Its PNG is intentionally diagnostic.
 - Do not expand this package into full texture, collision, spawn, or navigation export until `docs/runtime_map_loading_spike.md` has green answers for the runtime questions.

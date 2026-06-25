@@ -45,6 +45,18 @@ python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
 
 The script copies the repository package to the game-scanned `mods/tfm2_lol_map_spike/` folder and, when `--enable-exclusive` is used, writes `config/game/mods.json` with only this spike enabled for isolated QA.
 
+For the next local-only equivalent `map_setting` remap gate:
+
+```powershell
+python .\tools\install_runtime_spike_mod.py `
+  --clean `
+  --enable-exclusive `
+  --stage-map-setting-equivalent `
+  --map-setting-source "D:\path\to\original\map_setting"
+```
+
+This mode does not modify the repository's `mods/tfm2_lol_map_spike/mod.override_info`. It copies the binary source unchanged into the installed game mod at `mods/tfm2_lol_map_spike/setting/map_setting`, injects the temporary override only into that installed copy, validates byte size, SHA-256, and byte-for-byte equality, and writes a manifest outside the repository under `stage_runtime_spike_evidence/runtime_map_loading_spike/`.
+
 ## Manual QA Evidence
 
 | Date | Probe | Evidence | Result |
@@ -88,6 +100,57 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 4. Done: confirm units, minions, towers, jungle camps, and AI routes remain native and stable.
 5. Next: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
 6. Later: only after equivalent remap passes, try one tiny collision/path/spawn mutation in a separate branch or PR.
+
+## Q2a Equivalent Remap Gate
+
+Question:
+
+```text
+Q2a: does the loader accept an unmodified byte-equivalent map_setting remap?
+```
+
+Strict A/B:
+
+| Run | Installed override state | Purpose |
+| --- | --- | --- |
+| A | Background-only `tfm2_lol_map_spike` | Already verified visual baseline. |
+| B | Same as A, plus installed-copy-only `asset/base/setting/map_setting` equivalent remap | Tests whether the loader accepts and reads a local `map_setting` replacement without changing gameplay data. |
+
+Required non-visual proof for B:
+
+```text
+Process: TeamfightManager2.exe
+Path: ...\mods\tfm2_lol_map_spike\setting\map_setting...
+Operation: CreateFile / ReadFile
+Result: SUCCESS
+```
+
+This can come from Process Monitor or a game loader log. A successful match alone is not enough because the replacement file is byte-identical to the original and could be ignored by the loader.
+
+B pass criteria:
+
+- Replacement file is actually read by `TeamfightManager2.exe`.
+- Mod remains enabled.
+- No resource loading errors.
+- 5v5 match starts successfully.
+- Spawn points, towers, jungle monsters, and objective actors are normal.
+- Minion waves and hero AI paths are normal.
+- Brush gameplay behavior is unchanged.
+- At least two cold starts pass.
+- Source and staged target size and SHA-256 match, and byte-for-byte comparison passes.
+
+If B passes, record only loader takeover success. It still does not prove `map_setting` can be safely modified.
+
+The next gate after B is:
+
+```text
+map_setting decode
+-> no field edits
+-> re-encode
+-> output must be byte-identical to input
+```
+
+Only a byte-identical round trip should open the door to a tiny, reversible data mutation.
 
 ## Stop Conditions
 

@@ -30,6 +30,16 @@ To install the runtime spike into a local Teamfight Manager 2 folder that contai
 python .\tools\install_runtime_spike_mod.py --clean --enable-exclusive
 ```
 
+For the next local-only `map_setting` equivalent remap gate, pass an extracted original binary source. The source and staged copy stay outside the repository:
+
+```powershell
+python .\tools\install_runtime_spike_mod.py `
+  --clean `
+  --enable-exclusive `
+  --stage-map-setting-equivalent `
+  --map-setting-source "D:\path\to\original\map_setting"
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -44,7 +54,7 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work until the runtime spike answers whether `map_setting` and related map data can be safely remapped.
+Do not start formal map texture, collision mask, or exporter work until the runtime spike answers whether `map_setting` and related map data can be safely remapped. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
 
 ## Scope
 

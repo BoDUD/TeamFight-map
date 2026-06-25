@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import struct
 import unittest
 from pathlib import Path
+
+from tools import install_runtime_spike_mod
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +52,46 @@ class RuntimeSpikeTests(unittest.TestCase):
             "asset/base/setting/map_setting",
         ):
             self.assertIn(phrase, text)
+
+    def test_map_setting_equivalent_staging_only_mutates_installed_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            game_root = Path(temp_dir) / "game"
+            (game_root / "mods").mkdir(parents=True)
+            (game_root / "mod-sdk").mkdir()
+            (game_root / "TeamfightManager2.exe").write_bytes(b"")
+            (game_root / "mod-sdk" / "base_version.txt").write_text("0.4.4\n", encoding="utf-8")
+            source = Path(temp_dir) / "map_setting"
+            source.write_bytes(b"byte-identical-map-setting-probe")
+
+            installed = install_runtime_spike_mod.copy_mod(game_root, clean=True)
+            manifest_path = install_runtime_spike_mod.stage_map_setting_equivalent(game_root, installed, source)
+
+            target = installed / "setting" / "map_setting"
+            self.assertEqual(source.read_bytes(), target.read_bytes())
+            self.assertTrue(install_runtime_spike_mod.files_are_byte_equal(source, target))
+
+            installed_overrides = json.loads((installed / "mod.override_info").read_text(encoding="utf-8"))
+            self.assertIn("asset/base/setting/map_setting", installed_overrides)
+            self.assertEqual(
+                {
+                    "remapping": "asset/tfm2_lol_map_spike/setting/map_setting",
+                    "type": "override",
+                },
+                installed_overrides["asset/base/setting/map_setting"],
+            )
+
+            repo_overrides = json.loads((SPIKE_MOD / "mod.override_info").read_text(encoding="utf-8"))
+            self.assertNotIn("asset/base/setting/map_setting", repo_overrides)
+
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(str(source.resolve()), manifest["source_path"])
+            self.assertEqual(str(target), manifest["target_path"])
+            self.assertEqual(manifest["source_size"], manifest["target_size"])
+            self.assertEqual(manifest["source_sha256"], manifest["target_sha256"])
+            self.assertEqual(0, manifest["game_exe_size"])
+            self.assertEqual(install_runtime_spike_mod.sha256_file(game_root / "TeamfightManager2.exe"), manifest["game_exe_sha256"])
+            self.assertTrue(manifest["byte_equal"])
+            self.assertFalse(manifest["committed_to_repository"])
 
 
 if __name__ == "__main__":

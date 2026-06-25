@@ -175,6 +175,8 @@ def validate_design_counts(layout: dict[str, Any], errors: list[str]) -> None:
             continue
         if gate["kind"] != "lane_to_river" or gate["from"] != entrance["from"] or gate["to"] != entrance["to"]:
             errors.append(f"river entrance {entrance['id']} disagrees with its gate definition")
+        if gate["center"] != entrance["center"]:
+            errors.append(f"river entrance {entrance['id']} center disagrees with its gate definition")
 
     for objective in layout["objectives"]:
         entrance_count = len(objective["entrances"])
@@ -349,6 +351,32 @@ def validate_tower_rules(layout: dict[str, Any], errors: list[str]) -> None:
         errors.append("T2 lane seal must enhance minions for 90 seconds")
 
 
+def validate_runtime_requirements(layout: dict[str, Any], errors: list[str]) -> None:
+    requirements = layout.get("runtime_requirements")
+    if not requirements:
+        errors.append("runtime_requirements block is required for non-runtime specs")
+        return
+
+    if requirements.get("status") != "not_implemented":
+        errors.append("runtime_requirements.status must remain not_implemented until game runtime integration exists")
+
+    required_baselines = {
+        "collision_mask",
+        "walkable_area",
+        "wall_polygons",
+        "brush_gameplay_mask",
+        "world_to_texture_transform"
+    }
+    present_baselines = set(requirements.get("original_map_baseline_required", []))
+    missing = sorted(required_baselines - present_baselines)
+    if missing:
+        errors.append(f"runtime_requirements is missing baseline requirements: {', '.join(missing)}")
+
+    area_delta = requirements.get("target_max_total_passable_area_delta_pct")
+    if not isinstance(area_delta, (int, float)) or area_delta <= 0 or area_delta > 8:
+        errors.append("runtime_requirements.target_max_total_passable_area_delta_pct must be > 0 and <= 8")
+
+
 def validate_object_overlaps(layout: dict[str, Any], errors: list[str]) -> None:
     for tower in layout["towers"]:
         for brush in layout["functional_brush"]:
@@ -365,6 +393,7 @@ def validate_layout(layout: dict[str, Any]) -> list[str]:
     validate_objective_timelines(layout, errors)
     validate_region_codes_and_topology(layout, errors)
     validate_tower_rules(layout, errors)
+    validate_runtime_requirements(layout, errors)
     validate_object_overlaps(layout, errors)
     return errors
 

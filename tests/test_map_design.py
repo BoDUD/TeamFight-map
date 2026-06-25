@@ -48,6 +48,17 @@ class MapDesignTests(unittest.TestCase):
             self.assertIn("LANE_MID", half["adjacent_regions"])
             self.assertNotIn("LANE_MID", {exit_info["to"] for exit_info in half["exits"]})
 
+    def test_river_entrance_centers_match_gate_centers(self) -> None:
+        gates = {gate["id"]: gate for gate in self.layout["gates"]}
+        for entrance in self.layout["river"]["entrances"]:
+            self.assertEqual(gates[entrance["id"]]["center"], entrance["center"])
+
+    def test_runtime_requirements_keep_spec_non_runtime(self) -> None:
+        requirements = self.layout["runtime_requirements"]
+        self.assertEqual("not_implemented", requirements["status"])
+        self.assertIn("collision_mask", requirements["original_map_baseline_required"])
+        self.assertLessEqual(requirements["target_max_total_passable_area_delta_pct"], 8)
+
 
 if __name__ == "__main__":
     unittest.main()

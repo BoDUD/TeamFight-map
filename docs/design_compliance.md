@@ -31,6 +31,7 @@ This graybox is implemented from `teamfight_manager2_lol_map_design.md` dated 20
 - four camps per team;
 - Serpen and Morgard prototype timelines;
 - T1 plating and T2 lane-seal prototype rules;
+- non-runtime `runtime_requirements` status and required original-map baseline inputs;
 - required region codes and river continuity through the mid bridge.
 
 ## Intentional Graybox Choices

@@ -22,5 +22,8 @@ jobs:
       - name: Rebuild graybox previews
         run: python tools/build_graybox_map.py
 
+      - name: Ensure graybox previews are committed
+        run: git diff --exit-code -- assets/graybox
+
       - name: Run tests
         run: python -m unittest discover -s tests

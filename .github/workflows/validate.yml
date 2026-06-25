@@ -25,5 +25,14 @@ jobs:
       - name: Ensure graybox previews are committed
         run: git diff --exit-code -- assets/graybox
 
+      - name: Rebuild runtime spike assets
+        run: python tools/build_runtime_spike_assets.py
+
+      - name: Ensure runtime spike assets are committed
+        run: git diff --exit-code -- mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5
+
       - name: Run tests
         run: python -m unittest discover -s tests
+
+      - name: Compile install script
+        run: python -m py_compile tools/install_runtime_spike_mod.py

@@ -1,0 +1,14 @@
+{
+  "author": "BoDUD, Codex",
+  "dependencies": [
+    {
+      "mod_id": "base",
+      "version": ">=0.4.0"
+    }
+  ],
+  "description": "Runtime spike for TeamFight-map map asset loading. Diagnostic-only background override; not a playable map.",
+  "last_updated": "2026-06-25",
+  "mod_id": "tfm2_lol_map_spike",
+  "name": "TFM2 LOL Map Runtime Spike",
+  "version": "0.1.0"
+}

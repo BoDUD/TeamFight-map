@@ -1,0 +1,6 @@
+{
+  "asset/base/aseprite_resources/ingame/5v5/background_5v5": {
+    "remapping": "asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5",
+    "type": "override"
+  }
+}

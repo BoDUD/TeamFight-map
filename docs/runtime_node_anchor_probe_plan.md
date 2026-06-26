@@ -72,6 +72,14 @@ Therefore the next implementation step is API discovery:
 3. If a surface exists, render or log a few independent anchors without modifying gameplay.
 4. If no surface exists, document the blocker and continue with offline decoded anchors instead.
 
+PR #8 completed this source-level API discovery in `docs/runtime_node_anchor_api_discovery.md`. The checked public SDK/source surface exposes `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters, but no public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface. The result remains:
+
+```text
+runtime_node_anchor_api: unavailable_in_checked_public_sdk_sources
+map_setting_node_world_transform: unproven
+candidate_369_370: blocked
+```
+
 ## Mutation Is Still Blocked
 
 Do not create a mutated `map_setting` until all are true:

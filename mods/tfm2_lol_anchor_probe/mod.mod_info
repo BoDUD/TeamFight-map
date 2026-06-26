@@ -1,0 +1,14 @@
+{
+  "author": "BoDUD, Codex",
+  "dependencies": [
+    {
+      "mod_id": "base",
+      "version": ">=0.4.0"
+    }
+  ],
+  "description": "Read-only runtime node/world anchor API discovery probe. No asset overrides and no map_setting override.",
+  "last_updated": "2026-06-26",
+  "mod_id": "tfm2_lol_anchor_probe",
+  "name": "TFM2 LOL Runtime Node Anchor Probe",
+  "version": "0.1.0"
+}

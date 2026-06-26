@@ -39,3 +39,6 @@ jobs:
 
       - name: Compile map_setting round-trip tool
         run: python -m py_compile tools/map_setting_round_trip.py
+
+      - name: Compile map_setting inspect tool
+        run: python -m py_compile tools/map_setting_inspect.py

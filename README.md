@@ -12,6 +12,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/imagegen_prompt.md` records the prompt used for the generated map art.
 - `mods/tfm2_lol_map_spike/` is the minimal runtime spike package for one-asset map override testing.
 - `docs/runtime_map_loading_spike.md` records the runtime asset audit, test order, and open loader questions.
+- `docs/map_setting_layer_characterization.md` records the Q2c read-only layer inspection and selected one-cell mutation candidate.
 
 ## Build And Validate
 
@@ -48,6 +49,15 @@ python .\tools\map_setting_round_trip.py `
   --evidence-dir "D:\path\to\round_trip_evidence"
 ```
 
+To reproduce the read-only Q2c `map_setting` layer inspection, keep the original input, extracted original assets, overlays, masks, and manifest outside the repository:
+
+```powershell
+python .\tools\map_setting_inspect.py `
+  --input "D:\path\to\original\map_setting" `
+  --bundle "D:\steam\steamapps\common\Teamfight Manager2\bundle.game_data" `
+  --output-dir "D:\path\to\map_setting_layer_inspection"
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -62,7 +72,7 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, and Q2b proves a structural decode/re-encode can be byte-identical, but safe modification still requires one tiny reversible data mutation. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
+Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, and Q2c has only selected a read-only one-cell mutation candidate. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
 
 ## Scope
 

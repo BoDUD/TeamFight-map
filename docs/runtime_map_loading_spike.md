@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, but no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, and Q2c has selected a read-only one-cell mutation candidate, but no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | Public SDK probes found `ServerModContext.database.map_setting` exposes only `visible_view` and `path`; obvious `objectives`, `objective_spawns`, `jungle_camps`, `spawn`, and neutral objective fields were not exposed. |
 
 ## Minimal Mod Package
@@ -67,8 +67,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-25 | Q2a byte-equivalent `asset/base/setting/map_setting` remap staged only in the installed game copy | Summary stored outside the repository at `D:\steam\steamapps\common\Teamfight Manager2\stage_runtime_spike_evidence\runtime_map_loading_spike\q2a_b1_summary.json`; cold start screenshots `q2a_b1_coldstart1_live_20260625-223645.png` SHA-256 `7582051d44254b05ca19f0eefb7281d04baaa2ab32fe138aa3dc6578cfadfc59` and `q2a_b1_coldstart2_live_20260625-224248.png` SHA-256 `a503b89fdd3afc99a1f25d07fe1dcc50305a6ae6067a0c5a486d3ac648544048`; staged `map_setting.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Earlier registration-only pass. Two cold starts reached live 5v5 with the diagnostic background visible and no `source not found` or partial-override warning in the game log. Units, minions, towers, and AI routes remained visibly normal. The following Process Monitor row completes the positive `CreateFile` / `ReadFile SUCCESS` evidence gate. |
 | 2026-06-25 | Q2a positive local file-read evidence for the staged `map_setting.map_setting` | Process Monitor evidence stored outside the repository at `D:\tfm2_q2a_evidence\`: `q2a_file_read_procmon.pml` SHA-256 `cdd8a988e8a982bdf527b68ba619b2ebdebda0d24f773f4afa48829a161de1a7`, filtered `q2a_file_read_procmon.csv` SHA-256 `8eedab38208b6a85954a1ce937b47232abd116f2ba43e41144e9cc7c776262b5`, live screenshot `q2a_file_read_screenshot.png` SHA-256 `e74181647d32966248e12b51e9f2a7f35b80583f424ea32434ece2dce473fa62`, manifest `q2a_file_read_manifest.json` SHA-256 `20744e93e93e9e12387746e2f473e6a80e48ed91fc683c1c4fd596ce117bb694`; staged `map_setting.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Q2a: Loader Takeover Pass. `TeamfightManager2.exe` PID `9952` opened `D:\steam\steamapps\common\Teamfight Manager2\mods\tfm2_lol_map_spike\setting\map_setting.map_setting` with `CreateFile SUCCESS` at `23:18:08.1826610`, then read it with `ReadFile SUCCESS` at `23:18:08.1864235`, `Offset: 0, Length: 1,451,980`. This proves the local staged file was read; it does not prove the binary format can be decoded, re-encoded, or safely mutated. |
 | 2026-06-25 | Q2b byte-identical structural `map_setting` round trip | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_round_trip\`: manifest `map_setting_round_trip_manifest.json` SHA-256 `842a5f003f9307dbc6ceda2adc7ffa1fe30bc1a18ce2e9034cb52b54f695ed84`, output `map_setting.roundtrip.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`; input and output size `1,451,980` bytes | Q2b: Byte-Identical Round Trip Pass. The tool decodes only structural framing, preserving gameplay payloads as uninterpreted bytes: one chunked binary layer from offset `0` to `1,033,448`, followed by two packed4 layers ending at `1,438,464` and `1,451,980`. Re-encoding without field edits produced the same SHA-256 and no first-difference offset. This does not prove any gameplay field can be safely changed. |
+| 2026-06-26 | Q2c read-only `map_setting` layer characterization | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_layer_inspection\`: manifest `layer_inspection_manifest.json` SHA-256 `52427ca7932cb88156e3f7195ba5e3fce43b6d5997034beb717f8a03a4d852cb`, generated diagnostic masks and overlays for `chunked_binary`, `packed4_0`, and `packed4_1` | Q2c read-only candidate selected. `chunked_binary` is a `900x900` binary layer with `transpose_mismatch_count: 0`, consistent with a symmetric `30x30` source-target relation such as visibility or reachability. `packed4_0` is likely path/next-hop-like and `packed4_1` remains unverified. Candidate for follow-up review only: `chunked_binary` coordinate `[32,31]`, source node `31`, target node `32`, serialized byte offset `35668`, old value `1`, planned adjacent-sourced new value `0`. No mutated file was generated or installed. |
 
-This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, and that the currently observed structural framing can round-trip byte-identically without edits. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
+This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that a cautious one-cell candidate has been selected for review. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
 
 ## Resource Audit
 
@@ -87,7 +88,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Candidate for path/collision/spawn/placement, but must not be mutated except in a tiny reversible follow-up probe. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one cautious `chunked_binary` candidate at serialized byte offset `35668`. Candidate for path/collision/spawn/placement, but must not be mutated except in a tiny reversible follow-up probe. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | SDK field plus binary tables | Public field exists, but full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | SDK field plus binary tables | Public `path` exists, but safe replacement workflow is not proven. |
@@ -106,7 +107,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 5. Done: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
 6. Done: capture positive `TeamfightManager2.exe` `CreateFile` / `ReadFile SUCCESS` evidence for `mods\tfm2_lol_map_spike\setting\map_setting.map_setting`.
 7. Done: decode `map_setting`, re-encode without field edits, and prove the output is byte-identical to the original.
-8. Next: only after choosing a specific decoded field and rollback plan, try one tiny collision/path/spawn mutation in a separate branch or PR.
+8. Done: characterize the decoded layers read-only, generate repository-external masks/overlays, and select one candidate cell plus rollback plan.
+9. Next: try one tiny reversible mutation in a separate branch or PR with A/B/A runtime proof.
 
 ## Q2a Equivalent Remap Gate
 
@@ -172,6 +174,43 @@ Decoded structural layout:
 | Packed4 layer 1 | 1,438,464 | 1,451,980 | 27,000 4-bit cells / 13,500 bytes |
 
 This is still not a gameplay-field decoder. Only a tiny, reversible data mutation should be attempted next, and only in a separate PR with exact offset/context evidence and an install-time rollback path.
+
+## Q2c Read-Only Layer Characterization Gate
+
+Question:
+
+```text
+Which decoded layer has the safest, most interpretable single-cell target for the first reversible mutation?
+```
+
+Result on 2026-06-26: candidate selected for follow-up review only. `tools/map_setting_inspect.py` unfolds the structural layers into repository-external diagnostic masks, extracts local original visual assets from `bundle.game_data`, and creates overlays for comparison. The tool does not generate a mutated `map_setting` and does not install anything into the game.
+
+Summary:
+
+| Layer | Current interpretation | First-mutation decision |
+| --- | --- | --- |
+| `chunked_binary` | Symmetric `900x900` binary source-target matrix over a `30x30` logical grid. It most likely represents visibility or reachability, not a direct terrain-category mask. | Selected as the least risky candidate layer. |
+| `packed4_0` | `900x900` 4-bit table with values `0-7` and `15`, likely path or next-hop related. | Excluded for the first mutation because path/AI risk is higher. |
+| `packed4_1` | `27000` 4-bit values; `30x30x30` slices are an unverified diagnostic view only. | Excluded. |
+
+Selected read-only candidate:
+
+```text
+layer: chunked_binary
+logical_coordinate: [32, 31]
+source_node: 31
+target_node: 32
+source_xy_30x30: [1, 1]
+target_xy_30x30: [2, 1]
+serialized_byte_offset: 35668
+old_value: 1
+planned_new_value: 0
+planned_new_value_source_coordinate: [32, 30]
+rollback_source_sha256: 6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0
+prediction_confidence: hypothesis
+```
+
+This candidate sits on the upper-left outer logical edge, away from bases, tower clusters, objectives, jungle camps, functional brush, and normal lane flow. The next PR may build a one-cell mutation tool around this exact target, but it must still run A/B/A and stop on any crash, load error, pathing abnormality, failed rollback, or broader-than-expected diff.
 
 ## Stop Conditions
 

@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import shutil
+import struct
 from pathlib import Path
 from typing import Any
 
@@ -96,14 +97,32 @@ def load_override_table(path: Path) -> dict[str, Any]:
     return table
 
 
+def png_dimensions(path: Path) -> tuple[int, int]:
+    with path.open("rb") as handle:
+        header = handle.read(24)
+    if len(header) < 24 or not header.startswith(b"\x89PNG\r\n\x1a\n") or header[12:16] != b"IHDR":
+        raise SystemExit(f"background source is not a PNG file: {path}")
+    return struct.unpack(">II", header[16:24])
+
+
+def ensure_background_only_override(installed_mod: Path) -> None:
+    override_path = installed_mod / "mod.override_info"
+    with override_path.open("r", encoding="utf-8") as handle:
+        overrides = json.load(handle)
+    if sorted(overrides) != [BASE_BACKGROUND_ASSET]:
+        raise SystemExit("Visual-only background staging requires exactly one background override.")
+
+
 def stage_background_source(game_root: Path, installed_mod: Path, source: Path) -> Path:
     source = source.resolve()
     if not source.is_file():
         raise SystemExit(f"background source is not a file: {source}")
     if is_inside_repo(source):
         raise SystemExit(f"Refusing to stage repository-internal background source: {source}")
-    if source.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
-        raise SystemExit(f"background source is not a PNG file: {source}")
+    width, height = png_dimensions(source)
+    if (width, height) != (1280, 1280):
+        raise SystemExit(f"background source must be 1280x1280, got {width}x{height}: {source}")
+    ensure_background_only_override(installed_mod)
 
     target = installed_mod / BACKGROUND_REMAP_RELATIVE_PATH
     if source == target.resolve() or paths_are_same_existing_file(source, target):
@@ -131,6 +150,7 @@ def stage_background_source(game_root: Path, installed_mod: Path, source: Path) 
         "asset_key": BASE_BACKGROUND_ASSET,
         "source_size": source_size,
         "target_size": target_size,
+        "png_dimensions": [width, height],
         "source_sha256": source_sha,
         "target_sha256": target_sha,
         "byte_equal": byte_equal,
@@ -245,6 +265,8 @@ def main() -> int:
         help="Stage a repository-external PNG over the installed copy of background_5v5 for visual-only QA.",
     )
     args = parser.parse_args()
+    if args.stage_background_source is not None and args.stage_map_setting_equivalent:
+        raise SystemExit("--stage-background-source cannot be combined with --stage-map-setting-equivalent")
 
     game_root = args.game_root.resolve() if args.game_root else infer_game_root().resolve()
     if not (game_root / "TeamfightManager2.exe").exists():

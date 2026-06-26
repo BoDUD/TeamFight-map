@@ -39,6 +39,7 @@ def planned_output_paths(output_dir: Path) -> list[Path]:
     paths = [
         output_dir / "semantic_validation_manifest.json",
         output_dir / "chunked_packed4_contingency.json",
+        output_dir / "candidate_rotation180.json",
         output_dir / "direction_code_mapping.json",
         output_dir / "transform_scores.json",
         output_dir / "best_transform_overlay.png",
@@ -86,9 +87,21 @@ def row_sum_histogram(values: list[int], size: int) -> dict[str, int]:
     return {str(key): counts[key] for key in sorted(counts)}
 
 
+def rotation180_relation_mismatch_count(values: list[int], size: int = MATRIX_SIZE) -> int:
+    mismatch_count = 0
+    for source in range(size):
+        rotated_source = size - 1 - source
+        for target in range(size):
+            rotated_target = size - 1 - target
+            if values[source * size + target] != values[rotated_source * size + rotated_target]:
+                mismatch_count += 1
+    return mismatch_count
+
+
 def chunked_invariants(values: list[int], size: int = MATRIX_SIZE) -> dict[str, Any]:
     rows = matrix_rows(values, size)
     diagonal = [values[index * size + index] for index in range(size)]
+    rotation180_mismatch_count = rotation180_relation_mismatch_count(values, size)
     connected_pair_count = 0
     signature_mismatch_count = 0
     transitivity_violation_count = 0
@@ -110,6 +123,8 @@ def chunked_invariants(values: list[int], size: int = MATRIX_SIZE) -> dict[str, 
         "diagonal_0_count": diagonal.count(0),
         "diagonal_1_count": diagonal.count(1),
         "transpose_mismatch_count": inspect.matrix_transpose_mismatch_count(values, size),
+        "rotation180_relation_mismatch_count": rotation180_mismatch_count,
+        "rotation180_relation_symmetric": rotation180_mismatch_count == 0,
         "row_sum_histogram": row_sum_histogram(values, size),
         "unique_row_count": len(set(rows)),
         "connected_pair_count": connected_pair_count,
@@ -175,6 +190,45 @@ def candidate_cross_layer_record(
             if would_conflict
             else "no_packed4_0_conflict_detected_for_this_edge"
         ),
+    }
+
+
+def candidate_rotation180_record(
+    chunked: list[int],
+    size: int = MATRIX_SIZE,
+    edge: tuple[int, int] = CANDIDATE_EDGE,
+) -> dict[str, Any]:
+    source, target = edge
+    rotated_source = size - 1 - source
+    rotated_target = size - 1 - target
+    cells = [
+        {
+            "logical_coordinate": [source, target],
+            "serialized_matrix_index": source * size + target,
+            "value": chunked[source * size + target],
+        },
+        {
+            "logical_coordinate": [target, source],
+            "serialized_matrix_index": target * size + source,
+            "value": chunked[target * size + source],
+        },
+        {
+            "logical_coordinate": [rotated_source, rotated_target],
+            "serialized_matrix_index": rotated_source * size + rotated_target,
+            "value": chunked[rotated_source * size + rotated_target],
+        },
+        {
+            "logical_coordinate": [rotated_target, rotated_source],
+            "serialized_matrix_index": rotated_target * size + rotated_source,
+            "value": chunked[rotated_target * size + rotated_source],
+        },
+    ]
+    return {
+        "edge": [source, target],
+        "rotated_edge": [rotated_source, rotated_target],
+        "cells": cells,
+        "candidate_is_self_rotating": {tuple(cell["logical_coordinate"]) for cell in cells[:2]}
+        == {tuple(cell["logical_coordinate"]) for cell in cells[2:]},
     }
 
 
@@ -625,6 +679,7 @@ def candidate_decision(
     candidate_cross_layer: dict[str, Any],
     direction_mapping: dict[str, Any],
     scores: dict[str, Any],
+    candidate_rotation: dict[str, Any],
 ) -> dict[str, Any]:
     blockers: list[str] = []
     remaining: list[str] = []
@@ -632,16 +687,18 @@ def candidate_decision(
         blockers.append("chunked_binary behaves like a transitive reachability closure")
     if candidate_cross_layer["cross_layer_consistency_after_hypothetical_edit"].startswith("would_conflict"):
         blockers.append("hypothetical chunked edit conflicts with packed4_0 sentinel hypothesis")
+    if invariants["rotation180_relation_symmetric"] and not candidate_rotation["candidate_is_self_rotating"]:
+        blockers.append("chunked_binary also preserves 180-degree node rotation; candidate would require its rotated edge")
     if direction_mapping["stability"] != "stable":
         remaining.append("packed4_0 direction code mapping is ambiguous")
     if scores["conclusion"] != "single_best":
         remaining.append("offline wall/minimap transform scoring is ambiguous")
-    remaining.append("runtime visual grid screenshot has not been captured in this PR")
+    remaining.append("independent runtime node/world anchor has not been captured")
 
     if blockers:
         status = "rejected"
     elif remaining:
-        status = "pending_runtime_grid_confirmation"
+        status = "pending_independent_node_anchor"
     else:
         status = "validated_for_mutation_pr"
     return {
@@ -652,9 +709,10 @@ def candidate_decision(
         "remaining_validation": remaining,
         "approved_mutation_scope_if_later_validated": {
             "layer": "chunked_binary",
-            "changed_cell_count": 2,
-            "changed_byte_count": 2,
+            "changed_cell_count": 4 if blockers and any("180-degree" in item for item in blockers) else 2,
+            "changed_byte_count": 4 if blockers and any("180-degree" in item for item in blockers) else 2,
             "preserve_transpose_symmetry": True,
+            "preserve_rotation180_symmetry": invariants["rotation180_relation_symmetric"],
             "no_map_setting_mutation_in_this_pr": True,
         },
     }
@@ -691,16 +749,18 @@ def build_semantic_validation(
     invariants = chunked_invariants(chunked, MATRIX_SIZE)
     contingency = contingency_table(chunked, packed0)
     candidate_cross = candidate_cross_layer_record(chunked, packed0, contingency, MATRIX_SIZE, CANDIDATE_EDGE)
+    candidate_rotation = candidate_rotation180_record(chunked, MATRIX_SIZE, CANDIDATE_EDGE)
     direction_mapping = adjacent_direction_distributions(packed0, LOGICAL_GRID_SIZE)
     edges = adjacent_edges(chunked, LOGICAL_GRID_SIZE)
     assets = extract_reference_assets(bundle_path, output_dir)
     scores = transform_scores(edges, output_dir, assets)
     probe = draw_runtime_grid_probe(output_dir / "runtime_grid_probe.png", scores["best_transform"])
     runtime_manifest = runtime_anchor_manifest(scores["best_transform"], Path(probe["path"]))
-    decision = candidate_decision(invariants, candidate_cross, direction_mapping, scores)
+    decision = candidate_decision(invariants, candidate_cross, direction_mapping, scores, candidate_rotation)
 
     outputs = {
         "chunked_packed4_contingency": output_dir / "chunked_packed4_contingency.json",
+        "candidate_rotation180": output_dir / "candidate_rotation180.json",
         "direction_code_mapping": output_dir / "direction_code_mapping.json",
         "transform_scores": output_dir / "transform_scores.json",
         "runtime_anchor_measurements": output_dir / "runtime_anchor_measurements.json",
@@ -708,6 +768,11 @@ def build_semantic_validation(
     }
     outputs["chunked_packed4_contingency"].write_text(
         json.dumps({"contingency": contingency, "candidate": candidate_cross}, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    outputs["candidate_rotation180"].write_text(
+        json.dumps(candidate_rotation, indent=2, ensure_ascii=False) + "\n",
         encoding="utf-8",
         newline="\n",
     )
@@ -742,6 +807,7 @@ def build_semantic_validation(
         "output_dir": str(output_dir),
         "chunked_binary_invariants": invariants,
         "chunked_packed4_contingency_path": str(outputs["chunked_packed4_contingency"]),
+        "candidate_rotation180_path": str(outputs["candidate_rotation180"]),
         "direction_code_mapping_path": str(outputs["direction_code_mapping"]),
         "local_passability_graph": {
             "summary": passability_summary(edges),

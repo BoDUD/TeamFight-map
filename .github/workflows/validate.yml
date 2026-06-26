@@ -16,6 +16,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install development dependencies
+        run: python -m pip install -r requirements-dev.txt
+
       - name: Validate map data
         run: python tools/validate_map_design.py
 
@@ -39,3 +42,6 @@ jobs:
 
       - name: Compile map_setting round-trip tool
         run: python -m py_compile tools/map_setting_round_trip.py
+
+      - name: Compile map_setting inspect tool
+        run: python -m py_compile tools/map_setting_inspect.py

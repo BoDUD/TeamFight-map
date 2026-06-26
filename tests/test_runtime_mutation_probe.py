@@ -220,6 +220,71 @@ class RuntimeMutationProbeTests(unittest.TestCase):
             self.assertIn("actual byte diff", str(raised.exception))
             self.assertFalse((game_root / "mods" / "tfm2_lol_map_spike").exists())
 
+    def test_non_clean_existing_map_setting_override_fails_before_replacing_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            game_root = self.make_game_root(temp_dir)
+            installed_mod = game_root / "mods" / "tfm2_lol_map_spike"
+            installed_target = installed_mod / "setting" / "map_setting.map_setting"
+            installed_target.parent.mkdir(parents=True)
+            installed_target.write_bytes(b"old staged file")
+            installed_override = {
+                "asset/base/aseprite_resources/ingame/5v5/background_5v5": {
+                    "remapping": "asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5",
+                    "type": "override",
+                },
+                "asset/base/setting/map_setting": {
+                    "remapping": "asset/tfm2_lol_map_spike/setting/map_setting",
+                    "type": "override",
+                },
+            }
+            (installed_mod / "mod.override_info").write_text(
+                json.dumps(installed_override, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            original, source = self.write_q2e_pair(root)
+            manifest_path = root / "evidence" / "mutation_manifest.json"
+            manifest_path.parent.mkdir()
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "input_path": str(original),
+                        "input_sha256": install_runtime_spike_mod.sha256_file(original),
+                        "output_sha256": install_runtime_spike_mod.sha256_file(source),
+                        "input_size": original.stat().st_size,
+                        "output_size": source.stat().st_size,
+                        "changed_offsets": [427536, 427573],
+                        "expected_changed_offsets": [427536, 427573],
+                        "changed_cells": install_runtime_mutation_probe.EXPECTED_MUTATION_CELLS,
+                        "changed_byte_count": 2,
+                        "changed_cell_count": 2,
+                        "transpose_mismatch_after": 0,
+                        "runtime_installed": False,
+                        "map_setting_node_world_transform": "unproven",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            old_baseline = install_runtime_mutation_probe.BASELINE_SHA256
+            install_runtime_mutation_probe.BASELINE_SHA256 = install_runtime_spike_mod.sha256_file(original)
+            try:
+                with self.assertRaises(SystemExit) as raised:
+                    install_runtime_mutation_probe.stage_runtime_mutation_probe(
+                        game_root=game_root,
+                        mode="B",
+                        map_setting_source=source,
+                        evidence_dir=root / "evidence",
+                        mutation_manifest_path=manifest_path,
+                        clean=False,
+                    )
+            finally:
+                install_runtime_mutation_probe.BASELINE_SHA256 = old_baseline
+
+            self.assertIn("already contains map_setting", str(raised.exception))
+            self.assertEqual(b"old staged file", installed_target.read_bytes())
+            self.assertEqual(installed_override, json.loads((installed_mod / "mod.override_info").read_text()))
+            self.assertFalse((root / "evidence" / "q2e_b_stage_manifest.json").exists())
+
     def test_rejects_source_from_installed_mods_tree(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             game_root = self.make_game_root(temp_dir)

@@ -132,9 +132,29 @@ def validate_mutation_source(source: Path, mutation_manifest: dict[str, Any]) ->
     return source_sha
 
 
-def override_with_map_setting(installed_mod: Path) -> Path:
+def ensure_existing_install_can_stage(game_root: Path, clean: bool) -> None:
+    if clean:
+        return
+    installed_mod = game_root / "mods" / spike.MOD_ID
+    override_path = installed_mod / "mod.override_info"
+    if not override_path.exists():
+        return
+    with override_path.open("r", encoding="utf-8") as handle:
+        overrides = json.load(handle)
+    if spike.MAP_SETTING_ASSET in overrides:
+        raise SystemExit("Installed override already contains map_setting; run with --clean to reset before staging.")
+
+
+def load_base_override_for_staging(installed_mod: Path) -> tuple[Path, dict[str, Any]]:
     override_path = installed_mod / "mod.override_info"
     overrides = spike.load_override_table(override_path)
+    if sorted(overrides) != [spike.BASE_BACKGROUND_ASSET]:
+        raise SystemExit("Runtime mutation staging requires exactly one pre-existing background override.")
+    return override_path, overrides
+
+
+def override_with_map_setting(override_path: Path, overrides: dict[str, Any]) -> Path:
+    overrides = dict(overrides)
     overrides[spike.MAP_SETTING_ASSET] = {"remapping": spike.MAP_SETTING_REMAP, "type": "override"}
     if sorted(overrides) != [spike.BASE_BACKGROUND_ASSET, spike.MAP_SETTING_ASSET]:
         raise SystemExit("Runtime mutation staging allows only background and map_setting overrides.")
@@ -169,7 +189,9 @@ def stage_runtime_mutation_probe(
         source_sha = validate_mutation_source(map_setting_source, mutation_manifest)
         expected_stage = "risk_accepted_two_byte_mutation"
 
+    ensure_existing_install_can_stage(game_root, clean)
     installed_mod = spike.copy_mod(game_root, clean=clean)
+    override_path, base_overrides = load_base_override_for_staging(installed_mod)
     target = installed_mod / spike.MAP_SETTING_STAGED_RELATIVE_PATH
     expected_target = (game_root / "mods" / spike.MOD_ID / spike.MAP_SETTING_STAGED_RELATIVE_PATH).resolve()
     if target.resolve() != expected_target:
@@ -184,7 +206,7 @@ def stage_runtime_mutation_probe(
     if source_size != target_size or source_sha != target_sha or not byte_equal:
         raise SystemExit("Copied map_setting failed byte-equivalence checks; refusing staged mutation probe.")
 
-    override_path = override_with_map_setting(installed_mod)
+    override_path = override_with_map_setting(override_path, base_overrides)
     installed_overrides = json.loads(override_path.read_text(encoding="utf-8"))
     if spike.MAP_SETTING_ASSET not in installed_overrides:
         raise SystemExit("Installed override does not contain map_setting after staging.")

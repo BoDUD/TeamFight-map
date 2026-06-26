@@ -102,15 +102,18 @@ class MapSettingInspectTests(unittest.TestCase):
         output_dir: Path,
         expected_message: str,
         bundle: Path | None = None,
+        layout: Path | None = None,
     ) -> None:
         source_before = source.read_bytes()
         bundle_before = bundle.read_bytes() if bundle else None
+        layout_before = layout.read_bytes() if layout else None
 
         with self.assertRaises(SystemExit) as raised:
             map_setting_inspect.inspect_map_setting(
                 input_path=source,
                 output_dir=output_dir,
                 bundle_path=bundle,
+                layout_path=layout,
                 expected_sha256=round_trip.sha256_file(source),
             )
 
@@ -118,6 +121,8 @@ class MapSettingInspectTests(unittest.TestCase):
         self.assertEqual(source_before, source.read_bytes())
         if bundle and bundle_before is not None:
             self.assertEqual(bundle_before, bundle.read_bytes())
+        if layout and layout_before is not None:
+            self.assertEqual(layout_before, layout.read_bytes())
 
     def test_inspect_rejects_input_at_generated_png_path(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -180,6 +185,47 @@ class MapSettingInspectTests(unittest.TestCase):
                 output_dir=output_dir,
                 bundle=bundle,
                 expected_message="bundle inside the output directory",
+            )
+
+    def test_inspect_rejects_layout_inside_output_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source" / "map_setting"
+            output_dir = root / "evidence"
+            layout = output_dir / "candidate_nodes_on_minimap.png"
+            source.parent.mkdir()
+            layout.parent.mkdir(parents=True)
+            source.write_bytes(self.data)
+            layout.write_bytes(b'{"layout":"still read only"}')
+
+            self.assert_inspect_rejects_without_changing_sources(
+                source=source,
+                output_dir=output_dir,
+                layout=layout,
+                expected_message="layout inside the output directory",
+            )
+
+    def test_inspect_rejects_generated_output_hardlink_to_layout(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = root / "source" / "map_setting"
+            layout = root / "layout.json"
+            output_dir = root / "evidence"
+            hardlink = output_dir / "candidate_clearance_manifest.json"
+            source.parent.mkdir()
+            output_dir.mkdir()
+            source.write_bytes(self.data)
+            layout.write_bytes(b'{"layout":"protected"}')
+            try:
+                os.link(layout, hardlink)
+            except OSError as exc:
+                self.skipTest(f"hardlinks are not available in this environment: {exc}")
+
+            self.assert_inspect_rejects_without_changing_sources(
+                source=source,
+                output_dir=output_dir,
+                layout=layout,
+                expected_message="Refusing to overwrite layout",
             )
 
     def test_read_bundle_entry(self) -> None:

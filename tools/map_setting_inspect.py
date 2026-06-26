@@ -68,13 +68,22 @@ def planned_output_paths(output_dir: Path) -> list[Path]:
     return paths
 
 
-def ensure_no_source_output_conflicts(input_path: Path, bundle_path: Path | None, output_dir: Path) -> None:
+def ensure_no_source_output_conflicts(
+    input_path: Path,
+    bundle_path: Path | None,
+    output_dir: Path,
+    layout_path: Path | None = None,
+) -> None:
     ensure_source_outside_output_tree(input_path, output_dir, "input")
     if bundle_path:
         ensure_source_outside_output_tree(bundle_path, output_dir, "bundle")
+    if layout_path:
+        ensure_source_outside_output_tree(layout_path, output_dir, "layout")
     sources = {"input": input_path}
     if bundle_path:
         sources["bundle"] = bundle_path
+    if layout_path:
+        sources["layout"] = layout_path
     for output_path in planned_output_paths(output_dir):
         for label, source_path in sources.items():
             if output_path == source_path or paths_are_same_existing_file(output_path, source_path):
@@ -704,7 +713,7 @@ def inspect_map_setting(
     ensure_outside_repo(output_dir, "output directory")
     if bundle_path:
         ensure_outside_repo(bundle_path, "bundle")
-    ensure_no_source_output_conflicts(input_path, bundle_path, output_dir)
+    ensure_no_source_output_conflicts(input_path, bundle_path, output_dir, layout_path)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     data = input_path.read_bytes()

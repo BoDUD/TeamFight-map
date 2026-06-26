@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, and Q2c has characterized a symmetric read-only edge candidate, but no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. However, packed direction code `15` and the offline world transform remain ambiguous, so no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | Public SDK probes found `ServerModContext.database.map_setting` exposes only `visible_view` and `path`; obvious `objectives`, `objective_spawns`, `jungle_camps`, `spawn`, and neutral objective fields were not exposed. |
 
 ## Minimal Mod Package
@@ -68,8 +68,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-25 | Q2a positive local file-read evidence for the staged `map_setting.map_setting` | Process Monitor evidence stored outside the repository at `D:\tfm2_q2a_evidence\`: `q2a_file_read_procmon.pml` SHA-256 `cdd8a988e8a982bdf527b68ba619b2ebdebda0d24f773f4afa48829a161de1a7`, filtered `q2a_file_read_procmon.csv` SHA-256 `8eedab38208b6a85954a1ce937b47232abd116f2ba43e41144e9cc7c776262b5`, live screenshot `q2a_file_read_screenshot.png` SHA-256 `e74181647d32966248e12b51e9f2a7f35b80583f424ea32434ece2dce473fa62`, manifest `q2a_file_read_manifest.json` SHA-256 `20744e93e93e9e12387746e2f473e6a80e48ed91fc683c1c4fd596ce117bb694`; staged `map_setting.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Q2a: Loader Takeover Pass. `TeamfightManager2.exe` PID `9952` opened `D:\steam\steamapps\common\Teamfight Manager2\mods\tfm2_lol_map_spike\setting\map_setting.map_setting` with `CreateFile SUCCESS` at `23:18:08.1826610`, then read it with `ReadFile SUCCESS` at `23:18:08.1864235`, `Offset: 0, Length: 1,451,980`. This proves the local staged file was read; it does not prove the binary format can be decoded, re-encoded, or safely mutated. |
 | 2026-06-25 | Q2b byte-identical structural `map_setting` round trip | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_round_trip\`: manifest `map_setting_round_trip_manifest.json` SHA-256 `842a5f003f9307dbc6ceda2adc7ffa1fe30bc1a18ce2e9034cb52b54f695ed84`, output `map_setting.roundtrip.map_setting` SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`; input and output size `1,451,980` bytes | Q2b: Byte-Identical Round Trip Pass. The tool decodes only structural framing, preserving gameplay payloads as uninterpreted bytes: one chunked binary layer from offset `0` to `1,033,448`, followed by two packed4 layers ending at `1,438,464` and `1,451,980`. Re-encoding without field edits produced the same SHA-256 and no first-difference offset. This does not prove any gameplay field can be safely changed. |
 | 2026-06-26 | Q2c read-only `map_setting` layer characterization | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_layer_inspection\`: manifest `layer_inspection_manifest.json` SHA-256 `ef3d1ae47b0a75a8e27eb2c9df89c0f4ea76ac8725c22b4a64dde7504330ef78`, clearance manifest `candidate_clearance_manifest.json` SHA-256 `792a33f2c310b68e05e569e1088b3df81c3c3210b7ab26e1c18a8ebc917c0e3c`, generated diagnostic masks and overlays for `chunked_binary`, `packed4_0`, and `packed4_1` | Q2c read-only symmetric edge characterized. `chunked_binary` is a `900x900` binary layer with `transpose_mismatch_count: 0`, consistent with a symmetric `30x30` source-target relation such as visibility or reachability. Candidate for follow-up review only: edge `369-370`, cells `[370,369]` and `[369,370]`, serialized byte offsets `427536` and `427573`, old values `1`, planned values `0`, `transpose_mismatch_count_after_if_applied: 0`. Risk remains `unverified` because the world/grid transform is not proven and the nearest design feature is `GATE_BLUE_TOP_RIVER`. No mutated file was generated or installed. |
+| 2026-06-26 | Q2c-1 read-only relation semantics and `30x30` transform validation | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_transform_validation\`: manifest `semantic_validation_manifest.json` SHA-256 `071117b8c98454eec3e45bb8b3dbf9f6ff0147a75d235251063585ee119d32b1`, contingency `chunked_packed4_contingency.json` SHA-256 `c491d8ffbacbd92b6ad2ce41a9720d6d81c9fea76fbe3ff49455b988ed163150`, direction mapping `direction_code_mapping.json` SHA-256 `d3ae47d8c0c5012443b54855a011a64fdb3a3f43b82919129d43d9c810e1a74a`, transform scores `transform_scores.json` SHA-256 `458ce3e11ea874fbbff1d26444a41d1e979128a45b5c8ab1de33d6bc6d0d333a`, grid probe `runtime_grid_probe.png` SHA-256 `b32cd9669b2f9d1147e7612ab91996ac0152a6156592858e2f622ea73757ddc8` | Q2c-1 pending, not mutation-approved. `chunked_binary` is symmetric but not closure-like (`connected_pair_row_signature_mismatch_ratio: 0.999888`, `closure_like: false`). The `packed4_0` cross-table does not create a strong sentinel conflict for edge `369-370`, but direction code `15` is unresolved and transform scoring is ambiguous: `rotate180` score `0.013291`, `identity` score `0.013200`, margin `0.000091`. Candidate status is `pending_runtime_grid_confirmation`; no mutated file was generated or installed. |
 
-This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that a cautious symmetric edge candidate has been characterized for review. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, or `map_setting` mutation.
+This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that a cautious symmetric edge candidate has been characterized and partially checked. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or `map_setting` mutation.
 
 ## Resource Audit
 
@@ -88,7 +89,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`, but its risk remains unverified pending world/grid validation. Candidate for path/collision/spawn/placement, but must not be mutated except in a tiny reversible follow-up probe. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic, but packed4 direction code `15` and the offline `30x30` transform are ambiguous. Candidate for path/collision/spawn/placement investigation only; must not be mutated until runtime grid confirmation or explicit risk acceptance. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | SDK field plus binary tables | Public field exists, but full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | SDK field plus binary tables | Public `path` exists, but safe replacement workflow is not proven. |
@@ -108,7 +109,9 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 6. Done: capture positive `TeamfightManager2.exe` `CreateFile` / `ReadFile SUCCESS` evidence for `mods\tfm2_lol_map_spike\setting\map_setting.map_setting`.
 7. Done: decode `map_setting`, re-encode without field edits, and prove the output is byte-identical to the original.
 8. Done: characterize the decoded layers read-only, generate repository-external masks/overlays, and characterize one symmetric edge candidate plus rollback constraints.
-9. Next: validate or explicitly accept the candidate world/grid risk, then try one tiny reversible mutation in a separate branch or PR with A/B/A runtime proof.
+9. Done: run read-only relation semantics and offline transform validation for candidate edge `369-370`.
+10. Next: stage the pure visual coordinate grid background probe and capture runtime anchors before any changed `map_setting` is generated.
+11. Later only if Q2c-1 is resolved: try one tiny reversible mutation in a separate branch or PR with A/B/A runtime proof.
 
 ## Q2a Equivalent Remap Gate
 
@@ -217,6 +220,46 @@ prediction_confidence: hypothesis
 ```
 
 Under the unverified linear `30x30` grid-to-design transform, this edge has lane clearance `16.499` or greater and nearest-feature clearance `7.401` to `GATE_BLUE_TOP_RIVER`. Because the original `map_setting` world/grid transform is not yet proven and the nearest feature is a jungle-to-river gate, this PR records `risk_classification: unverified`, not low risk. The next PR may build a mutation tool around this exact symmetric edge only after validating or explicitly accepting that grid-risk boundary, and it must still run A/B/A and stop on any crash, load error, pathing abnormality, failed rollback, or broader-than-expected diff.
+
+## Q2c-1 Relation Semantics And Transform Gate
+
+Question:
+
+```text
+Can edge 369-370 be promoted from a structural candidate to a runtime mutation target?
+```
+
+Result on 2026-06-26: not yet. `tools/map_setting_validate_semantics.py` keeps this phase read-only, extracts local original wall/minimap resources, compares `chunked_binary` against `packed4_0`, infers adjacent direction-code distributions, scores all eight `30x30` square transforms, and writes a pure visual coordinate-grid background probe.
+
+Key findings:
+
+| Check | Result |
+| --- | --- |
+| `chunked_binary` transpose symmetry | Pass: `transpose_mismatch_count: 0`. |
+| Closure/transitivity risk | Not a closure: `connected_pair_row_signature_mismatch_ratio: 0.999888`, `closure_like: false`. |
+| `chunked_binary` x `packed4_0` sentinel rule | No strong rule: `P(packed4_0 == 15 | chunked_binary == 0) = 0.196971`, `P(chunked_binary == 0 | packed4_0 == 15) = 0.895068`. |
+| Candidate cross-layer conflict | No conflict detected for the current heuristic: chunked forward/reverse are `1`, packed4 forward/reverse are both `15`. |
+| Direction code mapping | Ambiguous overall because code `15` has purity `0.136223`; codes `0-7` look direction-like but are not enough to approve mutation. |
+| Offline transform scoring | Ambiguous: `rotate180` score `0.013291`, `identity` score `0.013200`, margin `0.000091`. |
+| Runtime grid screenshot | Pending. |
+
+Current candidate decision:
+
+```text
+candidate_status: pending_runtime_grid_confirmation
+may_enter_mutation_pr: false
+```
+
+To stage the generated grid probe as background-only evidence, use:
+
+```powershell
+python .\tools\install_runtime_spike_mod.py `
+  --clean `
+  --enable-exclusive `
+  --stage-background-source "D:\tfm2_q2a_evidence\map_setting_transform_validation\runtime_grid_probe.png"
+```
+
+The next evidence item should be a runtime screenshot and anchor measurements, not a mutated `map_setting`.
 
 ## Stop Conditions
 

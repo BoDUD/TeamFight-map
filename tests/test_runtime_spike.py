@@ -94,6 +94,50 @@ class RuntimeSpikeTests(unittest.TestCase):
             self.assertTrue(manifest["byte_equal"])
             self.assertFalse(manifest["committed_to_repository"])
 
+    def test_background_probe_staging_only_mutates_installed_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            game_root = Path(temp_dir) / "game"
+            (game_root / "mods").mkdir(parents=True)
+            (game_root / "TeamfightManager2.exe").write_bytes(b"")
+            source = Path(temp_dir) / "runtime_grid_probe.png"
+            source.write_bytes(SPIKE_BG.read_bytes())
+            repo_background_before = SPIKE_BG.read_bytes()
+
+            installed = install_runtime_spike_mod.copy_mod(game_root, clean=True)
+            manifest_path = install_runtime_spike_mod.stage_background_source(game_root, installed, source)
+
+            target = installed / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
+            self.assertEqual(source.read_bytes(), target.read_bytes())
+            self.assertEqual(repo_background_before, SPIKE_BG.read_bytes())
+
+            repo_overrides = json.loads((SPIKE_MOD / "mod.override_info").read_text(encoding="utf-8"))
+            installed_overrides = json.loads((installed / "mod.override_info").read_text(encoding="utf-8"))
+            self.assertEqual(repo_overrides, installed_overrides)
+            self.assertNotIn("asset/base/setting/map_setting", installed_overrides)
+
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(str(source.resolve()), manifest["source_path"])
+            self.assertEqual(str(target), manifest["target_path"])
+            self.assertEqual(manifest["source_sha256"], manifest["target_sha256"])
+            self.assertTrue(manifest["byte_equal"])
+            self.assertFalse(manifest["map_setting_override_installed"])
+            self.assertFalse(manifest["committed_to_repository"])
+
+    def test_background_probe_staging_rejects_repository_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            game_root = Path(temp_dir) / "game"
+            (game_root / "mods").mkdir(parents=True)
+            (game_root / "TeamfightManager2.exe").write_bytes(b"")
+            installed = install_runtime_spike_mod.copy_mod(game_root, clean=True)
+            target = installed / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
+            target_before = target.read_bytes()
+
+            with self.assertRaises(SystemExit) as raised:
+                install_runtime_spike_mod.stage_background_source(game_root, installed, SPIKE_BG)
+
+            self.assertIn("repository-internal background source", str(raised.exception))
+            self.assertEqual(target_before, target.read_bytes())
+
     def test_clean_install_refuses_to_delete_repository_source_mod(self) -> None:
         with mock.patch.object(install_runtime_spike_mod.shutil, "rmtree") as mocked_rmtree:
             with self.assertRaises(SystemExit) as raised:

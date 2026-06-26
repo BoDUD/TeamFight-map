@@ -145,3 +145,5 @@ A future mutation tool must:
 7. Stop immediately on crash, load error, unit spawn abnormality, stuck lanes, AI route regression, broader-than-expected diff, or failed rollback.
 
 Result of this PR: a symmetric edge candidate is characterized, but its runtime risk remains unverified. No Q2c loader mutation pass or semantic mutation pass is claimed.
+
+Follow-up Q2c-1 is recorded in `docs/map_setting_transform_validation.md`. It confirms `chunked_binary` is not closure-like, but direction-code and offline transform checks remain ambiguous, so edge `369-370` is still not approved for mutation.

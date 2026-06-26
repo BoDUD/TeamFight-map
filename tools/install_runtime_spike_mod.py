@@ -12,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MOD_ID = "tfm2_lol_map_spike"
 SOURCE_MOD = REPO_ROOT / "mods" / MOD_ID
 BASE_BACKGROUND_ASSET = "asset/base/aseprite_resources/ingame/5v5/background_5v5"
+BACKGROUND_REMAP_RELATIVE_PATH = Path("aseprite_resources") / "ingame" / "5v5" / "background_5v5.png"
 MAP_SETTING_ASSET = "asset/base/setting/map_setting"
 MAP_SETTING_REMAP = f"asset/{MOD_ID}/setting/map_setting"
 MAP_SETTING_STAGED_RELATIVE_PATH = Path("setting") / "map_setting.map_setting"
@@ -55,6 +56,14 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def is_inside_repo(path: Path) -> bool:
+    try:
+        path.resolve().relative_to(REPO_ROOT)
+        return True
+    except ValueError:
+        return False
+
+
 def files_are_byte_equal(left: Path, right: Path) -> bool:
     if left.stat().st_size != right.stat().st_size:
         return False
@@ -68,6 +77,15 @@ def files_are_byte_equal(left: Path, right: Path) -> bool:
                 return True
 
 
+def paths_are_same_existing_file(left: Path, right: Path) -> bool:
+    if not left.exists() or not right.exists():
+        return False
+    try:
+        return left.samefile(right)
+    except OSError:
+        return False
+
+
 def load_override_table(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
         table = json.load(handle)
@@ -76,6 +94,53 @@ def load_override_table(path: Path) -> dict[str, Any]:
     if BASE_BACKGROUND_ASSET not in table:
         raise SystemExit(f"Installed override is missing required background probe: {BASE_BACKGROUND_ASSET}")
     return table
+
+
+def stage_background_source(game_root: Path, installed_mod: Path, source: Path) -> Path:
+    source = source.resolve()
+    if not source.is_file():
+        raise SystemExit(f"background source is not a file: {source}")
+    if is_inside_repo(source):
+        raise SystemExit(f"Refusing to stage repository-internal background source: {source}")
+    if source.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+        raise SystemExit(f"background source is not a PNG file: {source}")
+
+    target = installed_mod / BACKGROUND_REMAP_RELATIVE_PATH
+    if source == target.resolve() or paths_are_same_existing_file(source, target):
+        raise SystemExit("Refusing to stage background source over itself.")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target)
+
+    source_size = source.stat().st_size
+    target_size = target.stat().st_size
+    source_sha = sha256_file(source)
+    target_sha = sha256_file(target)
+    byte_equal = files_are_byte_equal(source, target)
+    if source_size != target_size or source_sha != target_sha or not byte_equal:
+        raise SystemExit("Copied background probe failed byte-equivalence checks; refusing to keep staged asset.")
+
+    manifest_dir = game_root / "stage_runtime_spike_evidence" / "runtime_map_loading_spike"
+    manifest_dir.mkdir(parents=True, exist_ok=True)
+    manifest_path = manifest_dir / "background_probe_manifest.json"
+    manifest = {
+        "probe": "background_visual_probe",
+        "mod_id": MOD_ID,
+        "game_root": str(game_root),
+        "source_path": str(source),
+        "target_path": str(target),
+        "asset_key": BASE_BACKGROUND_ASSET,
+        "source_size": source_size,
+        "target_size": target_size,
+        "source_sha256": source_sha,
+        "target_sha256": target_sha,
+        "byte_equal": byte_equal,
+        "map_setting_override_installed": False,
+        "committed_to_repository": False,
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
+    print(f"Staged background visual probe in installed mod only: {target}")
+    print(f"Wrote evidence manifest: {manifest_path}")
+    return manifest_path
 
 
 def stage_map_setting_equivalent(game_root: Path, installed_mod: Path, source: Path) -> Path:
@@ -173,6 +238,12 @@ def main() -> int:
         default=None,
         help="Path to the local extracted original map_setting binary. Never committed to the repository.",
     )
+    parser.add_argument(
+        "--stage-background-source",
+        type=Path,
+        default=None,
+        help="Stage a repository-external PNG over the installed copy of background_5v5 for visual-only QA.",
+    )
     args = parser.parse_args()
 
     game_root = args.game_root.resolve() if args.game_root else infer_game_root().resolve()
@@ -181,6 +252,9 @@ def main() -> int:
 
     installed = copy_mod(game_root, clean=args.clean)
     print(f"Installed {MOD_ID} to {installed}")
+
+    if args.stage_background_source is not None:
+        stage_background_source(game_root, installed, args.stage_background_source)
 
     if args.stage_map_setting_equivalent:
         if args.map_setting_source is None:

@@ -45,7 +45,20 @@ PRODUCTION_CELLS = (
 )
 
 
+def is_under_mods_tree(path: Path) -> bool:
+    return "mods" in (part.lower() for part in path.resolve().parts)
+
+
+def ensure_not_runtime_install_output(output_path: Path) -> None:
+    if is_under_mods_tree(output_path):
+        raise SystemExit(
+            "Refusing to write mutated map_setting under a game mods directory; "
+            "generate evidence output outside the game install and stage it only in the runtime A/B/A PR."
+        )
+
+
 def ensure_mutation_paths_are_safe(input_path: Path, output_path: Path, manifest_path: Path) -> None:
+    ensure_not_runtime_install_output(output_path)
     for label, path in (("input", input_path), ("output", output_path), ("manifest", manifest_path)):
         rt.ensure_path_is_outside_repo(path, label)
     rt.ensure_distinct_round_trip_paths({"input": input_path, "output": output_path, "manifest": manifest_path})

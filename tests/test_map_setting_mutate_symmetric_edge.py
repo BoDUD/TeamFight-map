@@ -189,6 +189,38 @@ class MapSettingMutateSymmetricEdgeTests(unittest.TestCase):
             self.assertIn("Input, output, and manifest paths must be distinct", str(raised.exception))
             self.assertEqual(data, source.read_bytes())
 
+    def test_refuses_output_under_game_mods_tree_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = synthetic_map_setting()
+            source = self.write_source(root, data)
+            output = (
+                root
+                / "game"
+                / "mods"
+                / "tfm2_lol_map_spike"
+                / "setting"
+                / "map_setting.map_setting"
+            )
+            output.parent.mkdir(parents=True)
+            output.write_bytes(b"installed original")
+            manifest_path = root / "evidence" / "mutation_manifest.json"
+
+            with self.assertRaises(SystemExit) as raised:
+                mutate_edge.mutate_symmetric_edge(
+                    input_path=source,
+                    output_path=output,
+                    manifest_path=manifest_path,
+                    confirm_risk_accepted=True,
+                    expected_sha256=map_setting_round_trip.sha256_bytes(data),
+                    cells=self.synthetic_cells(data),
+                )
+
+            self.assertIn("game mods directory", str(raised.exception))
+            self.assertEqual(data, source.read_bytes())
+            self.assertEqual(b"installed original", output.read_bytes())
+            self.assertFalse(manifest_path.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

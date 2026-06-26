@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import tempfile
 import struct
+import sys
 import unittest
 from unittest import mock
 from pathlib import Path
@@ -118,10 +119,34 @@ class RuntimeSpikeTests(unittest.TestCase):
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertEqual(str(source.resolve()), manifest["source_path"])
             self.assertEqual(str(target), manifest["target_path"])
+            self.assertEqual([1280, 1280], manifest["png_dimensions"])
             self.assertEqual(manifest["source_sha256"], manifest["target_sha256"])
             self.assertTrue(manifest["byte_equal"])
             self.assertFalse(manifest["map_setting_override_installed"])
             self.assertFalse(manifest["committed_to_repository"])
+
+    def test_background_probe_staging_rejects_wrong_png_size(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            game_root = Path(temp_dir) / "game"
+            (game_root / "mods").mkdir(parents=True)
+            (game_root / "TeamfightManager2.exe").write_bytes(b"")
+            source = Path(temp_dir) / "small_probe.png"
+            source.write_bytes(
+                b"\x89PNG\r\n\x1a\n"
+                + (13).to_bytes(4, "big")
+                + b"IHDR"
+                + (64).to_bytes(4, "big")
+                + (64).to_bytes(4, "big")
+            )
+            installed = install_runtime_spike_mod.copy_mod(game_root, clean=True)
+            target = installed / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
+            target_before = target.read_bytes()
+
+            with self.assertRaises(SystemExit) as raised:
+                install_runtime_spike_mod.stage_background_source(game_root, installed, source)
+
+            self.assertIn("must be 1280x1280", str(raised.exception))
+            self.assertEqual(target_before, target.read_bytes())
 
     def test_background_probe_staging_rejects_repository_source(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -145,6 +170,33 @@ class RuntimeSpikeTests(unittest.TestCase):
 
             self.assertIn("repository source mod package", str(raised.exception))
             mocked_rmtree.assert_not_called()
+
+    def test_main_rejects_background_and_map_setting_staging_together(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            game_root = Path(temp_dir) / "game"
+            (game_root / "mods").mkdir(parents=True)
+            (game_root / "TeamfightManager2.exe").write_bytes(b"")
+            source = Path(temp_dir) / "runtime_grid_probe.png"
+            map_setting = Path(temp_dir) / "map_setting"
+            source.write_bytes(SPIKE_BG.read_bytes())
+            map_setting.write_bytes(b"map-setting")
+
+            argv = [
+                "install_runtime_spike_mod.py",
+                "--game-root",
+                str(game_root),
+                "--stage-background-source",
+                str(source),
+                "--stage-map-setting-equivalent",
+                "--map-setting-source",
+                str(map_setting),
+            ]
+            with mock.patch.object(sys, "argv", argv):
+                with self.assertRaises(SystemExit) as raised:
+                    install_runtime_spike_mod.main()
+
+            self.assertIn("cannot be combined", str(raised.exception))
+            self.assertFalse((game_root / "mods" / "tfm2_lol_map_spike").exists())
 
 
 if __name__ == "__main__":

@@ -14,6 +14,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/runtime_map_loading_spike.md` records the runtime asset audit, test order, and open loader questions.
 - `docs/map_setting_layer_characterization.md` records the Q2c read-only layer inspection and symmetric edge candidate.
 - `docs/map_setting_transform_validation.md` records the Q2c-1 read-only semantic checks and pending `30x30` transform validation.
+- `docs/runtime_node_anchor_probe_plan.md` records why background UV captures do not prove `map_setting` node/world transform and defines the next read-only gate.
 
 ## Build And Validate
 
@@ -92,7 +93,7 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, Q2c has characterized a read-only symmetric edge candidate, and Q2c-1 shows that the candidate still needs runtime grid confirmation because direction-code and offline transform results are ambiguous. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
+Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, Q2c has characterized a read-only symmetric edge candidate, and Q2c-1 shows that the candidate still needs independent runtime node/world anchoring because direction-code and offline transform results are ambiguous. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
 
 ## Scope
 

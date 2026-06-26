@@ -21,6 +21,7 @@ The tool writes:
 D:\tfm2_q2a_evidence\map_setting_transform_validation\
   semantic_validation_manifest.json
   chunked_packed4_contingency.json
+  candidate_rotation180.json
   direction_code_mapping.json
   transform_scores.json
   best_transform_overlay.png
@@ -35,12 +36,13 @@ D:\tfm2_q2a_evidence\map_setting_transform_validation\
 Evidence hashes from the local run:
 
 ```text
-semantic_validation_manifest.json: 071117b8c98454eec3e45bb8b3dbf9f6ff0147a75d235251063585ee119d32b1
+semantic_validation_manifest.json: ab61692d680d287ba92793ae134a9fd1b880d57d8b19a63048d577bbb206d3a8
 chunked_packed4_contingency.json:  c491d8ffbacbd92b6ad2ce41a9720d6d81c9fea76fbe3ff49455b988ed163150
+candidate_rotation180.json:        c14912012eae02c53491beadbd1728df23a3e39e5104a514d14b81d9a8749ad1
 direction_code_mapping.json:       d3ae47d8c0c5012443b54855a011a64fdb3a3f43b82919129d43d9c810e1a74a
 transform_scores.json:             458ce3e11ea874fbbff1d26444a41d1e979128a45b5c8ab1de33d6bc6d0d333a
 runtime_grid_probe.png:            b32cd9669b2f9d1147e7612ab91996ac0152a6156592858e2f622ea73757ddc8
-candidate_decision.json:           1f7e1f43148c36d1a7e093ca62950b3f017ecf30029d5dc29b6204d20dbd6ee9
+candidate_decision.json:           e239250531b72640199e31792d6efd75fe6c6788b7f354841e8433f3e0d3769d
 ```
 
 The extracted original assets, overlays, probe screenshot, and manifests are local evidence only. They must not be committed.
@@ -54,6 +56,8 @@ The extracted original assets, overlays, probe screenshot, and manifests are loc
   "diagonal_0_count": 596,
   "diagonal_1_count": 304,
   "transpose_mismatch_count": 0,
+  "rotation180_relation_mismatch_count": 44116,
+  "rotation180_relation_symmetric": false,
   "unique_row_count": 897,
   "connected_pair_count": 106670,
   "connected_pair_row_signature_mismatch_count": 106658,
@@ -64,6 +68,22 @@ The extracted original assets, overlays, probe screenshot, and manifests are loc
 ```
 
 This keeps a symmetric two-cell edit theoretically possible from an invariant perspective, but it does not prove gameplay safety.
+
+The matrix does not preserve full 180-degree node rotation symmetry. Candidate edge `369-370` has a rotated counterpart `530-529`, and all four observed cells currently have value `1`, but the whole matrix has `44116` rotation mismatches. Therefore 180-degree rotation is not a hard global invariant for this layer:
+
+```json
+{
+  "edge": [369, 370],
+  "rotated_edge": [530, 529],
+  "candidate_is_self_rotating": false,
+  "candidate_values": {
+    "R[369,370]": 1,
+    "R[370,369]": 1,
+    "R[530,529]": 1,
+    "R[529,530]": 1
+  }
+}
+```
 
 The `chunked_binary` and `packed4_0` cross-table does not support a strong `packed4_0 == 15` sentinel rule:
 
@@ -170,19 +190,35 @@ python .\tools\install_runtime_spike_mod.py `
   --stage-background-source "D:\tfm2_q2a_evidence\map_setting_transform_validation\runtime_grid_probe.png"
 ```
 
-Manual runtime capture is still pending. The expected local evidence file is:
+Runtime captures taken after PR #6 are recorded outside the repository:
 
 ```text
-D:\tfm2_q2a_evidence\map_setting_transform_validation\runtime_grid_probe_screenshot.png
+runtime_grid_probe_screenshot_blue_candidate.png
+  SHA-256: 7f8f4b1907f56e2077ffba7924850fa7fc0e19a53d1abb8c165e5b2ca8eca2c6
+
+runtime_grid_probe_screenshot_red_base.png
+  SHA-256: 97c996833a5559fbd4c07bfb883b22f5d47413ee6c48b627b826e20b8ef6ee7c
+
+runtime_anchor_measurements.json
+  SHA-256: 91c3b7211fa3f8179f0d39623efd231dbc09f6676130a2206772b50fe3131056
 ```
 
-At minimum, the screenshot or measurements must record:
+The `blue_candidate` capture shows the blue base, multiple towers, the rendered grid, and candidate labels `369` and `370`. The `red_base` capture reaches the red-side upper map area, the `logical SE 899` corner label, grid lines, and a red-side tower, but not the full red nexus/base object in main view.
 
-- Blue base.
-- Red base.
-- Map center.
-- Two visible towers or objectives.
-- Candidate edge `369-370` actual in-match location.
+These captures prove:
+
+```text
+runtime_background_uv_calibration: pass_partial_two_captures
+probe_transform_rendered: rotate180
+```
+
+They do not prove:
+
+```text
+map_setting_node_world_transform: proven
+```
+
+The node labels are pre-rendered into the PNG under the `rotate180` probe assumption. Independent runtime node/world anchoring is still required before any mutation.
 
 ## Candidate Decision
 
@@ -191,17 +227,17 @@ Current decision:
 ```json
 {
   "candidate_edge": [369, 370],
-  "candidate_status": "pending_runtime_grid_confirmation",
+  "candidate_status": "pending_independent_node_anchor",
   "may_enter_mutation_pr": false,
   "blockers": [],
   "remaining_validation": [
     "packed4_0 direction code mapping is ambiguous",
     "offline wall/minimap transform scoring is ambiguous",
-    "runtime visual grid screenshot has not been captured in this PR"
+    "independent runtime node/world anchor has not been captured"
   ]
 }
 ```
 
-No PR should generate a mutated `map_setting` from edge `369-370` until the remaining validation is closed or the risk is explicitly accepted in a separate review. If it later becomes valid, the approved mutation shape remains exactly two symmetric `chunked_binary` cells and two serialized bytes, preserving transpose symmetry and the original SHA-256 rollback baseline.
+No PR should generate a mutated `map_setting` from edge `369-370` until the remaining validation is closed or the risk is explicitly accepted in a separate review. If it later becomes valid, the current preflight result only requires preserving transpose symmetry; full 180-degree node rotation is not a global invariant in the observed matrix.
 
 Result of this PR: Q2c-1 read-only semantics and transform validation is implemented, but the candidate is not approved for mutation.

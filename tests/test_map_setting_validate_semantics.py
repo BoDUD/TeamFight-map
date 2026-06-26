@@ -59,6 +59,42 @@ class MapSettingValidateSemanticsTests(unittest.TestCase):
         self.assertGreater(invariants["connected_pair_row_signature_mismatch_count"], 0)
         self.assertGreater(invariants["transitivity_violation_count"], 0)
 
+    def test_rotation180_relation_mismatch_count(self) -> None:
+        symmetric = [
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+            1,
+        ]
+        asymmetric = symmetric.copy()
+        asymmetric[0] = 0
+
+        self.assertEqual(0, semantics.rotation180_relation_mismatch_count(symmetric, size=3))
+        self.assertEqual(2, semantics.rotation180_relation_mismatch_count(asymmetric, size=3))
+
+    def test_candidate_rotation180_record_reports_rotated_edge(self) -> None:
+        size = 5
+        values = [0] * (size * size)
+        values[1 * size + 2] = 1
+        values[2 * size + 1] = 1
+        values[3 * size + 2] = 1
+        values[2 * size + 3] = 1
+
+        record = semantics.candidate_rotation180_record(values, size=size, edge=(1, 2))
+
+        self.assertEqual([1, 2], record["edge"])
+        self.assertEqual([3, 2], record["rotated_edge"])
+        self.assertFalse(record["candidate_is_self_rotating"])
+        self.assertEqual(
+            [[1, 2], [2, 1], [3, 2], [2, 3]],
+            [cell["logical_coordinate"] for cell in record["cells"]],
+        )
+
     def test_contingency_table_reports_sentinel_probabilities(self) -> None:
         contingency = semantics.contingency_table(
             chunked=[0, 0, 1, 1],
@@ -109,17 +145,33 @@ class MapSettingValidateSemanticsTests(unittest.TestCase):
 
     def test_candidate_decision_rejects_closure_like_chunked_layer(self) -> None:
         decision = semantics.candidate_decision(
-            invariants={"closure_like": True},
+            invariants={"closure_like": True, "rotation180_relation_symmetric": False},
             candidate_cross_layer={
                 "cross_layer_consistency_after_hypothetical_edit": "no_packed4_0_conflict_detected_for_this_edge"
             },
             direction_mapping={"stability": "stable"},
             scores={"conclusion": "single_best"},
+            candidate_rotation={"candidate_is_self_rotating": False},
         )
 
         self.assertEqual("rejected", decision["candidate_status"])
         self.assertFalse(decision["may_enter_mutation_pr"])
         self.assertIn("transitive reachability closure", decision["blockers"][0])
+
+    def test_candidate_decision_rejects_rotation180_symmetric_matrix_without_rotated_edge(self) -> None:
+        decision = semantics.candidate_decision(
+            invariants={"closure_like": False, "rotation180_relation_symmetric": True},
+            candidate_cross_layer={
+                "cross_layer_consistency_after_hypothetical_edit": "no_packed4_0_conflict_detected_for_this_edge"
+            },
+            direction_mapping={"stability": "stable"},
+            scores={"conclusion": "single_best"},
+            candidate_rotation={"candidate_is_self_rotating": False},
+        )
+
+        self.assertEqual("rejected", decision["candidate_status"])
+        self.assertIn("180-degree node rotation", decision["blockers"][0])
+        self.assertEqual(4, decision["approved_mutation_scope_if_later_validated"]["changed_cell_count"])
 
     def test_transform_unit_point_basic_orientations(self) -> None:
         self.assertEqual((0.25, 0.75), semantics.transform_unit_point(0.25, 0.75, "identity"))

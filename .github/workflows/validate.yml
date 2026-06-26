@@ -48,3 +48,12 @@ jobs:
 
       - name: Compile map_setting semantic validation tool
         run: python -m py_compile tools/map_setting_validate_semantics.py
+
+      - name: Compile runtime anchor audit tools
+        run: |
+          python -m py_compile tools/audit_runtime_node_anchor_api.py
+          python -m py_compile tools/install_runtime_anchor_probe.py
+          python -m py_compile tools/bundle_utils.py
+          python -m py_compile tools/audit_bundle_map_assets.py
+          python -m py_compile tools/scan_setting_anchor_candidates.py
+          python -m py_compile tools/derive_map_setting_path_graph.py

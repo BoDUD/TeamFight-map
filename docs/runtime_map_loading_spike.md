@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. However, packed direction code `15` and the offline world transform remain ambiguous, so no decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. No decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -71,6 +71,7 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-26 | Q2c-1 read-only relation semantics and `30x30` transform validation | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_transform_validation\`: manifest `semantic_validation_manifest.json` SHA-256 `ab61692d680d287ba92793ae134a9fd1b880d57d8b19a63048d577bbb206d3a8`, contingency `chunked_packed4_contingency.json` SHA-256 `c491d8ffbacbd92b6ad2ce41a9720d6d81c9fea76fbe3ff49455b988ed163150`, 180 check `candidate_rotation180.json` SHA-256 `c14912012eae02c53491beadbd1728df23a3e39e5104a514d14b81d9a8749ad1`, direction mapping `direction_code_mapping.json` SHA-256 `d3ae47d8c0c5012443b54855a011a64fdb3a3f43b82919129d43d9c810e1a74a`, transform scores `transform_scores.json` SHA-256 `458ce3e11ea874fbbff1d26444a41d1e979128a45b5c8ab1de33d6bc6d0d333a`, grid probe `runtime_grid_probe.png` SHA-256 `b32cd9669b2f9d1147e7612ab91996ac0152a6156592858e2f622ea73757ddc8` | Q2c-1 pending, not mutation-approved. `chunked_binary` is symmetric but not closure-like (`connected_pair_row_signature_mismatch_ratio: 0.999888`, `closure_like: false`). It is not globally 180-degree rotation symmetric (`rotation180_relation_mismatch_count: 44116`). The `packed4_0` cross-table does not create a strong sentinel conflict for edge `369-370`, but direction code `15` is unresolved and transform scoring is ambiguous: `rotate180` score `0.013291`, `identity` score `0.013200`, margin `0.000091`. Candidate status is still not mutation-approved. |
 | 2026-06-26 | Q2c-1 runtime background UV captures | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_transform_validation\`: `runtime_grid_probe_screenshot_blue_candidate.png` SHA-256 `7f8f4b1907f56e2077ffba7924850fa7fc0e19a53d1abb8c165e5b2ca8eca2c6`, `runtime_grid_probe_screenshot_red_base.png` SHA-256 `97c996833a5559fbd4c07bfb883b22f5d47413ee6c48b627b826e20b8ef6ee7c`, `runtime_anchor_measurements.json` SHA-256 `91c3b7211fa3f8179f0d39623efd231dbc09f6676130a2206772b50fe3131056` | Runtime background UV calibration pass for observed views. The grid probe renders in match with near-square pitch and no extra mirror/rotation detected in the captured views. This is background texture evidence only; node labels are pre-rendered in the PNG, so `map_setting_node_world_transform` remains unproven and candidate mutation remains disallowed. |
 | 2026-06-26 | PR #8 read-only runtime node-anchor API discovery | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\runtime_node_anchor_probe\runtime_node_anchor_api_audit.json`; size `7948` bytes, SHA-256 `1035df9a8f6af3a89ce2e931d51fb66bc0b0c334c96e099e89882c7cdcfe9fba`. Local DLL compile check produced ignored build artifact `runtime_node_anchor_probe.dll` SHA-256 `33d826f22b13520bf10fa9d5bc691f475d1bde66f721a450176ac52d07875499`. | `runtime_node_anchor_api: unavailable_in_checked_public_sdk_sources`. The checked public source exposes a read-only callback shape but no independent node/world anchor surface. The new `tfm2_lol_anchor_probe` package is DLL-only and has no `mod.override_info`, `map_setting`, or background asset. Candidate `369-370` remains blocked. |
+| 2026-06-26 | Q2d offline runtime map anchor discovery | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\offline_runtime_map_anchor_discovery\`: asset index `bundle_asset_index.json` SHA-256 `7641a29a8626df715e82f499380845d4b9759ab4f4bc5f9b08efd0fef159328d`, map-related assets `bundle_map_related_assets.json` SHA-256 `df0a15db39b791d9a6787e6419bef3fa8735138a83c61760b63ec5e1f4e2d6e8`, setting scan report `anchor_candidate_report.json` SHA-256 `0344ee6d66a8d2f8b23dd719f2b46aa86e864e76640f4544a043990291213acf`, path graph scores `transform_scores_path_graph.json` SHA-256 `7678ec7330de54370f22333daa58c2065fd4f31a7a90d9ed2259ab86cf91e1f6` | Q2d: no sufficient offline anchor found. The bundle audit found 143 map-related metadata candidates and the blob scan found 68 unverified coordinate-like tables, but none are semantically tied to three non-collinear runtime anchors. `packed4_0` path-follow is weak/unresolved and transform scoring is still ambiguous: `rotate180` vs `identity` margin `0.000198`. `map_setting_node_world_transform` remains unproven and candidate `369-370` remains blocked. |
 
 This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that a cautious symmetric edge candidate has been characterized and partially checked. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or `map_setting` mutation.
 
@@ -91,7 +92,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic, but packed4 direction code `15` and the offline `30x30` transform are ambiguous. Candidate for path/collision/spawn/placement investigation only; must not be mutated until runtime grid confirmation or explicit risk acceptance. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Candidate for path/collision/spawn/placement investigation only; must not be mutated until a node/world anchor is proven or explicit risk acceptance is documented. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | Unknown / binary candidate | Not found in checked public SDK/source surfaces; full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | Unknown / binary candidate | `path` was not found in checked public SDK/source surfaces; safe replacement workflow is not proven. |
@@ -114,8 +115,9 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 9. Done: run read-only relation semantics and offline transform validation for candidate edge `369-370`.
 10. Done: stage the pure visual coordinate grid background probe and capture background UV evidence.
 11. Done: audit the checked public SDK/source surface and add an independent read-only DLL probe skeleton; no sufficient node/world anchor API was found.
-12. Next: prove an independent `map_setting` node/world anchor through offline decoded original entity/path data or a newly exposed SDK/debug surface.
-13. Later only if node/world anchoring is resolved: try one tiny reversible mutation in a separate branch or PR with A/B/A runtime proof.
+12. Done: run offline original bundle/setting anchor discovery. No sufficient independent anchor was found; path-graph transform scoring remains ambiguous.
+13. Next: prove an independent `map_setting` node/world anchor through a stronger original-data decoder, a newly exposed SDK/debug surface, or an explicit risk-acceptance document.
+14. Later only if node/world anchoring is resolved or risk is explicitly accepted: try one tiny reversible mutation in a separate branch or PR with A/B/A runtime proof.
 
 ## Q2a Equivalent Remap Gate
 
@@ -265,6 +267,38 @@ python .\tools\install_runtime_spike_mod.py `
 ```
 
 The checked public SDK/source surface does not currently provide that anchor. The next evidence item should come from offline decoded original runtime data or a new SDK/debug surface, not a mutated `map_setting`.
+
+## Q2d Offline Runtime Anchor Discovery Gate
+
+Question:
+
+```text
+Do original bundle.game_data / setting resources contain an independent anchor that proves the map_setting node/world transform?
+```
+
+Result on 2026-06-26: no sufficient offline anchor found. `tools/audit_bundle_map_assets.py` indexed `bundle.game_data` and found 143 map-related metadata candidates. `tools/scan_setting_anchor_candidates.py` scanned 29 binary candidates and reported 68 coordinate-like tables, but none are semantically tied to known entities, world bounds, or three non-collinear runtime anchors. `tools/derive_map_setting_path_graph.py` derived a local path graph from `chunked_binary` and `packed4_0`, but `packed4_0` path following is only `weak_or_unresolved` and transform scoring is still ambiguous.
+
+Key findings:
+
+| Check | Result |
+| --- | --- |
+| Bundle map-related metadata | 143 candidates; metadata only, no payload committed. |
+| Possible binary anchor sources | 27 from metadata filtering. |
+| Binary assets scanned | 29. |
+| Coordinate-like tables | 68, all `unverified_coordinate_table`; no semantic entity labels. |
+| `packed4_0` path-follow validation | 20,000 connected pairs tested; 17,986 reached, 2,014 unresolved code. |
+| Path graph transform scoring | `rotate180` best, `identity` second, margin `0.000198`; conclusion `ambiguous`. |
+
+Current Q2d decision:
+
+```text
+offline_anchor_result: no_sufficient_anchor_found
+map_setting_node_world_transform: unproven
+candidate_369_370: blocked
+may_enter_mutation_pr: false
+```
+
+Do not open a mutation PR from this state. The next valid paths are a stronger decoder for original runtime data, a newly exposed SDK/debug anchor surface, or an explicit risk-acceptance document before a tiny controlled probe.
 
 ## Stop Conditions
 

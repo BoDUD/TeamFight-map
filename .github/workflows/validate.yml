@@ -58,3 +58,4 @@ jobs:
           python -m py_compile tools/scan_setting_anchor_candidates.py
           python -m py_compile tools/derive_map_setting_path_graph.py
           python -m py_compile tools/map_setting_mutate_symmetric_edge.py
+          python -m py_compile tools/install_runtime_mutation_probe.py

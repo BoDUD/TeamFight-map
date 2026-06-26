@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e risk acceptance planning defines a possible two-byte probe but does not run it. No decoded field mutation has been tested. Visual layer overrides leave native AI/pathing intact. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, and the game loaded into 5v5 for A1, B, and A2 with rollback to the original SHA-256. This proves only that one bounded mutated file can be read and run through 5v5 startup; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -72,7 +72,7 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-26 | Q2c-1 runtime background UV captures | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\map_setting_transform_validation\`: `runtime_grid_probe_screenshot_blue_candidate.png` SHA-256 `7f8f4b1907f56e2077ffba7924850fa7fc0e19a53d1abb8c165e5b2ca8eca2c6`, `runtime_grid_probe_screenshot_red_base.png` SHA-256 `97c996833a5559fbd4c07bfb883b22f5d47413ee6c48b627b826e20b8ef6ee7c`, `runtime_anchor_measurements.json` SHA-256 `91c3b7211fa3f8179f0d39623efd231dbc09f6676130a2206772b50fe3131056` | Runtime background UV calibration pass for observed views. The grid probe renders in match with near-square pitch and no extra mirror/rotation detected in the captured views. This is background texture evidence only; node labels are pre-rendered in the PNG, so `map_setting_node_world_transform` remains unproven and candidate mutation remains disallowed. |
 | 2026-06-26 | PR #8 read-only runtime node-anchor API discovery | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\runtime_node_anchor_probe\runtime_node_anchor_api_audit.json`; size `7948` bytes, SHA-256 `1035df9a8f6af3a89ce2e931d51fb66bc0b0c334c96e099e89882c7cdcfe9fba`. Local DLL compile check produced ignored build artifact `runtime_node_anchor_probe.dll` SHA-256 `33d826f22b13520bf10fa9d5bc691f475d1bde66f721a450176ac52d07875499`. | `runtime_node_anchor_api: unavailable_in_checked_public_sdk_sources`. The checked public source exposes a read-only callback shape but no independent node/world anchor surface. The new `tfm2_lol_anchor_probe` package is DLL-only and has no `mod.override_info`, `map_setting`, or background asset. Candidate `369-370` remains blocked. |
 | 2026-06-26 | Q2d offline runtime map anchor discovery | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\offline_runtime_map_anchor_discovery\`: asset index `bundle_asset_index.json` SHA-256 `7641a29a8626df715e82f499380845d4b9759ab4f4bc5f9b08efd0fef159328d`, map-related assets `bundle_map_related_assets.json` SHA-256 `df0a15db39b791d9a6787e6419bef3fa8735138a83c61760b63ec5e1f4e2d6e8`, setting scan report `anchor_candidate_report.json` SHA-256 `0344ee6d66a8d2f8b23dd719f2b46aa86e864e76640f4544a043990291213acf`, path graph scores `transform_scores_path_graph.json` SHA-256 `7678ec7330de54370f22333daa58c2065fd4f31a7a90d9ed2259ab86cf91e1f6` | Q2d: no sufficient offline anchor found. The bundle audit found 143 map-related metadata candidates and the blob scan found 68 unverified coordinate-like tables, but none are semantically tied to three non-collinear runtime anchors. `packed4_0` path-follow is weak/unresolved and transform scoring is still ambiguous: `rotate180` vs `identity` margin `0.000198`. `map_setting_node_world_transform` remains unproven and candidate `369-370` remains blocked. |
-| 2026-06-26 | Q2e risk acceptance planning for a minimal mutation probe | No runtime evidence yet; this is a document and tool gate only. See `docs/minimal_mutation_risk_acceptance.md` and `tools/map_setting_mutate_symmetric_edge.py`. | Pending review. The proposed probe is risk-accepted only, not proven safe: mutate exactly offsets `427536` and `427573` from `1` to `0`, preserve transpose symmetry, write only repository-external output, and do not auto-install. No mutated file has been generated, staged, or tested in game by this PR. |
+| 2026-06-26 | Q2e risk-accepted two-byte `map_setting` loader mutation probe | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\minimal_mutation_probe\`: summary `q2e_loader_mutation_probe_summary.json` size `12,278`, SHA-256 `c84d0bb71deaa3e44997c633cb17cdb8787b3b02ddd5210b1ee6b352eaba9e41`; B mutation file `map_setting.q2e.mutated.map_setting` size `1,451,980`, SHA-256 `dd499ad3b531f4ba932bba2eecf055a792ac45991da5cabd2f52ac16e2718072`; mutation manifest SHA-256 `9129d2c4dcf1b86b602bfd4928f096f4e1e21dc3053a6999c08888d39595d380`; B filtered ProcMon CSV SHA-256 `2f8ec3aa0cc913b6f5420993c3ce7e229af94594a88724bf362523cc0feeab67`; A2 filtered ProcMon CSV SHA-256 `dd1eeaaef28dcd85cfa80d2f864927225a61325d1ff25c092d471fa873a32d1f`; screenshots for A1/B/A2 are recorded in `docs/q2e_loader_mutation_probe.md` by path, size, and SHA-256. | Q2e Loader Mutation Probe Pass. A1 original baseline reached 5v5 and 01:31. B staged only offsets `427536` and `427573` changed from `1` to `0`, reached 5v5 and 01:32, and Process Monitor captured `CreateFile SUCCESS` plus `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for the mutated installed file. A2 restored the original SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`, reached 5v5 and 01:31, and Process Monitor captured the restored file read. This is loader mutation proof only; semantic safety and broader map edits remain unproven. |
 
 This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that a cautious symmetric edge candidate has been characterized and partially checked. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or `map_setting` mutation.
 
@@ -93,7 +93,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Candidate for path/collision/spawn/placement investigation only; must not be mutated until a node/world anchor is proven or explicit risk acceptance is documented. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. PR #10 explicitly accepted the risk for one controlled two-byte probe only, and PR #11 loaded that B file through 5v5 startup and rollback. This is not semantic proof and does not approve path/collision/spawn/placement edits beyond that exact probe. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | Unknown / binary candidate | Not found in checked public SDK/source surfaces; full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | Unknown / binary candidate | `path` was not found in checked public SDK/source surfaces; safe replacement workflow is not proven. |
@@ -117,9 +117,10 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 10. Done: stage the pure visual coordinate grid background probe and capture background UV evidence.
 11. Done: audit the checked public SDK/source surface and add an independent read-only DLL probe skeleton; no sufficient node/world anchor API was found.
 12. Done: run offline original bundle/setting anchor discovery. No sufficient independent anchor was found; path-graph transform scoring remains ambiguous.
-13. In progress: review whether to accept one explicitly risky, two-byte, reversible A/B/A probe despite the unproven node/world transform.
-14. Next if risk acceptance is approved: generate one repository-external mutated file with `tools/map_setting_mutate_symmetric_edge.py`; do not install it automatically.
-15. Later only in a separate PR: run the A/B/A runtime proof and stop on any loader error, gameplay abnormality, or rollback failure.
+13. Done: document explicit risk acceptance for one two-byte reversible probe despite the unproven node/world transform.
+14. Done: generate one repository-external B file with `tools/map_setting_mutate_symmetric_edge.py`; do not commit the binary payload.
+15. Done: stage and run the A1/B/A2 runtime proof with `tools/install_runtime_mutation_probe.py`, including B-stage positive file-read evidence and A2 rollback to the original SHA-256.
+16. Next: do not broaden mutations from this result. Any follow-up must either prove a semantic, local, reversible effect for this exact field or return to stronger anchor/decode evidence.
 
 ## Q2a Equivalent Remap Gate
 
@@ -310,7 +311,7 @@ Question:
 Without a proven node/world anchor, does the project accept one tightly bounded two-byte mutation probe?
 ```
 
-Current PR status: planning only. `docs/minimal_mutation_risk_acceptance.md` records the known evidence and unknowns, then defines a single risk-accepted candidate:
+Result on 2026-06-26: accepted for one controlled probe only. `docs/minimal_mutation_risk_acceptance.md` records the known evidence and unknowns, then defines a single risk-accepted candidate:
 
 ```text
 layer: chunked_binary
@@ -325,7 +326,36 @@ risk label: risk-accepted candidate, not proven safe
 
 `tools/map_setting_mutate_symmetric_edge.py` implements the file generator for that exact candidate only. It requires `--confirm-risk-accepted`, rejects repository-internal paths, rejects path/hardlink aliases, verifies the known input SHA-256, verifies both old byte values, requires the diff to be exactly two bytes, decodes the output, and verifies transpose symmetry remains intact.
 
-This PR does not generate, install, or runtime-test a mutated `map_setting`. If the risk gate is approved, the next PR may generate the repository-external B file and run the A/B/A protocol. The result must be named `Q2e Loader Mutation Probe Pass` unless a clear, local, reversible, explainable gameplay effect is observed.
+The risk acceptance does not prove safety. It only permits one repository-external B file and one A/B/A runtime probe.
+
+## Q2e Loader Mutation Probe Gate
+
+Question:
+
+```text
+Can the game load and run one risk-accepted two-byte map_setting mutation through 5v5 startup, then roll back to the original SHA-256?
+```
+
+Result on 2026-06-26: Q2e Loader Mutation Probe Pass. `docs/q2e_loader_mutation_probe.md` records the external evidence paths, file sizes, SHA-256 values, screenshots, and filtered ProcMon proof.
+
+The B file was generated outside the repository and changed only:
+
+```text
+offset 427536: 1 -> 0
+offset 427573: 1 -> 0
+changed_byte_count: 2
+changed_cell_count: 2
+```
+
+A/B/A runtime result:
+
+| Run | map_setting | Runtime result |
+| --- | --- | --- |
+| A1 | Original byte-equivalent baseline, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | 5v5 entered and reached 01:31; visible heroes, minions, towers, jungle/objective actors, UI, and minimap appeared normal. |
+| B | Two-byte risk-accepted mutation, SHA-256 `dd499ad3b531f4ba932bba2eecf055a792ac45991da5cabd2f52ac16e2718072` | 5v5 entered and reached 01:32. Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for `mods\tfm2_lol_map_spike\setting\map_setting.map_setting`. No obvious global gameplay abnormality was observed. |
+| A2 | Original byte-equivalent rollback, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | 5v5 entered and reached 01:31. Process Monitor captured the restored installed file with `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`. |
+
+This proves the loader can read and run one risk-accepted two-byte `map_setting` mutation through 5v5 startup, and that the staged file can be rolled back to the original SHA-256. It does not prove the semantic meaning of `chunked_binary`, the true node/world transform, or the safety of broader map edits.
 
 ## Stop Conditions
 

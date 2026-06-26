@@ -15,6 +15,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/map_setting_layer_characterization.md` records the Q2c read-only layer inspection and symmetric edge candidate.
 - `docs/map_setting_transform_validation.md` records the Q2c-1 read-only semantic checks and pending `30x30` transform validation.
 - `docs/runtime_node_anchor_probe_plan.md` records why background UV captures do not prove `map_setting` node/world transform and defines the next read-only gate.
+- `docs/runtime_node_anchor_api_discovery.md` records the PR #8 SDK/API audit and independent read-only DLL probe guardrails.
 
 ## Build And Validate
 
@@ -79,6 +80,24 @@ python .\tools\install_runtime_spike_mod.py `
   --stage-background-source "D:\path\to\map_setting_transform_validation\runtime_grid_probe.png"
 ```
 
+To audit the public runtime node-anchor API surface without installing any gameplay or asset override:
+
+```powershell
+python .\tools\audit_runtime_node_anchor_api.py `
+  --sdk-dir "D:\steam\steamapps\common\Teamfight Manager2\mod-sdk" `
+  --include-adjacent-rift-source `
+  --output "D:\path\to\runtime_node_anchor_probe\runtime_node_anchor_api_audit.json"
+```
+
+To stage the independent read-only DLL anchor probe after building it locally:
+
+```powershell
+python .\tools\install_runtime_anchor_probe.py `
+  --game-root "D:\steam\steamapps\common\Teamfight Manager2" `
+  --dll "D:\local-build\runtime_node_anchor_probe.dll" `
+  --enable-exclusive
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -93,7 +112,7 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, Q2c has characterized a read-only symmetric edge candidate, and Q2c-1 shows that the candidate still needs independent runtime node/world anchoring because direction-code and offline transform results are ambiguous. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
+Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, Q2c has characterized a read-only symmetric edge candidate, and Q2c-1 shows that the candidate still needs independent runtime node/world anchoring because direction-code and offline transform results are ambiguous. PR #8 checked the public SDK/source surface and found no sufficient node/world anchor API, so candidate `369-370` remains blocked. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof after anchoring is solved. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
 
 ## Scope
 

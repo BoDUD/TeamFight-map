@@ -59,3 +59,4 @@ jobs:
           python -m py_compile tools/derive_map_setting_path_graph.py
           python -m py_compile tools/map_setting_mutate_symmetric_edge.py
           python -m py_compile tools/install_runtime_mutation_probe.py
+          python -m py_compile tools/select_q2f_semantic_probe_candidates.py

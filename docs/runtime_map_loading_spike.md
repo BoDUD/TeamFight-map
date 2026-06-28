@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, and Q2f repeated the same B file with longer live observation past 3:00. This proves only that one bounded mutated file can be read and run through 5v5 startup and extended observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, and Q2f repeated the same B file with longer live observation past 3:00. Q2g only defines risk acceptance and a dedicated tool gate for a second candidate; it does not generate or stage that file. This proves only that one bounded mutated file can be read and run through 5v5 startup and extended observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -75,6 +75,7 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-26 | Q2e risk-accepted two-byte `map_setting` loader mutation probe | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\minimal_mutation_probe\`: summary `q2e_loader_mutation_probe_summary.json` size `12,278`, SHA-256 `c84d0bb71deaa3e44997c633cb17cdb8787b3b02ddd5210b1ee6b352eaba9e41`; B mutation file `map_setting.q2e.mutated.map_setting` size `1,451,980`, SHA-256 `dd499ad3b531f4ba932bba2eecf055a792ac45991da5cabd2f52ac16e2718072`; mutation manifest SHA-256 `9129d2c4dcf1b86b602bfd4928f096f4e1e21dc3053a6999c08888d39595d380`; B filtered ProcMon CSV SHA-256 `2f8ec3aa0cc913b6f5420993c3ce7e229af94594a88724bf362523cc0feeab67`; A2 filtered ProcMon CSV SHA-256 `dd1eeaaef28dcd85cfa80d2f864927225a61325d1ff25c092d471fa873a32d1f`; screenshots for A1/B/A2 are recorded in `docs/q2e_loader_mutation_probe.md` by path, size, and SHA-256. | Q2e Loader Mutation Probe Pass. A1 original baseline reached 5v5 and 01:31. B staged only offsets `427536` and `427573` changed from `1` to `0`, reached 5v5 and 01:32, and Process Monitor captured `CreateFile SUCCESS` plus `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for the mutated installed file. A2 restored the original SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`, reached 5v5 and 01:31, and Process Monitor captured the restored file read. This is loader mutation proof only; semantic safety and broader map edits remain unproven. |
 | 2026-06-27 | Q2f semantic probe plan and read-only candidate catalog | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2f_semantic_probe_plan\`: candidates JSON size `24,231`, SHA-256 `3ef16f633a42993a98a55b46aa9b7c6b9826e169d47896ce6c27fae459c78254`; decision JSON size `899`, SHA-256 `6d1b847e64b98edba064e7aba588496e7b4a8bfffca60272cb273cb808db78f5`. | Q2f plan only. `tools/select_q2f_semantic_probe_candidates.py` catalogs higher-signal `chunked_binary` symmetric pairs without generating a mutated binary or installing runtime files. The recommended next runtime option remains repeating the same Q2e `369-370` mutation with longer observation. The top second candidate is cataloged only and has `may_enter_runtime_probe: false`. |
 | 2026-06-27 | Q2f extended observation of the same Q2e `369-370` two-byte mutation | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2f_extended_observation_369_370\`: summary `q2f_extended_observation_summary.json` size `14,035`, SHA-256 `5d144efd6e24af63c1545442e1596243f122a5b6f9c60acf0a35259ea61d823e`; B filtered ProcMon CSV SHA-256 `3e582c795154421e49724970572aacd31dcb3b9ad500462a4eebe7b51592f5b3`; A2 filtered ProcMon CSV SHA-256 `9923f3c58b431dfed4e40573de4cb5fb8508b23f9cd7110516b0d0b118610299`; screenshots for A1/B/A2 are recorded in `docs/q2f_extended_observation_probe.md` by path, size, and SHA-256. | Q2f Extended Observation Probe Pass. A1 original baseline reached about 02:59. B reused the exact Q2e mutated file SHA-256 `dd499ad3b531f4ba932bba2eecf055a792ac45991da5cabd2f52ac16e2718072`, reached about 03:59, and Process Monitor captured `CreateFile SUCCESS` plus `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for the mutated installed file. A2 restored the original SHA-256 and reached about 03:23 with restored-file read proof. No obvious global AI, lane, tower, UI, minimap, or runtime abnormality was observed. This is extended observation only; semantic safety and broader map edits remain unproven. |
+| 2026-06-27 | Q2g second-candidate risk acceptance and dedicated mutation-tool gate | No runtime evidence is produced by this PR. `docs/q2g_second_candidate_risk_acceptance.md` records the risk gate, and `tools/map_setting_mutate_q2g_second_candidate.py` is covered by synthetic unit tests only. | Q2g risk acceptance accepted for one controlled second-candidate probe only. Candidate `59-837` is higher signal than `369-370` but not proven safe: offsets `66605` and `932331`, old values `1, 1`, planned values `0, 0`, packed4 codes `1` and `3`, row/column hamming distance `873`. No real mutated binary is generated, no runtime staging occurs, and any A/B/A test must be a later PR. |
 
 This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that one risk-accepted two-byte mutation can run through extended 5v5 observation. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
 
@@ -124,7 +125,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 15. Done: stage and run the A1/B/A2 runtime proof with `tools/install_runtime_mutation_probe.py`, including B-stage positive file-read evidence and A2 rollback to the original SHA-256.
 16. Done: define Q2f semantic-probe guardrails and catalog read-only second-candidate options without generating mutation files.
 17. Done: repeat the same Q2e `369-370` mutation with longer observation to about 03:59 for B and A2 rollback to about 03:23.
-18. Next: define a separate review gate before any second candidate, multi-edge, region, visual-sync, or `packed4` mutation. Do not broaden mutations from Q2f.
+18. Done: define the Q2g second-candidate `59-837` risk-acceptance gate and dedicated hardcoded mutation tool without generating a real B file.
+19. Next: if approved, a later PR may run one A/B/A for `59-837` only. Multi-edge, region, visual-sync, and `packed4` mutations remain disallowed.
 
 ## Q2a Equivalent Remap Gate
 
@@ -431,6 +433,66 @@ broader map edits: not approved
 ```
 
 This extends Q2e's loader mutation startup proof to a longer observation of the same B file. It still does not prove `chunked_binary` semantics, the true node/world transform, or the safety of broader edits.
+
+## Q2g Second Candidate Risk Acceptance Gate
+
+Question:
+
+```text
+Should candidate 59-837 be allowed to enter one independent A/B/A runtime probe?
+```
+
+Result on 2026-06-27: accepted for one controlled second-candidate probe only. `docs/q2g_second_candidate_risk_acceptance.md` records the risk boundary. This PR does not generate a mutated `map_setting`, does not stage a runtime override, and does not run the game.
+
+Candidate:
+
+```text
+layer: chunked_binary
+edge: 59-837
+cell 1 logical_coordinate: [837, 59]
+cell 1 serialized_byte_offset: 66605
+cell 2 logical_coordinate: [59, 837]
+cell 2 serialized_byte_offset: 932331
+old values: 1, 1
+planned new values: 0, 0
+changed_cell_count: 2
+changed_byte_count: 2
+risk label: risk-accepted second candidate, not proven safe
+```
+
+Why it is higher signal:
+
+```text
+row_sum_source: 27
+row_sum_target: 900
+row_signature_hamming_distance: 873
+column_signature_hamming_distance: 873
+packed4_0_forward: 1
+packed4_0_reverse: 3
+```
+
+Why it is still risky:
+
+```text
+map_setting_node_world_transform: unproven
+chunked_binary semantics: unproven
+world position of source/target: unknown
+AI / vision / pathing effect: unknown
+```
+
+`tools/map_setting_mutate_q2g_second_candidate.py` is a dedicated, non-generic tool. It only allows the above two offsets, requires `--confirm-risk-accepted`, rejects repository-internal paths, rejects output under any `mods` tree, rejects path/hardlink aliases, checks the original SHA-256, checks both old values, requires exactly two changed bytes, decodes the output, and verifies transpose symmetry remains `0`.
+
+Current Q2g status:
+
+```text
+risk acceptance: accepted for one controlled second-candidate probe
+mutated binary generated: false
+runtime staged: false
+semantic safety: not proven
+broader map edits: not approved
+```
+
+If this gate is approved, the next runtime PR may run `Q2g Second Candidate Loader Probe` with A1 original, B `59-837`, and A2 rollback. It must not claim semantic pass unless a clear, local, reversible, explainable gameplay effect appears in B and disappears after A2.
 
 ## Stop Conditions
 

@@ -66,3 +66,4 @@ jobs:
           python -m py_compile tools/analyze_packed4_next_hop_semantics.py
           python -m py_compile tools/analyze_packed4_code15_contexts.py
           python -m py_compile tools/analyze_code15_component_graph.py
+          python -m py_compile tools/analyze_no15_singleton_components.py

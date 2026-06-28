@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate, but not a proven gameplay field. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate. Q2l classifies the 90 no15 singleton components as a structured special-node-set candidate. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -81,8 +81,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-28 | Q2i `packed4_0` next-hop static decode | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2i_packed4_next_hop_static_decode\`: value histogram JSON size `1,416`, SHA-256 `ebf8110b6314a43637fc377974db95e32dfc77f1f550acb82dacd1ea7337912e`; direction candidates JSON size `2,371`, SHA-256 `aaf6fdf3b832b0586b6b2a94163994fa6faf2e0e791b4065add4b2f52d1288a7`; path-follow samples JSON size `36,504`, SHA-256 `6101fc77ce23768ec3a3b2e3452e2a9a618a7a632d7ada6a8ea4aea742c3ea92`; code 15 analysis JSON size `1,375`, SHA-256 `6b7610ba2fcd6bd3e3cbea15a43b88330865fea3a177c1b4f5162df2517ca015`; interpretation JSON size `3,890`, SHA-256 `53128ceaf217c23f41ad9cc3cd3fb7fe9017fcceb621e53e050779d152ffb1cc`. | Q2i static decode only. `packed4_0` values `0-7` show strong adjacent-direction behavior, with candidate directions `0:E`, `1:S`, `2:W`, `3:N`, `4:SE`, `5:SW`, `6:NE`, `7:NW`. Non-adjacent path-follow reached `42,803 / 50,000` sampled connected pairs (`0.856060`), and every sampled failure was unresolved code `15`. Code `15` remains `ambiguous_special_case`, so the overall interpretation is `packed4_0_interpretation: ambiguous`; runtime mutation remains disallowed. |
 | 2026-06-28 | Q2j `packed4_0` code15 context analysis | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2j_packed4_code15_context_analysis\`: contexts JSON size `1,697`, SHA-256 `c8bcfce986a7c2732ed0150948b84fc8c26f9504ccf496b571a9eaf3f0bd7551`; distance buckets JSON size `11,328`, SHA-256 `32c3dab66b2e4651230d3df0a553f32acd06f2ddfe6bd34b4b7096d7254d801e`; endpoint classes JSON size `14,723`, SHA-256 `e3d7a1a35cd5dbf72a2ab9f0999f94a9a3bc23821d3af32defa60f9144643d05`; path recovery JSON size `21,879`, SHA-256 `c4f516085b07ee61e3a7b9e8339a4a70ddac8e0739e0ace6f1b2012c03f7c23d`; interpretation JSON size `3,555`, SHA-256 `a89ccbdf7ef88ca53190582db92af43aa9d0e2008b18202ceb31898e47be6cf3`. | Q2j static analysis only. Code `15` remains `ambiguous`: it appears with `chunked_binary == 0` in `138,476` cells and with `chunked_binary == 1` in `16,234` cells, so it is not a clean blocked sentinel. Among connected non-self code15 contexts, no pair was recoverable through either the inferred 0-7 direction graph without 15 or the chunked non15 graph. Runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
 | 2026-06-28 | Q2k code15/no15 component graph | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2k_code15_component_graph\`: no15 component summary JSON size `21,881`, SHA-256 `3733aadc1746281bd3908c78a44588bdfbd718215923a79f0485e9456121548a`; cross-component edges JSON size `25,002`, SHA-256 `f3a097735f23bc050dd1900912759bfb0b5720b5c23d98b9685912d58f6db213`; component pair matrix JSON size `36,276`, SHA-256 `bd8aea72cfe245ddb5c6f4bc574dcc33abb1a9abe922253734d1cd59504d1de0`; prior probe component context JSON size `3,934`, SHA-256 `afac523ddf3f51e078f73e4bf9001c6fbf4bb46756a580a7d57558c0955d5ff3`; packed4_1 correlation JSON size `50,482`, SHA-256 `ba80633b6d01dfb232d56ec388348fd6ff959e5c79bf24f5c19e4f3eb553ff78`; interpretation JSON size `1,953`, SHA-256 `daaa5f23116ee350bd9804fd730a3883bbfb305aef00d42d971e5078681c5f1d`. | Q2k static analysis only. The no15 graph has `91` weak components: one `810`-node component and ninety single-node components. All `15,930` connected non-self code15 relations cross components, so `code15_component_role` is `cross_component_bridge_candidate`. `packed4_1` does not show a clear component-id-like pattern under tested reshapes. Runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
+| 2026-06-28 | Q2l no15 singleton component classification | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2l_no15_singleton_components\`: singleton nodes JSON size `28,505`, SHA-256 `74f7c439bdab16f7618e9e29ba6d9bb1803c0396832aa1b50118497aa0347328`; spatial pattern JSON size `7,846`, SHA-256 `d09a031fab0bd3e368c78004b0644783cc195ca60d331d0d88ddd71995422d53`; bridge edges JSON size `33,163`, SHA-256 `fa77819df77455eefc81e0c4d83b0004337543d536cbafdbcf15aadfa38051ea`; singleton packed4_1 profiles JSON size `61,886`, SHA-256 `c5ca0a701478edc00822c0de54e357237f0a54e124377d34e71a93a387b7758f`; interpretation JSON size `2,992`, SHA-256 `f8649e6db505e758f36fd1fbd011ca5e8770077c62950b8e3ebd7c59646a2f1f`. | Q2l static analysis only. The 90 no15 singleton nodes are all interior, form a table-coordinate `band_candidate`, have symmetric code15 bridge degrees, and share one node-major packed4_1 profile that does not appear in the large no15 component. `no15_singleton_role` is `structured_special_node_set_candidate`; runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
 
-This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. Q2h then shows those probes did not produce semantic signal and recommends static decoding before any third runtime probe. Q2i narrows `packed4_0` toward direction-like codes `0-7`; Q2j keeps code `15` unresolved after deeper context analysis; Q2k classifies code15 as a static cross-component bridge candidate. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
+This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. Q2h then shows those probes did not produce semantic signal and recommends static decoding before any third runtime probe. Q2i narrows `packed4_0` toward direction-like codes `0-7`; Q2j keeps code `15` unresolved after deeper context analysis; Q2k classifies code15 as a static cross-component bridge candidate; Q2l classifies the singleton components as a structured special-node-set candidate. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
 
 ## Resource Audit
 
@@ -101,7 +102,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Q2e/Q2f loaded and observed `369-370`, and Q2g loaded and observed `59-837`; neither produced semantic signal. Q2h identifies Q2g endpoint `837` as the only universal-like row/column and recommends static decoding before a third runtime probe. Q2i shows `packed4_0` codes `0-7` are direction-like. Q2j shows code `15` is not a clean blocked sentinel and is not recoverable through current no-15 graphs. Q2k shows all connected non-self code15 edges cross no15 components, so code15 is a static cross-component bridge candidate. This is not gameplay semantic proof and does not approve packed4/path/collision/spawn/placement edits. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Q2e/Q2f loaded and observed `369-370`, and Q2g loaded and observed `59-837`; neither produced semantic signal. Q2h identifies Q2g endpoint `837` as the only universal-like row/column and recommends static decoding before a third runtime probe. Q2i shows `packed4_0` codes `0-7` are direction-like. Q2j shows code `15` is not a clean blocked sentinel and is not recoverable through current no-15 graphs. Q2k shows all connected non-self code15 edges cross no15 components. Q2l shows the 90 singleton components are an interior band-like special set with symmetric code15 bridges and a distinct node-major packed4_1 profile. This is not gameplay semantic proof and does not approve packed4/path/collision/spawn/placement edits. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | Unknown / binary candidate | Not found in checked public SDK/source surfaces; full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | Unknown / binary candidate | `path` was not found in checked public SDK/source surfaces; safe replacement workflow is not proven. |
@@ -782,6 +783,80 @@ next_recommended_step: continue_static_decoding
 ```
 
 This strengthens the static hypothesis that code `15` marks component-bridging or special inter-component relations. It still does not prove gameplay semantics, node/world transform, or a safe edit path. No `packed4` mutation, third `chunked_binary` runtime probe, multi-edge edit, region edit, or visual sync is approved.
+
+## Q2l No15 Singleton Component Classification Gate
+
+Question:
+
+```text
+Are the 90 no15 singleton components structured special nodes, or scattered graph leftovers?
+```
+
+Result on 2026-06-28: structured special-node-set candidate, static only. `docs/q2l_no15_singleton_component_classification.md` records the read-only analysis.
+
+The analysis output is repository-external:
+
+```text
+D:\tfm2_q2a_evidence\q2l_no15_singleton_components\
+```
+
+Singleton node class result:
+
+```text
+singleton_count: 90
+large_component_id: 0
+large_component_size: 810
+row/column class pairs:
+  middle|middle: 88
+  sparse|sparse: 2
+edge positions:
+  interior: 90
+```
+
+Spatial result:
+
+```text
+spatial_pattern: band_candidate
+complete_rows: []
+complete_columns: []
+bounding_box:
+  min_x: 3
+  max_x: 26
+  min_y: 3
+  max_y: 26
+```
+
+Bridge result:
+
+```text
+large_component_to_singleton: 7,609
+singleton_to_large_component: 7,609
+singleton_to_singleton: 712
+all_singletons_have_code15_bridge: true
+all_singleton_bridge_degrees_symmetric: true
+```
+
+Packed4_1 profile result:
+
+```text
+node-major singleton unique profiles: 1
+node-major large component unique profiles: 506
+node-major shared profiles: 0
+node-major signal: strong_unverified
+```
+
+Conclusion:
+
+```text
+no15_singleton_role: structured_special_node_set_candidate
+runtime_mutation_allowed: false
+packed4_mutation_allowed: false
+third_chunked_binary_runtime_probe_allowed: false
+map_editing_allowed: false
+next_recommended_step: continue_static_decoding
+```
+
+This makes the singleton set look intentional in the static table graph, especially because all singleton `packed4_0` source rows are code15-only and all singleton nodes share a node-major `packed4_1` profile absent from the large component. It still does not prove gameplay semantics, node/world transform, or a safe edit path. No `packed4` mutation, third `chunked_binary` runtime probe, multi-edge edit, region edit, or visual sync is approved.
 
 ## Stop Conditions
 

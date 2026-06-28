@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -77,8 +77,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-27 | Q2f extended observation of the same Q2e `369-370` two-byte mutation | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2f_extended_observation_369_370\`: summary `q2f_extended_observation_summary.json` size `14,035`, SHA-256 `5d144efd6e24af63c1545442e1596243f122a5b6f9c60acf0a35259ea61d823e`; B filtered ProcMon CSV SHA-256 `3e582c795154421e49724970572aacd31dcb3b9ad500462a4eebe7b51592f5b3`; A2 filtered ProcMon CSV SHA-256 `9923f3c58b431dfed4e40573de4cb5fb8508b23f9cd7110516b0d0b118610299`; screenshots for A1/B/A2 are recorded in `docs/q2f_extended_observation_probe.md` by path, size, and SHA-256. | Q2f Extended Observation Probe Pass. A1 original baseline reached about 02:59. B reused the exact Q2e mutated file SHA-256 `dd499ad3b531f4ba932bba2eecf055a792ac45991da5cabd2f52ac16e2718072`, reached about 03:59, and Process Monitor captured `CreateFile SUCCESS` plus `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for the mutated installed file. A2 restored the original SHA-256 and reached about 03:23 with restored-file read proof. No obvious global AI, lane, tower, UI, minimap, or runtime abnormality was observed. This is extended observation only; semantic safety and broader map edits remain unproven. |
 | 2026-06-27 | Q2g second-candidate risk acceptance and dedicated mutation-tool gate | No runtime evidence is produced by this PR. `docs/q2g_second_candidate_risk_acceptance.md` records the risk gate, and `tools/map_setting_mutate_q2g_second_candidate.py` is covered by synthetic unit tests only. | Q2g risk acceptance accepted for one controlled second-candidate probe only. Candidate `59-837` is higher signal than `369-370` but not proven safe: offsets `66605` and `932331`, old values `1, 1`, planned values `0, 0`, packed4 codes `1` and `3`, row/column hamming distance `873`. No real mutated binary is generated, no runtime staging occurs, and any A/B/A test must be a later PR. |
 | 2026-06-28 | Q2g second-candidate `59-837` loader probe | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2g_second_candidate_probe\`: summary `q2g_second_candidate_probe_summary.json` size `14,621`, SHA-256 `ecb0ae7b7d9c631a126409eaaf5bc191dc8864d54f1d82aff5f37fb65dc9faab`; B mutation file `map_setting.q2g.59_837.mutated.map_setting` size `1,451,980`, SHA-256 `d633092b25abf6bee3527f51249650ebe91d3912f25040dcff0728164819156a`; mutation manifest SHA-256 `a78437844fc6387c5422e456b7e9757e37426c06fabe9c69ff1f5f15d14d97f2`; B filtered ProcMon CSV SHA-256 `deb1e8fa41588f3658beb38af5d1de635d95f71b201703796709e6f036e0572d`; A2 filtered ProcMon CSV SHA-256 `b0ccfadc60a014e6cfa880d3722be8403a008aa0d1d0234ec7406b60af3fbd35`; screenshots for A1/B/A2 are recorded in `docs/q2g_second_candidate_loader_probe.md` by path, size, and SHA-256. | Q2g Second Candidate Loader Probe Pass. A1 original baseline reached about 03:54. B staged only offsets `66605` and `932331` changed from `1` to `0`, reached about 03:52, and Process Monitor captured `CreateFile SUCCESS` plus `ReadFile SUCCESS`, `Offset: 0, Length: 1,451,980`, for the mutated installed file. A2 restored the original SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0`, reached about 03:59, and Process Monitor captured the restored file read. No obvious global AI, lane, tower, UI, minimap, loader, or runtime abnormality was observed, and no clear local reversible gameplay effect was identified. This is loader probe proof only; semantic safety and broader map edits remain unproven. |
+| 2026-06-28 | Q2h `chunked_binary` probe synthesis | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2h_chunked_binary_probe_synthesis\`: row/column classes JSON size `12,955`, SHA-256 `3c9589223712c6cad52b667f4283d0a3f83d086b1076c57178888b95f85a637b`; prior probe analysis JSON size `5,417`, SHA-256 `7b4d9df953fea56df24f32d14180164504e397b9852448cbeefb6f185a2905c7`; next strategy JSON size `2,105`, SHA-256 `f5a339aa46c3d467dc5923055d8c1b305d60e47ea6d6f7e995a79c14cd2c326f`. | Q2h synthesis only. `tools/analyze_chunked_binary_probe_targets.py` writes read-only JSON diagnostics outside the repository. Q2h found one universal-like `row_sum == 900` and `column_sum == 900` node: node `837`, which was one endpoint of Q2g `59-837`. This may explain why Q2g looked high-signal by row/column contrast but still produced no visible semantic effect. The next action is `continue_static_decoding`; do not run a third runtime probe now. |
 
-This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
+This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. Q2h then shows those probes did not produce semantic signal and recommends static decoding before any third runtime probe. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
 
 ## Resource Audit
 
@@ -97,7 +98,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. PR #10 explicitly accepted the risk for one controlled two-byte probe only, and PR #11 loaded that B file through 5v5 startup and rollback. This is not semantic proof and does not approve path/collision/spawn/placement edits beyond that exact probe. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Q2e/Q2f loaded and observed `369-370`, and Q2g loaded and observed `59-837`; neither produced semantic signal. Q2h identifies Q2g endpoint `837` as the only universal-like row/column and recommends static decoding before a third runtime probe. This is not semantic proof and does not approve path/collision/spawn/placement edits. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | Unknown / binary candidate | Not found in checked public SDK/source surfaces; full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | Unknown / binary candidate | `path` was not found in checked public SDK/source surfaces; safe replacement workflow is not proven. |
@@ -128,7 +129,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 17. Done: repeat the same Q2e `369-370` mutation with longer observation to about 03:59 for B and A2 rollback to about 03:23.
 18. Done: define the Q2g second-candidate `59-837` risk-acceptance gate and dedicated hardcoded mutation tool without generating a real B file.
 19. Done: stage and run the Q2g second-candidate A1/B/A2 runtime proof with B-stage positive file-read evidence and A2 rollback to the original SHA-256.
-20. Next: define a separate review gate before any multi-edge, region, visual-sync, or `packed4` mutation. Do not broaden mutations from Q2g.
+20. Done: synthesize Q2e/Q2f and Q2g probe targets by row/column class and identify Q2g node `837` as the only universal-like row/column.
+21. Next: continue static decoding before any third runtime probe. Do not broaden mutations from Q2g.
 
 ## Q2a Equivalent Remap Gate
 
@@ -535,6 +537,53 @@ broader map edits: not approved
 ```
 
 This proves the loader can read and run the risk-accepted second candidate through live 5v5 observation and rollback. It still does not prove `chunked_binary` semantics, the true node/world transform, or the safety of broader edits.
+
+## Q2h Chunked Binary Probe Synthesis Gate
+
+Question:
+
+```text
+Why did Q2e/Q2f 369-370 and Q2g 59-837 both load successfully but produce no clear semantic signal?
+```
+
+Result on 2026-06-28: Q2h synthesis only. `docs/q2h_chunked_binary_probe_synthesis.md` records the read-only analysis.
+
+The analysis output is repository-external:
+
+```text
+D:\tfm2_q2a_evidence\q2h_chunked_binary_probe_synthesis\
+```
+
+Key row/column findings:
+
+```text
+matrix: 900 x 900
+chunked value 0 count: 703,026
+chunked value 1 count: 106,974
+middle rows/columns: 782
+sparse rows/columns: 112
+near_universal rows/columns: 5
+universal_like rows/columns: 1
+universal_like node: 837
+```
+
+Prior probe interpretation:
+
+| Probe | Row/column class | Runtime result | Semantic signal |
+| --- | --- | --- | --- |
+| Q2e/Q2f `369-370` | `369` middle, `370` middle; packed4 values `15 / 15` | Loader and extended observation pass | None observed |
+| Q2g `59-837` | `59` sparse, `837` universal_like; packed4 values `1 / 3` | Loader pass | None observed |
+
+Q2g's high row/column hamming distance remains real, but it touches the only `row_sum == 900` and `column_sum == 900` node. This may indicate a default, sentinel-like, redundant, or otherwise low-observability relation.
+
+Decision:
+
+```text
+next_action: continue_static_decoding
+do_not_run_third_runtime_probe_now: true
+```
+
+If a future PR proposes a third candidate, it needs a separate risk review and should avoid `row_sum_900` or `column_sum_900` universal-like nodes unless that is the explicit hypothesis. It must still avoid already tested edges, keep `changed_cell_count == 2`, keep `changed_byte_count == 2`, avoid `packed4`, avoid visual synchronization, and avoid broader region edits.
 
 ## Stop Conditions
 

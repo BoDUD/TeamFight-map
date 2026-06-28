@@ -62,3 +62,4 @@ jobs:
           python -m py_compile tools/select_q2f_semantic_probe_candidates.py
           python -m py_compile tools/map_setting_mutate_q2g_second_candidate.py
           python -m py_compile tools/install_runtime_q2g_probe.py
+          python -m py_compile tools/analyze_chunked_binary_probe_targets.py

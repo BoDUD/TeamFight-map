@@ -9,7 +9,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 | Question | Current answer | Evidence |
 | --- | --- | --- |
 | Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
-| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate. Q2l classifies the 90 no15 singleton components as a structured special-node-set candidate, and Q2m shows those singleton nodes share a distinct node-major `packed4_1` profile absent from the 810-node large component. Q2n correlates those structural masks with original visual resources, but the transform result remains ambiguous. Q2o drills into the 30 node-major `packed4_1` slots and finds the complete singleton profile is exclusive while individual slot values are not. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, node/world transform, collision/path/spawn editing, and broader map safety remain unproven. |
+| Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate. Q2l classifies the 90 no15 singleton components as a structured special-node-set candidate, and Q2m shows those singleton nodes share a distinct node-major `packed4_1` profile absent from the 810-node large component. Q2n correlates those structural masks with original visual resources, but the transform result remains ambiguous. Q2o drills into the 30 node-major `packed4_1` slots and finds the complete singleton profile is exclusive while individual slot values are not. Q2p classifies exact `packed4_1` profile families, keeps Hamming clusters diagnostic-only, and finds asymmetric exact-family masks for a later read-only visual-correlation pass. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, node/world transform, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
 ## Minimal Mod Package
@@ -85,8 +85,9 @@ The first no-extension staging attempt on 2026-06-25 failed before gameplay vali
 | 2026-06-28 | Q2m `packed4_1` node-major profile analysis | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2m_packed4_1_node_profiles\`: profile catalog JSON size `510,584`, SHA-256 `f38e9946012918cc1e86ca7b0aeed10a696fa43628f05c451d31157480ca49fe`; spatial patterns JSON size `45,774`, SHA-256 `a6141fd338381e50fd195a8f7e1ced938548d77a3e8d35e96342f0036eb39a3a`; component correlation JSON size `379,599`, SHA-256 `4b3babdc65c35c49ae94382e247e94ce3dc443e3738b9f1cd1e86131fb0b3284`; bridge correlation JSON size `904,423`, SHA-256 `bfb01cf453f51152dcac8d39efe6cd7c70b5096c66c621e70789f48b08078201`; tracked nodes JSON size `11,151`, SHA-256 `5dfe141bfe776d39d081da80b5a37364ec358cd30e8c8e858485a30b7f8e013c`; interpretation JSON size `2,934`, SHA-256 `c55b685a83e40ed3c886187c90ba357d71e8a15549f42f390f83c92a3f3a457d`. | Q2m static analysis only. Under the `900x30 node-major` hypothesis, `packed4_1` has `507` unique profiles. All 90 no15 singleton nodes share `profile_0001`, the alternating `[8, 0]` profile, and that profile is absent from the 810-node large component. The singleton profile has varied code15 bridge degrees (`90` to `400`), so it is a `node_class_descriptor_candidate`, not a bridge-strength proof. Runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
 | 2026-06-28 | Q2n map_setting structural mask visual correlation | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2n_map_setting_mask_visual_correlation\`: structural manifest JSON size `1,664`, SHA-256 `5b71711e6067348e75c124c6a0ce71c73e10b9f8e9c8253cfa8a71e6624a2b4f`; profile mask PNG size `2,266`, SHA-256 `4d5d9bdb3e9c40391b7eded01c5ad15a21b8c7d28881ebddcd871f334c331ad3`; large component mask PNG size `2,266`, SHA-256 `6a1b2554ba97288895714979d31639ea74692093629a5f1be17e7fc6313c3298`; bridge heatmap PNG size `3,601`, SHA-256 `2e9e823f4edce22e3516fe0ff32b31b524435135939b6443fdcc736c4ed7ca4d`; visual resource manifest JSON size `2,817`, SHA-256 `e84f1d119d7242c8ac45c7be67c7eb262ce6fb6aab35160f76230992f3591794`; transform summary JSON size `5,520`, SHA-256 `c0583fdaf068e7e0dbc2cd09ff29501f352a5ee907e5ad36112f9680b02a6c3d`; interpretation JSON size `1,561`, SHA-256 `986daf69a616ec33c6d561c055e4e28c52a89114026ad0e8cbdfd5662e922247`; plus 24 repository-external overlay PNGs. | Q2n static visual correlation only. Structural masks were compared with original `background_5v5`, `minimap_5v5_bg`, `wall_5v5`, `wall_5v5_front`, and `bush_5v5` resources across 8 transforms. The top transform was `transpose` with score `0.681203`, but `identity` scored `0.681138`; margin `0.000065`, so `visual_correlation_result` is `ambiguous` and `node_world_transform` remains `unproven`. Runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
 | 2026-06-29 | Q2o `packed4_1` slot-plane analysis | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2o_packed4_1_slot_planes\`: slot histograms JSON size `153,541`, SHA-256 `ddbfb1c71890f57117f5963a20e4fee13af57327fd86e59fcc800b17789c44fc`; spatial patterns JSON size `927,705`, SHA-256 `ba81eff1785209fc592340e69c2e9e3b787f645d6c54808547b7424039dbd8f6`; component correlation JSON size `232,454`, SHA-256 `08d9750cf9945231b70be23b228ca1eb853670b8758ad2ed72dc41feb37583a9`; pair correlation JSON size `29,374`, SHA-256 `080c38ad463f28c3f5f1ec0eb6f7e7933e97f69c36cd54af5db7e6d0dd9c923d`; profile signature JSON size `8,975`, SHA-256 `dcf3c76ddbd9908a6f1cbb9e6f3903e2f347e82531626eb31e7cf8fbdd0b57a0`; tracked nodes JSON size `10,422`, SHA-256 `b5b2926a77c7f356ba8cc59b85a9112000e27de6bf04b2e3e53d082e79e45a1f`; interpretation JSON size `2,109`, SHA-256 `a68459b16c751856ba639f9130b4659002f65a4a985cb08f81f5ba6b8fc44040`; plus 208 repository-external slot/value mask PNGs and one contact sheet. | Q2o static analysis only. The full singleton `packed4_1[node * 30 : node * 30 + 30]` profile remains exclusive to all 90 no15 singleton nodes and follows the alternating `[8, 0]` signature, but individual slot/value pairs are not singleton-exclusive (`singleton_only_slot_value_count: 0`). `packed4_1_slot_role` is `slot_level_node_class_descriptor_candidate`; runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
+| 2026-06-29 | Q2p `packed4_1` profile-family analysis | Evidence stored outside the repository at `D:\tfm2_q2a_evidence\q2p_packed4_1_profile_families\`: profile family catalog JSON size `2,254,100`, SHA-256 `ffb0c6a3d2a1b24d5ffd73fc61c116fa1f41b448daf197d611d2bdfef76509a0`; Hamming clusters JSON size `33,718`, SHA-256 `5ca8360edce6cc001f32d9ddf1604a28d11b715f48fc6a358a00da515d9125ab`; spatial patterns JSON size `706,370`, SHA-256 `4b7c1c48459b1eee756f21760fc23343f0ff1214ea20d72a10984d03cdfb6a0c`; component correlation JSON size `417,308`, SHA-256 `e8e564df6765178be81bbb0d97adfdad2c55dc0f8c86a98d538d3ff082be9627`; anchor candidates JSON size `44,550`, SHA-256 `0c64a66751e9c07f7074e814c7c7608e64366aca454a89418dde85575baea7fc`; tracked nodes JSON size `16,642`, SHA-256 `6a938414a1a6341d22bc92ebe9497af8dadc7f43b5326f5c0389da951af12002`; interpretation JSON size `1,901`, SHA-256 `127b19d1ecbe530500ed43129f88d143c32771e199d3e2386e94e4373301e176`; plus 40 repository-external family mask PNGs and one contact sheet SHA-256 `95d7a902faa4dfe120802643a05d335c33f53e62af86d03285ae9bcf7d43cd82`. | Q2p static analysis only. Exact node-major profile families remain the primary interpretation surface: `507` exact families, with `family_0001` containing all 90 no15 singleton nodes and the alternating `[8, 0]` profile. Hamming threshold `2` yields `73` diagnostic clusters and `1,337` Hamming-neighbor edges, but clusters do not override exact-family conclusions. The tool found `134` asymmetric exact-family masks that may be useful only for a later read-only visual-correlation pass. Runtime mutation, packed4 mutation, third chunked runtime probe, and broader map edits remain disallowed. |
 
-This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. Q2h then shows those probes did not produce semantic signal and recommends static decoding before any third runtime probe. Q2i narrows `packed4_0` toward direction-like codes `0-7`; Q2j keeps code `15` unresolved after deeper context analysis; Q2k classifies code15 as a static cross-component bridge candidate; Q2l classifies the singleton components as a structured special-node-set candidate; Q2m classifies the singleton-only node-major `packed4_1` profile as a static node-class descriptor candidate; Q2n shows current structural masks do not produce a unique visual transform against original resources; Q2o shows that the complete singleton profile is more informative than any individual slot/value. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
+This proves the background visual asset can be overridden through `mod.override_info`, that the loader registers and reads a byte-equivalent `map_setting` override when staged with the `.map_setting` file extension, that the currently observed structural framing can round-trip byte-identically without edits, and that two risk-accepted two-byte `chunked_binary` mutations can run through live 5v5 observation. Q2h then shows those probes did not produce semantic signal and recommends static decoding before any third runtime probe. Q2i narrows `packed4_0` toward direction-like codes `0-7`; Q2j keeps code `15` unresolved after deeper context analysis; Q2k classifies code15 as a static cross-component bridge candidate; Q2l classifies the singleton components as a structured special-node-set candidate; Q2m classifies the singleton-only node-major `packed4_1` profile as a static node-class descriptor candidate; Q2n shows current structural masks do not produce a unique visual transform against original resources; Q2o shows that the complete singleton profile is more informative than any individual slot/value; Q2p separates exact profile families from diagnostic Hamming clusters and finds asymmetric family masks for later read-only visual correlation. It does not prove collision, lane pathing, spawn points, brush gameplay regions, objective placement, world/grid transform, or broader `map_setting` mutation safety.
 
 ## Resource Audit
 
@@ -105,7 +106,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Jungle monster sprites | `asset/base/aseprite_resources/ingame/rhino#sheet`, `epic#sheet`, `serpen#sheet`, matching `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; camp placement is separate. |
 | Minion visual sprites | `asset/base/aseprite_resources/UI_aseprite/minion#sheet`, `#anim` | PNG sheet plus animation data | Reference mods prove visual actor remaps work; lane paths are separate. |
 | Minimap resource | `asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg` | PNG, native `320x320` in prior probe | HUD minimap background can be tested after map background. |
-| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Q2e/Q2f loaded and observed `369-370`, and Q2g loaded and observed `59-837`; neither produced semantic signal. Q2h identifies Q2g endpoint `837` as the only universal-like row/column and recommends static decoding before a third runtime probe. Q2i shows `packed4_0` codes `0-7` are direction-like. Q2j shows code `15` is not a clean blocked sentinel and is not recoverable through current no-15 graphs. Q2k shows all connected non-self code15 edges cross no15 components. Q2l shows the 90 singleton components are an interior band-like special set with symmetric code15 bridges. Q2m shows those singleton nodes share one node-major `packed4_1` profile absent from the large component, making `packed4_1_node_major_role` a static `node_class_descriptor_candidate`. Q2n compares current structural masks against original visual resources, but the transform score margin is only `0.000065`, so visual correlation remains ambiguous. Q2o shows the full 30-slot singleton profile is exclusive, while individual slot/value pairs are not singleton-exclusive. This is not gameplay semantic proof and does not approve packed4/path/collision/spawn/placement edits. |
+| MapSetting data | `asset/base/setting/map_setting` | Binary, local size `1451980` bytes, SHA-256 `6fee0c2b22905b5387976529d218f407efc5ca4ef9edb63d3f520a78eb8e9ca0` | Equivalent remap registration, positive local-file read, and byte-identical structural round trip succeed when the installed file is staged as `setting/map_setting.map_setting`. Read-only layer characterization selected one symmetric `chunked_binary` edge candidate at serialized byte offsets `427536` and `427573`; Q2c-1 shows it does not violate a transitive-closure invariant or the current packed4 sentinel heuristic. Q2d still found no sufficient offline runtime anchor, and `packed4_0` path-graph transform scoring remains ambiguous. Q2e/Q2f loaded and observed `369-370`, and Q2g loaded and observed `59-837`; neither produced semantic signal. Q2h identifies Q2g endpoint `837` as the only universal-like row/column and recommends static decoding before a third runtime probe. Q2i shows `packed4_0` codes `0-7` are direction-like. Q2j shows code `15` is not a clean blocked sentinel and is not recoverable through current no-15 graphs. Q2k shows all connected non-self code15 edges cross no15 components. Q2l shows the 90 singleton components are an interior band-like special set with symmetric code15 bridges. Q2m shows those singleton nodes share one node-major `packed4_1` profile absent from the large component, making `packed4_1_node_major_role` a static `node_class_descriptor_candidate`. Q2n compares current structural masks against original visual resources, but the transform score margin is only `0.000065`, so visual correlation remains ambiguous. Q2o shows the full 30-slot singleton profile is exclusive, while individual slot/value pairs are not singleton-exclusive. Q2p keeps exact `packed4_1` profile families as the primary interpretation surface, records Hamming clusters as diagnostic-only, and finds asymmetric exact-family masks for a later read-only visual correlation pass. This is not gameplay semantic proof and does not approve packed4/path/collision/spawn/placement edits. |
 | World bounds | likely `map_setting.visible_view` plus binary map tables | Unknown / binary candidate | Not found in checked public SDK/source surfaces; full runtime meaning is not proven. |
 | Walls / collision data | likely `asset/base/setting/map_setting` binary tables | Binary grid/table | Not proven replaceable. |
 | Walkable area | likely `asset/base/setting/map_setting.path` or adjacent binary path tables | Unknown / binary candidate | `path` was not found in checked public SDK/source surfaces; safe replacement workflow is not proven. |
@@ -138,7 +139,14 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 19. Done: stage and run the Q2g second-candidate A1/B/A2 runtime proof with B-stage positive file-read evidence and A2 rollback to the original SHA-256.
 20. Done: synthesize Q2e/Q2f and Q2g probe targets by row/column class and identify Q2g node `837` as the only universal-like row/column.
 21. Done: refine `packed4_0` next-hop interpretation read-only. Codes `0-7` are direction-like; code `15` remains unresolved and overall interpretation is ambiguous.
-22. Next: continue static decoding before any third runtime probe. Do not broaden mutations from Q2g or mutate packed4.
+22. Done: analyze `packed4_0` code15 contexts. Code `15` is not a clean blocked sentinel and remains ambiguous.
+23. Done: analyze code15/no15 component graph structure. Code15 is a static cross-component bridge candidate.
+24. Done: classify the 90 no15 singleton components as a structured special-node set candidate.
+25. Done: classify node-major `packed4_1` profiles. The singleton profile is a static node-class descriptor candidate.
+26. Done: correlate current structural masks with original visual resources. The result remains ambiguous and does not prove node/world transform.
+27. Done: analyze the 30 node-major `packed4_1` slot planes. The complete profile is informative, but no individual slot/value isolates the singleton set.
+28. Done: classify exact `packed4_1` profile families and separate diagnostic Hamming clusters. Asymmetric exact-family masks are available only for a later read-only visual-correlation pass.
+29. Next: continue static decoding before any third runtime probe. Do not broaden mutations from Q2g, mutate packed4, or start map editing.
 
 ## Q2a Equivalent Remap Gate
 
@@ -1083,6 +1091,92 @@ next_recommended_step: continue_static_decoding
 ```
 
 This strengthens the static hypothesis that the full node-major `packed4_1` profile encodes or describes membership in the no15 singleton node class. It does not prove that any individual slot is an editable class bit, does not prove gameplay semantics, does not prove node/world transform, and does not approve mutation of `packed4_1`, `packed4_0`, `chunked_binary`, regions, collision, pathing, spawns, or visual sync.
+
+## Q2p Packed4_1 Profile Family Analysis Gate
+
+Question:
+
+```text
+Can exact packed4_1 node-major profile families provide sharper static masks than slot/value planes?
+```
+
+Result on 2026-06-29: profile-level node-class descriptor candidate, static only. `docs/q2p_packed4_1_profile_family_analysis.md` records the read-only analysis.
+
+The analysis output is repository-external:
+
+```text
+D:\tfm2_q2a_evidence\q2p_packed4_1_profile_families\
+```
+
+Q2p separates two concepts:
+
+```text
+exact profile family:
+  nodes with the exact same packed4_1[node * 30 : node * 30 + 30] profile
+
+Hamming cluster:
+  diagnostic connected components between exact profiles with Hamming distance <= 2
+```
+
+Exact profile families remain the primary interpretation surface. Hamming clusters are diagnostic only and do not override exact-family conclusions.
+
+Core evidence:
+
+```text
+unique_profile_count: 507
+exact_family_count: 507
+top_family: family_0001
+top_family_node_count: 90
+top_family_dominant_role: singleton_component
+hamming_threshold: 2
+hamming_cluster_count: 73
+hamming_edge_count: 1,337
+asymmetric_anchor_candidates_found: true
+anchor_candidate_count: 134
+```
+
+`family_0001` is the same complete singleton profile isolated in Q2m/Q2o:
+
+```text
+[8, 0, 8, 0, 8, 0, 8, 0, 8, 0,
+ 8, 0, 8, 0, 8, 0, 8, 0, 8, 0,
+ 8, 0, 8, 0, 8, 0, 8, 0, 8, 0]
+```
+
+Q2p also found small asymmetric exact-profile families that may be useful for a later read-only visual-correlation pass:
+
+```text
+family_0120: 2 nodes, large_component, asymmetry 1.0, avg code15 endpoint degree 160.0
+family_0112: 2 nodes, large_component, asymmetry 1.0, avg code15 endpoint degree 75.0
+family_0023: 5 nodes, large_component, asymmetry 1.0, avg code15 endpoint degree 66.4
+family_0042: 4 nodes, large_component, asymmetry 1.0, avg code15 endpoint degree 57.0
+family_0049: 3 nodes, large_component, asymmetry 1.0, avg code15 endpoint degree 52.666666666666664
+```
+
+These are not runtime anchors and are not approved mutation targets. They are candidate masks for future read-only visual correlation only.
+
+Tracked-node context:
+
+```text
+node 369: profile_0001, family_0001, singleton_component, Q2e/Q2f endpoint
+node 370: profile_0287, family_0287, large_component, Q2e/Q2f endpoint
+node 59: profile_0156, family_0156, large_component, sparse, Q2g endpoint
+node 837: profile_0002, family_0002, large_component, universal_like row/column, Q2g endpoint
+```
+
+Conclusion:
+
+```text
+packed4_1_profile_family_role: profile_level_node_class_descriptor_candidate
+asymmetric_anchor_candidates_found: true
+runtime_mutation_allowed: false
+packed4_mutation_allowed: false
+third_chunked_binary_runtime_probe_allowed: false
+map_editing_allowed: false
+next_recommended_step: continue_static_decoding
+```
+
+This strengthens the static hypothesis that exact node-major `packed4_1` profiles describe node classes and gives sharper asymmetric masks for a later read-only transform/correlation attempt. It does not prove gameplay semantics, does not prove node/world transform, does not approve a third runtime probe, and does not approve mutation of `packed4_1`, `packed4_0`, `chunked_binary`, regions, collision, pathing, spawns, or visual sync.
 
 ## Stop Conditions
 

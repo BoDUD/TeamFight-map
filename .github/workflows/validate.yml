@@ -69,3 +69,4 @@ jobs:
           python -m py_compile tools/analyze_no15_singleton_components.py
           python -m py_compile tools/analyze_packed4_1_node_profiles.py
           python -m py_compile tools/correlate_map_setting_masks_with_visuals.py
+          python -m py_compile tools/analyze_packed4_1_slot_planes.py

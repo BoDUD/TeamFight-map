@@ -16,6 +16,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/map_setting_transform_validation.md` records the Q2c-1 read-only semantic checks and pending `30x30` transform validation.
 - `docs/runtime_node_anchor_probe_plan.md` records why background UV captures do not prove `map_setting` node/world transform and defines the next read-only gate.
 - `docs/runtime_node_anchor_api_discovery.md` records the PR #8 SDK/API audit and independent read-only DLL probe guardrails.
+- `docs/q2s_map_setting_route_decision.md` records the Q2 route decision: gameplay `map_setting` editing is blocked pending runtime anchor and semantic proof; the next route should be either visual-only deliverable or a separate runtime-anchor spike.
 
 ## Build And Validate
 
@@ -98,6 +99,13 @@ python .\tools\install_runtime_anchor_probe.py `
   --enable-exclusive
 ```
 
+To reproduce the Q2S route-decision status matrix:
+
+```powershell
+python .\tools\summarize_spike_status.py `
+  --output "D:\tfm2_q2a_evidence\q2s_map_setting_route_decision\q2s_status_matrix.json"
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -112,7 +120,26 @@ It does not include runtime DLL hooks, game map data replacement, collision mask
 
 The image-gen PNG is concept art only. Runtime map assets should be exported as layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
-Do not start formal map texture, collision mask, or exporter work yet. Q2a proves the loader can read a byte-equivalent local `map_setting` override, Q2b proves a structural decode/re-encode can be byte-identical, Q2c has characterized a read-only symmetric edge candidate, and Q2c-1 shows that the candidate still needs independent runtime node/world anchoring because direction-code and offline transform results are ambiguous. PR #8 checked the public SDK/source surface and found no sufficient node/world anchor API, so candidate `369-370` remains blocked. Safe modification still requires a separate tiny reversible data mutation with A/B/A runtime proof after anchoring is solved. The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; the equivalent remap is staged only in the installed local game copy.
+Do not start formal gameplay map texture, collision mask, pathing, spawn, brush gameplay, objective-placement, or exporter work yet. The Q2 `map_setting` spike has proved visual override, loader takeover, byte-identical structural round trip, and bounded two-byte loader probes, but it has not proved `chunked_binary`, `packed4_0`, or `packed4_1` gameplay semantics, and it has not proved node/world transform.
+
+Current route decision:
+
+```text
+q2_map_setting_route_status: blocked_pending_runtime_anchor
+node_world_transform: unproven
+semantic_safety: not_proven
+runtime_mutation_allowed: false
+packed4_mutation_allowed: false
+third_chunked_binary_runtime_probe_allowed: false
+map_editing_allowed: false
+```
+
+The next route should be chosen explicitly:
+
+- Route A: build a visual-only LOL-like map skin / concept mod using proven visual asset override paths. This must not include `map_setting`, collision, pathing, spawns, brush gameplay, objectives, or AI-route edits.
+- Route B: run a separate runtime-anchor / instrumentation spike to prove node/world transform and field semantics before any further gameplay mutation.
+
+The repository package must continue to keep `asset/base/setting/map_setting` out of `mods/tfm2_lol_map_spike/mod.override_info`; equivalent or mutated remaps are staged only in installed local game copies for explicitly reviewed probes.
 
 ## Scope
 

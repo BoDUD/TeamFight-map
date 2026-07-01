@@ -4,7 +4,6 @@ import argparse
 import binascii
 import math
 import struct
-import zlib
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -32,6 +31,30 @@ def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
     return struct.pack(">I", len(payload)) + chunk_type + payload + struct.pack(">I", checksum)
 
 
+def adler32(data: bytes) -> int:
+    modulus = 65521
+    a = 1
+    b = 0
+    for offset in range(0, len(data), 5552):
+        chunk = data[offset : offset + 5552]
+        for value in chunk:
+            a = (a + value) % modulus
+            b = (b + a) % modulus
+    return (b << 16) | a
+
+
+def zlib_stored_stream(data: bytes) -> bytes:
+    parts = [b"\x78\x01"]
+    for offset in range(0, len(data), 65535):
+        block = data[offset : offset + 65535]
+        final = offset + 65535 >= len(data)
+        parts.append(bytes([1 if final else 0]))
+        parts.append(struct.pack("<HH", len(block), 0xFFFF - len(block)))
+        parts.append(block)
+    parts.append(struct.pack(">I", adler32(data)))
+    return b"".join(parts)
+
+
 def png_bytes(image: Image.Image) -> bytes:
     rgba = image.convert("RGBA")
     width, height = rgba.size
@@ -43,7 +66,7 @@ def png_bytes(image: Image.Image) -> bytes:
         [
             b"\x89PNG\r\n\x1a\n",
             png_chunk(b"IHDR", header),
-            png_chunk(b"IDAT", zlib.compress(raw, level=9)),
+            png_chunk(b"IDAT", zlib_stored_stream(raw)),
             png_chunk(b"IEND", b""),
         ]
     )

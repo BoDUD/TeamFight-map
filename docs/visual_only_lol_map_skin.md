@@ -22,7 +22,7 @@ The skin is generated deterministically at native size:
 ```text
 background_5v5.png
 size: 1280x1280
-sha256: 592925d953a09b262a20ded1c4abcbfde0450a5b27525cb178ec52c793f787dc
+sha256: 53524fcd452ffe606a166e6bf6108c81f56069d9f190597a26f941ea1a3fa21a
 ```
 
 ## Design Intent

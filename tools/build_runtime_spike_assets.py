@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import binascii
 import math
+import struct
+import zlib
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -23,9 +26,30 @@ def npoint(x: float, y: float, size: int) -> tuple[int, int]:
     return int(round(x / 100 * size)), int(round(y / 100 * size))
 
 
-def add_layer(base: Image.Image, layer: Image.Image, blur: float = 0.0) -> None:
-    if blur:
-        layer = layer.filter(ImageFilter.GaussianBlur(blur))
+def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
+    checksum = binascii.crc32(chunk_type)
+    checksum = binascii.crc32(payload, checksum) & 0xFFFFFFFF
+    return struct.pack(">I", len(payload)) + chunk_type + payload + struct.pack(">I", checksum)
+
+
+def png_bytes(image: Image.Image) -> bytes:
+    rgba = image.convert("RGBA")
+    width, height = rgba.size
+    raw_pixels = rgba.tobytes()
+    stride = width * 4
+    raw = b"".join(b"\x00" + raw_pixels[y * stride : (y + 1) * stride] for y in range(height))
+    header = struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0)
+    return b"".join(
+        [
+            b"\x89PNG\r\n\x1a\n",
+            png_chunk(b"IHDR", header),
+            png_chunk(b"IDAT", zlib.compress(raw, level=9)),
+            png_chunk(b"IEND", b""),
+        ]
+    )
+
+
+def add_layer(base: Image.Image, layer: Image.Image) -> None:
     base.alpha_composite(layer)
 
 
@@ -94,7 +118,7 @@ def draw_lanes(image: Image.Image, size: int) -> None:
         draw_polyline(lane_layer, lane, size, 112, lane_outer)
         draw_polyline(lane_layer, lane, size, 76, lane_inner)
         draw_polyline(lane_layer, lane, size, 18, lane_highlight)
-    add_layer(image, lane_layer, 1.6)
+    add_layer(image, lane_layer)
 
 
 def draw_river(image: Image.Image, size: int) -> None:
@@ -115,7 +139,7 @@ def draw_river(image: Image.Image, size: int) -> None:
     for center in ((37, 37), (63, 63)):
         cx, cy = npoint(center[0], center[1], size)
         draw.ellipse((cx - 86, cy - 52, cx + 86, cy + 52), fill=(25, 131, 144, 68))
-    add_layer(image, river, 1.2)
+    add_layer(image, river)
 
 
 def draw_jungle_and_objectives(image: Image.Image, size: int) -> None:
@@ -136,7 +160,7 @@ def draw_jungle_and_objectives(image: Image.Image, size: int) -> None:
     for center, tint in [((28, 28), (149, 120, 82, 118)), ((72, 72), (112, 92, 146, 105))]:
         draw_ring(layer, center, size, 92, tint, 9)
         draw_ring(layer, center, size, 56, (219, 202, 146, 48), 4)
-    add_layer(image, layer, 1.8)
+    add_layer(image, layer)
 
 
 def draw_bases_and_frame(image: Image.Image, size: int) -> None:
@@ -149,7 +173,7 @@ def draw_bases_and_frame(image: Image.Image, size: int) -> None:
             draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=fill)
     draw.rectangle((18, 18, size - 19, size - 19), outline=(215, 195, 132, 52), width=5)
     draw.rectangle((34, 34, size - 35, size - 35), outline=(17, 48, 45, 82), width=7)
-    add_layer(image, layer, 2.0)
+    add_layer(image, layer)
 
 
 def draw_subtle_tilework(image: Image.Image, size: int) -> None:
@@ -161,7 +185,7 @@ def draw_subtle_tilework(image: Image.Image, size: int) -> None:
         pos = index * step
         draw.line((pos, 0, pos, size), fill=(227, 215, 155, alpha), width=1)
         draw.line((0, pos, size, pos), fill=(4, 25, 25, alpha), width=1)
-    add_layer(image, layer, 0.0)
+    add_layer(image, layer)
 
 
 def build_lol_like_background(size: int = 1280) -> Image.Image:
@@ -183,7 +207,7 @@ def main() -> int:
     if args.size <= 0:
         raise SystemExit("--size must be positive.")
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    build_lol_like_background(args.size).save(args.output)
+    args.output.write_bytes(png_bytes(build_lol_like_background(args.size)))
     print(f"Wrote {args.output}")
     return 0
 

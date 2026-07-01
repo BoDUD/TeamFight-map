@@ -8,7 +8,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 
 | Question | Current answer | Evidence |
 | --- | --- | --- |
-| Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
+| Can map visuals be replaced by asset override? | Yes for `background_5v5`; static visual map-layer overrides are viable. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. PR #28 replaces the diagnostic solid color with a generated visual-only LOL-like background skin while keeping the active override background-only. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
 | Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate. Q2l classifies the 90 no15 singleton components as a structured special-node-set candidate, and Q2m shows those singleton nodes share a distinct node-major `packed4_1` profile absent from the 810-node large component. Q2n correlates those structural masks with original visual resources, but the transform result remains ambiguous. Q2o drills into the 30 node-major `packed4_1` slots and finds the complete singleton profile is exclusive while individual slot values are not. Q2p classifies exact `packed4_1` profile families, keeps Hamming clusters diagnostic-only, and finds asymmetric exact-family masks for a later read-only visual-correlation pass. Q2q scores those asymmetric exact-family masks against original visuals, but aggregate and resource-subset results remain ambiguous. Q2r inventories unclassified/residual `map_setting` sections and finds the known three structural layers consume the full baseline file, leaving no residual anchor candidates. Q2s closes the current spike route: gameplay `map_setting` editing remains blocked pending runtime anchor and semantic proof; the next route must be either visual-only deliverable or a separate runtime-anchor spike. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, node/world transform, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
@@ -35,7 +35,7 @@ The override table follows the installed Workshop schema:
 }
 ```
 
-The PNG is a generated solid-color diagnostic asset. It is not image-gen map art and is not intended to ship as a map texture.
+The PNG is now an image-gen sourced visual-only LOL-like background skin normalized by the build script. It is not a gameplay map edit and not proof of collision/path/spawn editing.
 
 Install the spike into the local game folder with:
 
@@ -98,7 +98,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 
 | Runtime area | Candidate path or field | Format | Current status |
 | --- | --- | --- | --- |
-| Map background / ground texture | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | PNG, native `1280x1280` | Verified in match through `tfm2_lol_map_spike`; diagnostic probe visible and native simulation behavior stable. |
+| Map background / ground texture | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | PNG, native `1280x1280` | Override route verified in match through `tfm2_lol_map_spike`; PR #28 replaces the earlier diagnostic probe with a generated visual-only LOL-like skin. Runtime QA for the new skin is a follow-up PR. |
 | Primary wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5` | PNG, native `1280x1280` | Override route verified by references; not included in this minimal spike package. |
 | Foreground wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` | PNG, native `1280x1280` | Candidate visual layer; test separately after background. |
 | Wall shadow visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_shadow_5v5` | PNG, native `1280x1280` | Candidate visual layer; not pathing. |
@@ -123,7 +123,7 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 
 1. Done: load this mod package without any DLL or `map_setting` override.
 2. Done: confirm the game recognizes `mod.mod_info`.
-3. Done: enter a 5v5 match and confirm the solid-color `background_5v5` probe is visible.
+3. Done: enter a 5v5 match and confirm the `background_5v5` override route is visible.
 4. Done: confirm units, minions, towers, jungle camps, and AI routes remain native and stable.
 5. Done: create a separate local-only `map_setting` equivalent remap with an unmodified copied asset.
 6. Done: capture positive `TeamfightManager2.exe` `CreateFile` / `ReadFile SUCCESS` evidence for `mods\tfm2_lol_map_spike\setting\map_setting.map_setting`.
@@ -152,7 +152,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 29. Done: correlate Q2P asymmetric exact-family masks against original visuals. Aggregate and resource-subset transform results remain ambiguous.
 30. Done: inventory unclassified/residual `map_setting` sections after the known three structural layers. No residual spans or direct anchor candidates were found.
 31. Done: synthesize Q2 map_setting spike results and record route decision: gameplay map editing is blocked pending runtime anchor and semantic proof.
-32. Next: choose Route A visual-only deliverable or Route B runtime-anchor/instrumentation spike. Do not broaden mutations from Q2g, mutate packed4, or start map editing.
+32. Done: choose Route A and add a background-only visual LOL-like skin package without enabling minimap or gameplay data overrides.
+33. Next: run visual-only runtime QA for the new background skin. Do not broaden mutations from Q2g, mutate packed4, or start gameplay map editing.
 
 ## Q2a Equivalent Remap Gate
 
@@ -1365,6 +1366,57 @@ The next PR should choose either Route A visual-only deliverable or Route B runt
 ```
 
 This is a route-decision gate only. It does not generate any runtime asset, does not approve a third runtime probe, and does not approve mutation of `packed4_1`, `packed4_0`, `chunked_binary`, regions, collision, pathing, spawns, or visual sync.
+
+## Route A Visual-Only Background Skin Gate
+
+Question:
+
+```text
+Can Route A produce a user-visible package without touching gameplay data?
+```
+
+Result: package prepared, runtime QA pending. `docs/visual_only_lol_map_skin.md` records the visual-only scope.
+
+Active override remains exactly:
+
+```text
+asset/base/aseprite_resources/ingame/5v5/background_5v5
+```
+
+The image-gen source and generated runtime background skin are:
+
+```text
+assets/visual/lol_skin/background_5v5_imagegen_source.png
+size: 1254x1254
+sha256: 4b832c0d58a58256248bdf4700727dcc540343f1d9504e44cf3d9bff094b6ac1
+```
+
+```text
+mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5.png
+size: 1280x1280
+sha256: dfcc59e1be45d21d33954e6e5fa2ed8b71ea9b0311e3b6ca1251890cb3f20fc9
+```
+
+Still not enabled:
+
+```text
+minimap_5v5_bg
+map_setting
+collision/path/spawn
+brush gameplay
+objective placement
+AI route edits
+```
+
+Conclusion:
+
+```text
+Route A background-only visual skin package: prepared
+runtime QA: pending separate PR
+gameplay map editing: still not allowed
+```
+
+This gate prepares a cosmetic package only. It does not prove gameplay semantics, does not approve minimap override, does not approve a third runtime probe, and does not approve mutation of `map_setting`, regions, collision, pathing, spawns, or visual sync.
 
 ## Stop Conditions
 

@@ -72,3 +72,4 @@ jobs:
           python -m py_compile tools/analyze_packed4_1_slot_planes.py
           python -m py_compile tools/analyze_packed4_1_profile_families.py
           python -m py_compile tools/correlate_profile_family_masks_with_visuals.py
+          python -m py_compile tools/analyze_map_setting_unclassified_sections.py

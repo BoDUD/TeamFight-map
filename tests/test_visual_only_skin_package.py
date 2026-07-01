@@ -13,11 +13,19 @@ from tools import summarize_spike_status
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MOD_ROOT = REPO_ROOT / "mods" / "tfm2_lol_map_spike"
+IMAGEGEN_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "background_5v5_imagegen_source.png"
 BACKGROUND = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
 OVERRIDE_INFO = MOD_ROOT / "mod.override_info"
 
 
 class VisualOnlySkinPackageTests(unittest.TestCase):
+    def test_imagegen_source_asset_exists(self) -> None:
+        self.assertEqual(IMAGEGEN_SOURCE, build_runtime_spike_assets.DEFAULT_SOURCE)
+        self.assertTrue(IMAGEGEN_SOURCE.is_file())
+        with Image.open(IMAGEGEN_SOURCE) as image:
+            self.assertEqual((1254, 1254), image.size)
+            self.assertEqual("RGB", image.mode)
+
     def test_background_skin_exists_and_is_native_size(self) -> None:
         self.assertTrue(BACKGROUND.is_file())
         with Image.open(BACKGROUND) as image:

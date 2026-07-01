@@ -12,7 +12,7 @@ The package remaps exactly one runtime asset:
 | --- | --- |
 | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | `asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5` |
 
-The skin image is a deterministic generated PNG sized to the native `1280x1280` background. It visually suggests a LOL-like three-lane, river, and jungle layout while preserving the native Teamfight Manager 2 gameplay data.
+The skin image is normalized from a project-local image-gen bitmap source into the native `1280x1280` background. It visually suggests a LOL-like terrain language while preserving the native Teamfight Manager 2 gameplay data.
 
 `minimap_5v5_bg` is not remapped in this package. It needs a separate visual-only QA pass before default enablement.
 

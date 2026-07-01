@@ -119,7 +119,7 @@ This is not yet a playable Teamfight Manager 2 gameplay map mod. The repository 
 
 It does not include runtime DLL hooks, game map data replacement, collision masks, walkable masks, brush gameplay masks, minimap export, spawn data, or an in-game navigation graph.
 
-The image-gen PNG is concept art only. The runtime background skin is deterministic generated art and remains cosmetic. Gameplay map assets would still need proven layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
+Earlier image-gen PNGs under `docs/concept/` remain concept art only. The active runtime background skin now uses a project-local image-gen source that is normalized by `tools/build_runtime_spike_assets.py` into a deterministic cosmetic `background_5v5` override. Gameplay map assets would still need proven layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
 Do not start formal gameplay map texture, collision mask, pathing, spawn, brush gameplay, objective-placement, or exporter work yet. The Q2 `map_setting` spike has proved visual override, loader takeover, byte-identical structural round trip, and bounded two-byte loader probes, but it has not proved `chunked_binary`, `packed4_0`, or `packed4_1` gameplay semantics, and it has not proved node/world transform.
 

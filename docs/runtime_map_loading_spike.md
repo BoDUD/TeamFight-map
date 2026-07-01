@@ -35,7 +35,7 @@ The override table follows the installed Workshop schema:
 }
 ```
 
-The PNG is now a generated visual-only LOL-like background skin. It is not image-gen map art, not a gameplay map edit, and not proof of collision/path/spawn editing.
+The PNG is now an image-gen sourced visual-only LOL-like background skin normalized by the build script. It is not a gameplay map edit and not proof of collision/path/spawn editing.
 
 Install the spike into the local game folder with:
 
@@ -1383,12 +1383,18 @@ Active override remains exactly:
 asset/base/aseprite_resources/ingame/5v5/background_5v5
 ```
 
-The generated background skin is:
+The image-gen source and generated runtime background skin are:
+
+```text
+assets/visual/lol_skin/background_5v5_imagegen_source.png
+size: 1254x1254
+sha256: 4b832c0d58a58256248bdf4700727dcc540343f1d9504e44cf3d9bff094b6ac1
+```
 
 ```text
 mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5.png
 size: 1280x1280
-sha256: 2ab96c7e2911c9b2f605aa5ab69b39ba84d8f6b3b1c51bf030dabd2a2f0986c6
+sha256: dfcc59e1be45d21d33954e6e5fa2ed8b71ea9b0311e3b6ca1251890cb3f20fc9
 ```
 
 Still not enabled:

@@ -7,6 +7,7 @@ This package is a non-gameplay cosmetic map skin for Teamfight Manager 2. It use
 This PR updates only:
 
 ```text
+assets/visual/lol_skin/background_5v5_imagegen_source.png
 mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5.png
 tools/build_runtime_spike_assets.py
 ```
@@ -17,12 +18,20 @@ Active runtime override:
 asset/base/aseprite_resources/ingame/5v5/background_5v5
 ```
 
-The skin is generated deterministically at native size:
+The skin uses an image-gen bitmap source, then the build tool normalizes it into a deterministic native runtime PNG:
+
+```text
+background_5v5_imagegen_source.png
+size: 1254x1254
+sha256: 4b832c0d58a58256248bdf4700727dcc540343f1d9504e44cf3d9bff094b6ac1
+```
+
+Runtime output:
 
 ```text
 background_5v5.png
 size: 1280x1280
-sha256: 2ab96c7e2911c9b2f605aa5ab69b39ba84d8f6b3b1c51bf030dabd2a2f0986c6
+sha256: dfcc59e1be45d21d33954e6e5fa2ed8b71ea9b0311e3b6ca1251890cb3f20fc9
 ```
 
 ## Design Intent
@@ -30,11 +39,11 @@ sha256: 2ab96c7e2911c9b2f605aa5ab69b39ba84d8f6b3b1c51bf030dabd2a2f0986c6
 The background keeps the native gameplay map shape and simulation data intact. It visually suggests a LOL-like map language without adding any gameplay meaning:
 
 ```text
-three clear lane bands
-subtle diagonal river band
-jungle-color visual quadrants
+hand-painted MOBA-like terrain
+soft lane and river language
+jungle-color visual zones
 soft blue/red base tint
-objective-pit decoration as background art only
+decorative terrain detail as background art only
 ```
 
 The art is deliberately painted as a background texture. It does not claim that any new terrain, brush, objective, spawn, path, or collision exists.

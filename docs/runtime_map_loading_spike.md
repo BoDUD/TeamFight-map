@@ -8,7 +8,7 @@ This spike answers whether the LOL-like map can move from design data into a rea
 
 | Question | Current answer | Evidence |
 | --- | --- | --- |
-| Can map visuals be replaced by asset override? | Yes for static visual layers. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. PR #28 replaced the diagnostic solid color with a generated visual-only LOL-like background skin. PR #34 prepared position-locked `wall_5v5` / `wall_5v5_front` candidates, PR #35 completed optional installed-copy runtime QA, and PR #36 promotes those wall layers into the default visual-only package with default-package runtime QA still pending. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
+| Can map visuals be replaced by asset override? | Yes for static visual layers. | Manual QA on 2026-06-25 loaded `tfm2_lol_map_spike` in a 5v5 match and showed the diagnostic background while units, minions, towers, jungle monsters, and AI routes stayed stable. PR #28 replaced the diagnostic solid color with a generated visual-only LOL-like background skin. PR #34 prepared position-locked `wall_5v5` / `wall_5v5_front` candidates, PR #35 completed optional installed-copy runtime QA, PR #36 promoted those wall layers into the default visual-only package, and PR #37 recorded default-package runtime QA pass. Installed Workshop mods and prior local probes also use ordinary `mod.override_info` remaps for visual layers. |
 | Can collision, minion paths, and spawn points be replaced by data files? | Not proven. | The loader positively reads a byte-equivalent `asset/base/setting/map_setting` remap when the staged file is named `setting/map_setting.map_setting`; Process Monitor captured `TeamfightManager2.exe` `CreateFile SUCCESS` and `ReadFile SUCCESS` for the installed local file. A structural decode/re-encode round trip is byte-identical, Q2c has characterized a symmetric read-only edge candidate, and Q2c-1 shows that `chunked_binary` is not a transitive closure. Q2d audited original bundle/setting data offline but found no sufficient independent anchor; `packed4_0` path-graph transform scoring remains ambiguous. Q2e then ran one explicitly risk-accepted two-byte `map_setting` A/B/A loader mutation probe, Q2f repeated the same B file with longer live observation past 3:00, and Q2g ran a second risk-accepted two-byte candidate through A/B/A. Q2h synthesizes those probes and recommends static decoding before any third runtime candidate because neither probe produced a semantic signal. Q2i refines `packed4_0`: codes `0-7` are strong direction-like candidates, but code `15` remains unresolved and the overall next-hop interpretation is still ambiguous. Q2j classifies code `15` contexts more deeply and keeps the result `ambiguous`: it is not a clean blocked sentinel, and connected non-self code15 contexts are not recoverable through the current no-15 graphs. Q2k shows all connected non-self code15 relations cross no15 components, making code `15` a static cross-component bridge candidate. Q2l classifies the 90 no15 singleton components as a structured special-node-set candidate, and Q2m shows those singleton nodes share a distinct node-major `packed4_1` profile absent from the 810-node large component. Q2n correlates those structural masks with original visual resources, but the transform result remains ambiguous. Q2o drills into the 30 node-major `packed4_1` slots and finds the complete singleton profile is exclusive while individual slot values are not. Q2p classifies exact `packed4_1` profile families, keeps Hamming clusters diagnostic-only, and finds asymmetric exact-family masks for a later read-only visual-correlation pass. Q2q scores those asymmetric exact-family masks against original visuals, but aggregate and resource-subset results remain ambiguous. Q2r inventories unclassified/residual `map_setting` sections and finds the known three structural layers consume the full baseline file, leaving no residual anchor candidates. Q2s closes the current spike route: gameplay `map_setting` editing remains blocked pending runtime anchor and semantic proof; the next route must be either visual-only deliverable or a separate runtime-anchor spike. This proves only that bounded two-byte `chunked_binary` mutations can be read and run through 5v5 observation; decoded field semantics, node/world transform, collision/path/spawn editing, and broader map safety remain unproven. |
 | If data replacement fails, does ModExtension/DLL expose enough map API? | Not currently proven. | PR #8 source-level audit found only `ModExtension::post_update` plus opaque `Scene`, `GameUI`, and `Assets` parameters in the checked public SDK/source surface. No public `visible_view`, `path`, world-to-screen transform, debug draw/text overlay, camera/viewport, or entity-position anchor surface was found. |
 
@@ -109,8 +109,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 | Runtime area | Candidate path or field | Format | Current status |
 | --- | --- | --- | --- |
 | Map background / ground texture | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | PNG, native `1280x1280` | Default visual-only package layer. Runtime QA passed for the reduced-obstacle background skin. |
-| Primary wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5` | PNG, native `1280x1280` | Default visual-only package layer after position-locked candidate generation and optional installed-copy QA; default-package runtime QA pending. |
-| Foreground wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` | PNG, native `1280x1280` | Default visual-only package layer after position-locked candidate generation and optional installed-copy QA; default-package runtime QA pending. |
+| Primary wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5` | PNG, native `1280x1280` | Default visual-only package layer after position-locked candidate generation, optional installed-copy QA, and default-package runtime QA pass. |
+| Foreground wall visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` | PNG, native `1280x1280` | Default visual-only package layer after position-locked candidate generation, optional installed-copy QA, and default-package runtime QA pass. |
 | Wall shadow visual layer | `asset/base/aseprite_resources/ingame/5v5/wall_shadow_5v5` | PNG, native `1280x1280` | Candidate visual layer; not pathing. |
 | Brush visual layer | `asset/base/aseprite_resources/ingame/5v5/bush_5v5` | PNG, native `1280x1280` | Candidate visual layer; does not prove brush gameplay state. |
 | Brush shadow visual layer | `asset/base/aseprite_resources/ingame/5v5/bush_shadow_5v5` | PNG, native `1280x1280` | Candidate visual layer; not pathing. |
@@ -169,7 +169,8 @@ Only paths, formats, and field surfaces are recorded here. No original game reso
 36. Done: inventory visual map-detail asset surfaces.
 37. Done: add position-locked wall/front-wall candidates without changing gameplay data.
 38. Done: record optional installed-copy wall/front-wall runtime QA.
-39. Current: enable wall/front-wall in the default visual-only package; default-package runtime QA is pending. Do not broaden mutations from Q2g, mutate packed4, or start gameplay map editing.
+39. Done: enable wall/front-wall in the default visual-only package.
+40. Done: record default-package runtime QA for background + wall + front-wall. Do not broaden mutations from Q2g, mutate packed4, or start gameplay map editing.
 
 ## Q2a Equivalent Remap Gate
 
@@ -1391,7 +1392,7 @@ Question:
 Can Route A produce a user-visible package without touching gameplay data?
 ```
 
-Result: package prepared and reduced-obstacle background runtime QA passed. `docs/visual_only_lol_map_skin.md` records the visual-only scope, and `docs/visual_only_runtime_qa.md` records the live 5v5 background QA evidence. Later wall/front-wall visual layers are enabled by default in `docs/visual_only_wall_terrain_default_enablement.md`, with default-package runtime QA still pending.
+Result: package prepared and reduced-obstacle background runtime QA passed. `docs/visual_only_lol_map_skin.md` records the visual-only scope, and `docs/visual_only_runtime_qa.md` records the live 5v5 background QA evidence. Later wall/front-wall visual layers are enabled by default in `docs/visual_only_wall_terrain_default_enablement.md`, and `docs/visual_only_wall_terrain_default_runtime_qa.md` records default-package runtime QA pass.
 
 Current default visual-only overrides:
 
@@ -1439,7 +1440,7 @@ Conclusion:
 Route A visual skin package: prepared
 runtime QA: pass for reduced-obstacle background version
 wall/front-wall default enablement: accepted
-wall/front-wall default-package runtime QA: pending
+wall/front-wall default-package runtime QA: pass
 gameplay map editing: still not allowed
 ```
 
@@ -1593,8 +1594,8 @@ Candidate visual surfaces:
 | Category | Candidate | Native reference | Default enabled | Risk | Next PR |
 | --- | --- | --- | --- | --- | --- |
 | Background | `background_5v5` | yes, `1280x1280` | yes | low | completed |
-| Terrain wall | `wall_5v5` | yes, `1280x1280` | yes | medium | PR #37 default-package QA |
-| Front wall | `wall_5v5_front` | yes, `1280x1280` | yes | medium | PR #37 default-package QA |
+| Terrain wall | `wall_5v5` | yes, `1280x1280` | yes | medium | completed |
+| Front wall | `wall_5v5_front` | yes, `1280x1280` | yes | medium | completed |
 | Bush visual | `bush_5v5` | yes, `1280x1280` | no | high | future visual candidate |
 | Minimap | `minimap_5v5_bg` | yes, `320x320` | no | medium | future default decision |
 | Tower / crystal / base | actor or atlas candidates | yes | no | high | investigate |
@@ -1611,7 +1612,7 @@ gameplay_data_modified: false
 map_editing_allowed: false
 ```
 
-This inventory did not replace walls, bushes, towers, crystals, jungle monsters, or minimap defaults. Later PRs prepared wall/front-wall candidates, ran optional installed-copy wall QA, and promoted wall/front-wall to the default visual-only package. Minimap remains disabled by default. Gameplay map editing remains blocked.
+This inventory did not replace walls, bushes, towers, crystals, jungle monsters, or minimap defaults. Later PRs prepared wall/front-wall candidates, ran optional installed-copy wall QA, promoted wall/front-wall to the default visual-only package, and recorded default-package runtime QA pass. Minimap remains disabled by default. Gameplay map editing remains blocked.
 
 ## Route A Wall And Terrain Candidate Gate
 
@@ -1672,7 +1673,7 @@ gameplay data modified: false
 runtime QA performed in candidate PR: false
 optional installed-copy runtime QA: pass
 default wall/front-wall enablement: accepted later
-default-package runtime QA: pending
+default-package runtime QA: pass
 ```
 
 Conclusion:
@@ -1680,11 +1681,11 @@ Conclusion:
 ```text
 Wall / terrain visual candidates prepared.
 default wall/front-wall enablement: accepted after optional QA
-default-package runtime QA: pending
+default-package runtime QA: pass
 gameplay map editing: still blocked
 ```
 
-This gate only prepared candidate assets. A later decision enables the wall/front-wall overrides by default, but default-package runtime QA remains separate. It does not approve collision/path/spawn edits, brush gameplay edits, objective placement, AI-route edits, or `map_setting` work.
+This gate only prepared candidate assets. Later PRs enabled the wall/front-wall overrides by default and recorded default-package runtime QA pass. It does not approve collision/path/spawn edits, brush gameplay edits, objective placement, AI-route edits, or `map_setting` work.
 
 ## Route A Optional Wall Terrain Runtime QA
 
@@ -1753,13 +1754,13 @@ Conclusion:
 Optional Wall Terrain Visual Runtime QA Pass
 default wall override enablement at time of optional QA: false
 later default wall/front-wall enablement: accepted
-default-package runtime QA: pending
+default-package runtime QA: pass
 gameplay data modified: false
 map_setting override installed: false
 gameplay map editing: still blocked
 ```
 
-This QA pass did not itself enable wall overrides by default. It supports the later default-enable decision but does not replace default-package runtime QA, does not prove gameplay map editing, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, minimap-default, or `map_setting` edits.
+This QA pass did not itself enable wall overrides by default. It supports the later default-enable decision; default-package runtime QA is recorded separately in `docs/visual_only_wall_terrain_default_runtime_qa.md`. It does not prove gameplay map editing and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, minimap-default, or `map_setting` edits.
 
 ## Route A Wall Terrain Default Enablement Decision
 
@@ -1769,7 +1770,7 @@ Question:
 Can wall_5v5 and wall_5v5_front be promoted into the default visual-only package after mask preservation and optional installed-copy QA?
 ```
 
-Result on 2026-07-02: accepted for the default visual-only package. `docs/visual_only_wall_terrain_default_enablement.md` records the decision. Default-package runtime QA is pending and must be recorded in a separate follow-up PR.
+Result on 2026-07-02: accepted for the default visual-only package. `docs/visual_only_wall_terrain_default_enablement.md` records the decision, and `docs/visual_only_wall_terrain_default_runtime_qa.md` records the follow-up default-package runtime QA pass.
 
 Default package overrides:
 
@@ -1801,11 +1802,60 @@ Conclusion:
 ```text
 default wall/front-wall enablement: accepted
 default package changed: true
-default-package runtime QA: pending
+default-package runtime QA: pass
 gameplay map editing: still blocked
 ```
 
-This decision does not claim a final runtime QA pass for the wall-enabled default package. The next PR should install the repository default package cleanly, enter live 5v5, confirm background/wall/front-wall rendering, and confirm minimap and `map_setting` remain absent.
+This decision PR did not itself claim a final runtime QA pass for the wall-enabled default package. The follow-up default-package QA installed the repository package cleanly, entered live 5v5, confirmed background/wall/front-wall rendering, and confirmed minimap and `map_setting` remain absent.
+
+## Route A Default Wall Terrain Package Runtime QA
+
+Question:
+
+```text
+Can the repository default package with background_5v5, wall_5v5, and wall_5v5_front display correctly in live 5v5 without staging gameplay data?
+```
+
+Result on 2026-07-02: pass. `docs/visual_only_wall_terrain_default_runtime_qa.md` records the QA evidence.
+
+Installed default overrides:
+
+```text
+asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
+```
+
+Runtime evidence summary:
+
+```text
+entered live 5v5: true
+background displayed: true
+wall_5v5 displayed: true
+wall_5v5_front displayed: true
+heroes, minions, towers, UI readable: true
+no obvious new walkable path visual: true
+no obvious new blocked path visual: true
+no obvious debug collision mask visual: true
+loader log: not available / not captured
+```
+
+Repository-external evidence:
+
+```text
+D:\tfm2_q2a_evidence\visual_default_wall_runtime_qa\default_wall_runtime_summary.json
+size: 6,949
+sha256: 55b6318d12ea673c029261c18133b5bdb479daa65c62d535c119adc75a0e60ff
+```
+
+Conclusion:
+
+```text
+Visual-only Default Wall Terrain Package Runtime QA Pass
+minimap default override: false
+map_setting override: false
+gameplay map editing: still blocked
+```
 
 ## Stop Conditions
 

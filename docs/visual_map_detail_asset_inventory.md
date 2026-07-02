@@ -70,8 +70,8 @@ Category counts:
 | Category | Asset candidate | Native reference found | Representative dimensions | Visual-only? | Default enabled? | Runtime QA needed? | Risk | Next PR |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Background | `background_5v5` | yes | `1280x1280` | Proven visual-only background override | yes | no | low | completed |
-| Terrain wall | `wall_5v5` | yes | `1280x1280` | Visual-only when replacing only the existing wall layer | yes | default-package QA pending | medium | PR #37 |
-| Front wall | `wall_5v5_front` | yes | `1280x1280` | Visual-only when replacing only the existing front-wall layer | yes | default-package QA pending | medium | PR #37 |
+| Terrain wall | `wall_5v5` | yes | `1280x1280` | Visual-only when replacing only the existing wall layer | yes | no, pass | medium | completed |
+| Front wall | `wall_5v5_front` | yes | `1280x1280` | Visual-only when replacing only the existing front-wall layer | yes | no, pass | medium | completed |
 | Bush visual | `bush_5v5` | yes | `1280x1280` | Visual-only only if the existing visual layer is replaced without changing gameplay brush masks | no | yes | high | PR #38 |
 | Minimap | `minimap_5v5_bg` | yes | `320x320` | Candidate prepared and optional installed-copy QA passed | no | default-enable QA needed | medium | PR #39 |
 | Tower | `tower` | yes | `23x24` | Unknown until actor or atlas surface is reviewed | no | yes | high | PR #40 |
@@ -80,7 +80,7 @@ Category counts:
 
 ## Interpretation
 
-Terrain and wall resources were the safest first visual-detail candidates because `wall_5v5` and `wall_5v5_front` appear as existing visual layers. Follow-up PRs prepared position-locked candidates, optional runtime QA passed, and a later decision promotes those layers into the default visual-only package. Default-package runtime QA is still required and must not change collision, pathing, or `map_setting`.
+Terrain and wall resources were the safest first visual-detail candidates because `wall_5v5` and `wall_5v5_front` appear as existing visual layers. Follow-up PRs prepared position-locked candidates, optional runtime QA passed, and those layers are now in the default visual-only package with default-package runtime QA pass. This still does not change collision, pathing, or `map_setting`.
 
 Bush visuals are higher risk. The existing `bush_5v5` visual layer can be investigated, but Route A must not add, move, resize, or otherwise change gameplay brush masks.
 
@@ -91,10 +91,10 @@ Tower, crystal, base, and jungle monster candidates appear to be actor or atlas-
 ## Recommended Follow-Ups
 
 ```text
-PR #34  wall / stone / terrain visual candidates
-PR #35  optional wall terrain runtime QA
-PR #36  wall/front-wall default enable decision
-PR #37  wall/front-wall default-package runtime QA
+PR #34  done: wall / stone / terrain visual candidates
+PR #35  done: optional wall terrain runtime QA
+PR #36  done: wall/front-wall default enable decision
+PR #37  done: wall/front-wall default-package runtime QA
 PR #38  bush visual candidate, no gameplay brush edit
 PR #39  minimap default enable decision + default-package QA
 PR #40  tower / crystal visual asset investigation

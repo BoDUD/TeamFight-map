@@ -24,7 +24,8 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/visual_map_detail_asset_inventory.md` inventories map-detail visual override surfaces for future Route A work without enabling new overrides.
 - `docs/visual_only_wall_terrain_candidates.md` records the wall/front-wall visual candidates and their mask-preservation gate.
 - `docs/visual_only_wall_terrain_runtime_qa.md` records optional installed-copy runtime QA for the wall/front-wall candidates.
-- `docs/visual_only_wall_terrain_default_enablement.md` records the default-package decision to enable wall/front-wall visual overrides while keeping default-package QA pending.
+- `docs/visual_only_wall_terrain_default_enablement.md` records the default-package decision to enable wall/front-wall visual overrides.
+- `docs/visual_only_wall_terrain_default_runtime_qa.md` records live 5v5 QA for the default wall/front-wall package.
 
 ## Build And Validate
 
@@ -166,7 +167,7 @@ minimap_5v5_bg: candidate prepared and optional runtime QA passed; not enabled b
 map-detail visual inventory: completed
 wall_5v5 / wall_5v5_front: default enabled visual-only layers
 wall/front-wall optional runtime QA: pass when temporarily staged in installed copy
-wall/front-wall default-package runtime QA: pending
+wall/front-wall default-package runtime QA: pass
 map_setting: forbidden
 ```
 

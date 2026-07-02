@@ -69,7 +69,7 @@ class VisualOnlyWallTerrainCandidateTests(unittest.TestCase):
                 sum((source_value > 0) != (candidate_value > 0) for source_value, candidate_value in zip(source_alpha, candidate_alpha)),
             )
 
-    def test_builder_can_generate_candidates_without_touching_runtime_wall_layers(self) -> None:
+    def test_builder_can_generate_wall_candidates(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             wall_output = root / "wall_5v5_candidate.png"
@@ -88,8 +88,8 @@ class VisualOnlyWallTerrainCandidateTests(unittest.TestCase):
                     self.assertEqual("RGBA", image.mode)
                     self.assertEqual(0, image.getchannel("A").getextrema()[0])
 
-        self.assertFalse(RUNTIME_WALL.exists())
-        self.assertFalse(RUNTIME_WALL_FRONT.exists())
+        self.assertTrue(RUNTIME_WALL.exists())
+        self.assertTrue(RUNTIME_WALL_FRONT.exists())
 
     def test_committed_candidates_match_deterministic_builder(self) -> None:
         self.assertEqual(
@@ -101,19 +101,27 @@ class VisualOnlyWallTerrainCandidateTests(unittest.TestCase):
             build_runtime_spike_assets.png_bytes(build_runtime_spike_assets.build_wall_front_candidate(1280)),
         )
 
-    def test_runtime_package_still_background_only(self) -> None:
-        self.assertFalse(RUNTIME_WALL.exists())
-        self.assertFalse(RUNTIME_WALL_FRONT.exists())
+    def test_runtime_wall_files_match_committed_candidates(self) -> None:
+        self.assertTrue(RUNTIME_WALL.exists())
+        self.assertTrue(RUNTIME_WALL_FRONT.exists())
+        self.assertEqual(WALL_CANDIDATE.read_bytes(), RUNTIME_WALL.read_bytes())
+        self.assertEqual(WALL_FRONT_CANDIDATE.read_bytes(), RUNTIME_WALL_FRONT.read_bytes())
+
+    def test_runtime_package_enables_wall_but_still_excludes_gameplay_data(self) -> None:
+        self.assertTrue(RUNTIME_WALL.exists())
+        self.assertTrue(RUNTIME_WALL_FRONT.exists())
         self.assertFalse((MOD_ROOT / "setting" / "map_setting.map_setting").exists())
 
         table = json.loads(OVERRIDE_INFO.read_text(encoding="utf-8"))
         self.assertEqual(
-            {"asset/base/aseprite_resources/ingame/5v5/background_5v5"},
+            {
+                "asset/base/aseprite_resources/ingame/5v5/background_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front",
+            },
             set(table),
         )
         serialized = json.dumps(table, sort_keys=True)
-        self.assertNotIn("wall_5v5", serialized)
-        self.assertNotIn("wall_5v5_front", serialized)
         self.assertNotIn("minimap_5v5_bg", serialized)
         self.assertNotIn("asset/base/setting/map_setting", serialized)
         self.assertNotIn("setting/map_setting.map_setting", serialized)

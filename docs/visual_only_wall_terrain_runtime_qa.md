@@ -1,6 +1,6 @@
 ﻿# Visual-Only Wall Terrain Runtime QA
 
-This document records optional installed-copy runtime QA for the Route A wall and terrain visual candidates.
+This document records optional installed-copy runtime QA for the Route A wall and terrain visual candidates. A later decision promotes these candidates into the default visual-only package; that decision still requires a separate default-package runtime QA pass.
 
 ## Result
 
@@ -13,14 +13,16 @@ background_5v5 override: pass
 map_setting override installed: false
 minimap default override installed: false
 gameplay data modified: false
-default runtime package changed: false
+default runtime package changed by this QA PR: false
+later default wall/front-wall enablement: accepted
+default-package runtime QA: pending
 ```
 
-This QA proves only that the disabled `wall_5v5` and `wall_5v5_front` visual candidates can be temporarily staged in a local installed copy and displayed in live 5v5 with the current background skin. It does not enable wall overrides by default, does not prove gameplay map editing, does not approve collision/path/spawn/brush/objective/AI edits, and does not approve `map_setting` mutation.
+This QA proves only that the `wall_5v5` and `wall_5v5_front` visual candidates can be temporarily staged in a local installed copy and displayed in live 5v5 with the current background skin. It does not by itself prove the default package has been QA-passed, does not prove gameplay map editing, does not approve collision/path/spawn/brush/objective/AI edits, and does not approve `map_setting` mutation.
 
 ## Temporary Staging
 
-The repository default package remained background-only. For this QA only, the installed local copy temporarily contained these visual overrides:
+At the time of this optional QA, the repository default package remained background-only. For this QA only, the installed local copy temporarily contained these visual overrides:
 
 ```text
 asset/base/aseprite_resources/ingame/5v5/background_5v5
@@ -153,7 +155,6 @@ sha256: 7fc755fadc1b31a6696b8ed57c69d2bfc37f5457735c8fcfae31fcbd7bba97d5
 This QA does not approve:
 
 ```text
-default wall override enablement
 minimap default override enablement
 map_setting mutation
 packed4_0 mutation

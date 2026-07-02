@@ -29,20 +29,20 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
     {
         "category": "terrain / wall",
         "asset_candidate": "wall_5v5",
-        "visual_only": "likely visual-only if replacing the existing wall layer only",
-        "default_enabled": False,
-        "runtime_qa_needed": True,
+        "visual_only": "default-enabled visual-only replacement of the existing wall layer",
+        "default_enabled": True,
+        "runtime_qa_needed": "default-package QA pending",
         "risk": "medium",
-        "next_pr": "PR #34",
+        "next_pr": "PR #37",
     },
     {
         "category": "terrain / wall",
         "asset_candidate": "wall_5v5_front",
-        "visual_only": "likely visual-only if replacing the existing front-wall layer only",
-        "default_enabled": False,
-        "runtime_qa_needed": True,
+        "visual_only": "default-enabled visual-only replacement of the existing front-wall layer",
+        "default_enabled": True,
+        "runtime_qa_needed": "default-package QA pending",
         "risk": "medium",
-        "next_pr": "PR #34",
+        "next_pr": "PR #37",
     },
     {
         "category": "brush visual",
@@ -51,7 +51,7 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
         "default_enabled": False,
         "runtime_qa_needed": True,
         "risk": "high",
-        "next_pr": "PR #35",
+        "next_pr": "PR #38",
     },
     {
         "category": "minimap",
@@ -60,7 +60,7 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
         "default_enabled": False,
         "runtime_qa_needed": "default-enable QA needed before default package change",
         "risk": "medium",
-        "next_pr": "PR #36",
+        "next_pr": "PR #39",
     },
     {
         "category": "tower / crystal / base",
@@ -69,7 +69,7 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
         "default_enabled": False,
         "runtime_qa_needed": True,
         "risk": "high",
-        "next_pr": "PR #37",
+        "next_pr": "PR #40",
     },
     {
         "category": "tower / crystal / base",
@@ -78,7 +78,7 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
         "default_enabled": False,
         "runtime_qa_needed": True,
         "risk": "high",
-        "next_pr": "PR #37",
+        "next_pr": "PR #40",
     },
     {
         "category": "jungle / neutral monsters",
@@ -87,7 +87,7 @@ EXPECTED_SURFACES: list[dict[str, Any]] = [
         "default_enabled": False,
         "runtime_qa_needed": True,
         "risk": "high",
-        "next_pr": "PR #39",
+        "next_pr": "PR #42",
     },
 ]
 
@@ -329,7 +329,7 @@ def build_inventory(scan_roots: list[Path], output_dir: Path) -> dict[str, Any]:
         "category_summary": category_summary(entries),
         "surface_matrix": matrix,
         "recommended_next_prs": [
-            "wall_and_terrain_detail_candidates",
+            "wall_front_wall_default_package_runtime_qa",
             "bush_visual_candidate",
             "minimap_default_enable_decision",
             "tower_crystal_asset_investigation",

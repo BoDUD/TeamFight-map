@@ -16,6 +16,8 @@ MOD_ROOT = REPO_ROOT / "mods" / "tfm2_lol_map_spike"
 MINIMAP_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "minimap_5v5_bg_imagegen_source.png"
 MINIMAP_CANDIDATE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "minimap_5v5_bg_candidate.png"
 BACKGROUND = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
+RUNTIME_WALL = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "wall_5v5.png"
+RUNTIME_WALL_FRONT = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "wall_5v5_front.png"
 RUNTIME_MINIMAP = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "minimap_5v5_bg.png"
 OVERRIDE_INFO = MOD_ROOT / "mod.override_info"
 
@@ -69,8 +71,10 @@ class VisualOnlyMinimapCandidateTests(unittest.TestCase):
         )
         self.assertEqual(MINIMAP_CANDIDATE.read_bytes(), rebuilt)
 
-    def test_runtime_package_still_excludes_minimap_and_map_setting(self) -> None:
+    def test_runtime_package_enables_wall_but_still_excludes_minimap_and_map_setting(self) -> None:
         self.assertTrue(BACKGROUND.is_file())
+        self.assertTrue(RUNTIME_WALL.is_file())
+        self.assertTrue(RUNTIME_WALL_FRONT.is_file())
         self.assertFalse(RUNTIME_MINIMAP.exists())
         self.assertFalse((MOD_ROOT / "setting" / "map_setting.map_setting").exists())
 
@@ -78,6 +82,8 @@ class VisualOnlyMinimapCandidateTests(unittest.TestCase):
         self.assertEqual(
             {
                 "asset/base/aseprite_resources/ingame/5v5/background_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front",
             },
             set(table),
         )

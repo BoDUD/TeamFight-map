@@ -34,7 +34,7 @@ jobs:
       - name: Ensure runtime spike assets are committed
         run: git diff --exit-code -- mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5
 
-      - name: Ensure disabled visual candidates are committed
+      - name: Ensure visual candidates are committed
         run: |
           git diff --exit-code -- assets/visual/lol_skin/minimap_5v5_bg_candidate.png
           git diff --exit-code -- assets/visual/lol_skin/wall_5v5_candidate.png

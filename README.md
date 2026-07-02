@@ -22,8 +22,9 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/visual_only_minimap_candidate.md` records the Route A minimap candidate asset, which is not enabled by default.
 - `docs/visual_only_minimap_runtime_qa.md` records optional installed-copy runtime QA for the minimap candidate.
 - `docs/visual_map_detail_asset_inventory.md` inventories map-detail visual override surfaces for future Route A work without enabling new overrides.
-- `docs/visual_only_wall_terrain_candidates.md` records disabled wall/front-wall visual candidates for future Route A QA.
+- `docs/visual_only_wall_terrain_candidates.md` records the wall/front-wall visual candidates and their mask-preservation gate.
 - `docs/visual_only_wall_terrain_runtime_qa.md` records optional installed-copy runtime QA for the wall/front-wall candidates.
+- `docs/visual_only_wall_terrain_default_enablement.md` records the default-package decision to enable wall/front-wall visual overrides while keeping default-package QA pending.
 
 ## Build And Validate
 
@@ -129,11 +130,11 @@ docs/concept/tfm2_lol_like_map_imagegen_v1.png
 
 ## Runtime Status
 
-This is not yet a playable Teamfight Manager 2 gameplay map mod. The repository includes a visual-only spike package with `mod.mod_info` and `mod.override_info`, and it replaces only `asset/base/aseprite_resources/ingame/5v5/background_5v5` with a non-gameplay LOL-like background skin.
+This is not yet a playable Teamfight Manager 2 gameplay map mod. The repository includes a visual-only spike package with `mod.mod_info` and `mod.override_info`, and it replaces `asset/base/aseprite_resources/ingame/5v5/background_5v5`, `asset/base/aseprite_resources/ingame/5v5/wall_5v5`, and `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` with non-gameplay LOL-like visual skin layers.
 
 It does not include runtime DLL hooks, game map data replacement, collision masks, walkable masks, brush gameplay masks, minimap export, spawn data, or an in-game navigation graph.
 
-Earlier image-gen PNGs under `docs/concept/` remain concept art only. The active runtime background skin now uses a project-local image-gen source that is normalized by `tools/build_runtime_spike_assets.py` into a deterministic cosmetic `background_5v5` override. Gameplay map assets would still need proven layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
+Earlier image-gen PNGs under `docs/concept/` remain concept art only. The active runtime skin uses project-local source assets normalized by `tools/build_runtime_spike_assets.py` into deterministic cosmetic `background_5v5`, `wall_5v5`, and `wall_5v5_front` overrides. Gameplay map assets would still need proven layered ground, water, wall, decoration, brush visual, brush gameplay mask, collision/walkable mask, minimap, entity spawn data, and navigation graph from one authoritative map source.
 
 Do not start formal gameplay map texture, collision mask, pathing, spawn, brush gameplay, objective-placement, or exporter work yet. The Q2 `map_setting` spike has proved visual override, loader takeover, byte-identical structural round trip, and bounded two-byte loader probes, but it has not proved `chunked_binary`, `packed4_0`, or `packed4_1` gameplay semantics, and it has not proved node/world transform.
 
@@ -162,9 +163,10 @@ Current visual package scope:
 background_5v5: enabled visual-only LOL-like skin
 background runtime QA: pass for reduced-obstacle version
 minimap_5v5_bg: candidate prepared and optional runtime QA passed; not enabled by default
-map-detail visual inventory: completed; no new detail overrides enabled
-wall_5v5 / wall_5v5_front: candidates prepared; not enabled by default
+map-detail visual inventory: completed
+wall_5v5 / wall_5v5_front: default enabled visual-only layers
 wall/front-wall optional runtime QA: pass when temporarily staged in installed copy
+wall/front-wall default-package runtime QA: pending
 map_setting: forbidden
 ```
 

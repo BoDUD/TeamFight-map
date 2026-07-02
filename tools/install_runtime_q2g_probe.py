@@ -163,16 +163,16 @@ def ensure_existing_install_can_stage(game_root: Path, clean: bool) -> None:
 def load_base_override_for_staging(installed_mod: Path) -> tuple[Path, dict[str, Any]]:
     override_path = installed_mod / "mod.override_info"
     overrides = spike.load_override_table(override_path)
-    if sorted(overrides) != [spike.BASE_BACKGROUND_ASSET]:
-        raise SystemExit("Q2g staging requires exactly one pre-existing background override.")
+    if set(overrides) != set(spike.DEFAULT_VISUAL_ASSETS):
+        raise SystemExit("Q2g staging requires the default visual-only overrides.")
     return override_path, overrides
 
 
 def override_with_map_setting(override_path: Path, overrides: dict[str, Any]) -> Path:
     overrides = dict(overrides)
     overrides[spike.MAP_SETTING_ASSET] = {"remapping": spike.MAP_SETTING_REMAP, "type": "override"}
-    if sorted(overrides) != [spike.BASE_BACKGROUND_ASSET, spike.MAP_SETTING_ASSET]:
-        raise SystemExit("Q2g staging allows only background and map_setting overrides.")
+    if set(overrides) != set(spike.DEFAULT_VISUAL_ASSETS) | {spike.MAP_SETTING_ASSET}:
+        raise SystemExit("Q2g staging allows only default visual overrides and map_setting.")
     override_path.write_text(json.dumps(overrides, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n")
     return override_path
 
@@ -225,7 +225,7 @@ def stage_runtime_q2g_probe(
     installed_overrides = json.loads(override_path.read_text(encoding="utf-8"))
     if spike.MAP_SETTING_ASSET not in installed_overrides:
         raise SystemExit("Installed override does not contain map_setting after staging.")
-    if sorted(installed_overrides) != [spike.BASE_BACKGROUND_ASSET, spike.MAP_SETTING_ASSET]:
+    if set(installed_overrides) != set(spike.DEFAULT_VISUAL_ASSETS) | {spike.MAP_SETTING_ASSET}:
         raise SystemExit("Installed override contains unexpected assets after Q2g staging.")
 
     config_path = None

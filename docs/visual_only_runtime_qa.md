@@ -40,7 +40,7 @@ mods/tfm2_lol_map_spike/setting/map_setting.map_setting exists: false
 forbidden override matches for minimap|map_setting|setting: 0
 ```
 
-The runtime package therefore remained background-only during this QA pass.
+The runtime package therefore remained background-only during this historical QA pass. Later wall/front-wall default enablement is tracked separately and still requires its own default-package runtime QA.
 
 ## Runtime Observation
 

@@ -1,19 +1,19 @@
 # Visual-Only Minimap Candidate
 
-This document records a Route A minimap visual candidate. The candidate is not enabled by default and has not received runtime QA. It is a repository asset for later review only.
+This document records a Route A minimap visual candidate. The candidate is not enabled by default. Optional runtime QA is recorded separately in `docs/visual_only_minimap_runtime_qa.md`.
 
 ## Result
 
 ```text
-Minimap candidate prepared, not enabled.
+Minimap candidate prepared, not enabled by default.
 minimap_5v5_bg override installed: false
 background_5v5 override remains enabled: true
 map_setting override installed: false
 gameplay data modified: false
-runtime QA performed: false
+optional runtime QA: pass when temporarily staged in installed copy
 ```
 
-This PR does not approve the minimap override by default. A separate runtime QA PR must stage the candidate locally, verify HUD readability and direction consistency, and continue to keep `map_setting` and gameplay data out of the package.
+The runtime QA pass does not approve the minimap override by default. The default repository package still keeps `minimap_5v5_bg` out of `mod.override_info`.
 
 ## Native Size Reference
 
@@ -76,20 +76,26 @@ The generated minimap candidate is intentionally not copied to:
 mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/minimap_5v5_bg.png
 ```
 
-## Future QA Gate
+## Runtime QA Result
 
-A later PR may run optional minimap runtime QA. That PR must verify:
+Optional runtime QA has been recorded in:
 
 ```text
-minimap_5v5_bg displays in the HUD correctly
-orientation is not misleading
-routes, bases, walls, objectives, and camera frame remain readable
-background_5v5 still displays correctly
-map_setting override installed: false
-gameplay data modified: false
+docs/visual_only_minimap_runtime_qa.md
 ```
 
-If the minimap candidate appears misleading in HUD scale, the candidate should be revised or left disabled. It must not be treated as gameplay map proof.
+QA result:
+
+```text
+Optional Minimap Visual Runtime QA Pass
+minimap_5v5_bg override: pass when temporarily staged in installed copy
+background_5v5 override: pass
+map_setting override installed: false
+gameplay data modified: false
+default runtime package changed: false
+```
+
+The candidate remains disabled by default and must not be treated as gameplay map proof.
 
 ## Still Forbidden
 

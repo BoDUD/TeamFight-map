@@ -4,7 +4,7 @@ This package is a non-gameplay cosmetic map skin for Teamfight Manager 2. It use
 
 ## Scope
 
-This PR updates only:
+The visual package updates only:
 
 ```text
 assets/visual/lol_skin/background_5v5_imagegen_source.png
@@ -85,24 +85,29 @@ minimap_5v5_bg still needs separate visual-only QA before default enablement.
 
 A later visual PR may add and QA a minimap candidate. That PR must still keep `map_setting` and gameplay data out of the runtime package.
 
-## Runtime QA Plan
+## Runtime QA Result
 
-After this visual package is merged, run a separate visual-only QA PR:
+The reduced-obstacle background version has passed a live visual-only runtime QA pass:
 
 ```text
-[visual] record LOL-like background skin runtime QA
+Visual-only LOL-like Background Runtime QA Pass
 ```
 
-QA should verify:
+Recorded in:
 
 ```text
-mod only enables visual override
+docs/visual_only_runtime_qa.md
+```
+
+QA confirmed:
+
+```text
+background_5v5 override displays in live 5v5
+installed mod remains background-only
 mod.override_info does not contain map_setting
-5v5 can be entered
-background skin is visible
-heroes, minions, towers, minimap, and AI routes appear native/stable
-no Override source not found warning
-no Only 1/2 override applied warning
+mods/tfm2_lol_map_spike/setting/map_setting.map_setting does not exist
+minimap override is not installed
+heroes, minions, towers, UI, and original minimap remain readable
 ```
 
-This QA should not stage or mutate `map_setting`.
+The QA pass does not prove gameplay map editing and does not approve minimap, `map_setting`, collision, pathing, spawn, brush gameplay, objective, or AI-route edits.

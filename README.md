@@ -20,6 +20,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/visual_only_lol_map_skin.md` records the Route A non-gameplay background skin scope and runtime QA result.
 - `docs/visual_only_runtime_qa.md` records the live 5v5 visual-only QA pass for the reduced-obstacle background skin.
 - `docs/visual_only_minimap_candidate.md` records the Route A minimap candidate asset, which is not enabled by default.
+- `docs/visual_only_minimap_runtime_qa.md` records optional installed-copy runtime QA for the minimap candidate.
 
 ## Build And Validate
 
@@ -149,7 +150,7 @@ Current visual package scope:
 ```text
 background_5v5: enabled visual-only LOL-like skin
 background runtime QA: pass for reduced-obstacle version
-minimap_5v5_bg: candidate prepared, not enabled; runtime QA still required
+minimap_5v5_bg: candidate prepared and optional runtime QA passed; not enabled by default
 map_setting: forbidden
 ```
 

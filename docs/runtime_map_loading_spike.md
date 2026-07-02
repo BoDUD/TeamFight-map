@@ -1410,8 +1410,8 @@ AI route edits
 Optional minimap candidate:
 
 ```text
-minimap_5v5_bg candidate: prepared, not enabled
-runtime QA: not performed
+minimap_5v5_bg candidate: prepared, not enabled by default
+optional runtime QA: pass when temporarily staged in installed copy
 default override: false
 ```
 
@@ -1474,6 +1474,72 @@ gameplay map editing: still blocked
 ```
 
 This QA pass does not prove gameplay map editing, does not approve minimap override, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, or `map_setting` edits.
+
+## Route A Optional Minimap Runtime QA
+
+Question:
+
+```text
+Can the optional minimap_5v5_bg candidate display correctly in live 5v5 when temporarily staged in the installed copy?
+```
+
+Result on 2026-07-02: pass for optional visual minimap runtime display. `docs/visual_only_minimap_runtime_qa.md` records the QA evidence.
+
+Temporary installed-copy overrides during QA:
+
+```text
+asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg
+```
+
+Installed asset checks during QA:
+
+```text
+background_5v5 sha256: 7c0c6dfca623436c8f0d267161ed4f135987e1bcdff39dfcb694ab3bb2b80c81
+minimap_5v5_bg sha256: b3040d6301fc1e0d8d3431adb97ed3535cebbd674c17cc0d56772b20e56fb6bf
+map_setting override installed: false
+mods\tfm2_lol_map_spike\setting\map_setting.map_setting exists: false
+```
+
+Runtime evidence summary:
+
+```text
+entered live 5v5: true
+minimap candidate displayed: true
+background displayed correctly: true
+heroes, minions, towers, UI readable: true
+camera frame readable on minimap: true
+loader log: not available / not captured
+```
+
+Repository-external evidence:
+
+```text
+D:\tfm2_q2a_evidence\visual_only_minimap_runtime_qa\minimap_runtime_summary.json
+size: 4,998
+sha256: c146da5ca90e31d41748bc3e0bc17dcdf2b5cba94e768d9b76eb530b69d3d872
+```
+
+Post-QA restore:
+
+```text
+installed package restored to background-only: true
+minimap_5v5_bg.png exists in installed mod: false
+map_setting.map_setting exists in installed mod: false
+forbidden override matches for minimap|map_setting|setting: 0
+```
+
+Conclusion:
+
+```text
+Optional Minimap Visual Runtime QA Pass
+default minimap override enablement: false
+gameplay data modified: false
+map_setting override installed: false
+gameplay map editing: still blocked
+```
+
+This QA pass does not enable minimap override by default, does not prove gameplay map editing, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, or `map_setting` edits.
 
 ## Stop Conditions
 

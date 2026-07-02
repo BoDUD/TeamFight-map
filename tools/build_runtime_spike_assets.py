@@ -25,6 +25,8 @@ DEFAULT_WALL_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "wall_5v5_p
 DEFAULT_WALL_CANDIDATE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "wall_5v5_candidate.png"
 DEFAULT_WALL_FRONT_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "wall_5v5_front_position_locked_source.png"
 DEFAULT_WALL_FRONT_CANDIDATE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "wall_5v5_front_candidate.png"
+DEFAULT_WALL_RUNTIME_OUTPUT = DEFAULT_OUTPUT.parent / "wall_5v5.png"
+DEFAULT_WALL_FRONT_RUNTIME_OUTPUT = DEFAULT_OUTPUT.parent / "wall_5v5_front.png"
 
 
 def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
@@ -184,7 +186,7 @@ def build_wall_front_candidate(size: int = 1280, source: Path = DEFAULT_WALL_FRO
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build the visual-only LOL-like runtime map skin background.")
+    parser = argparse.ArgumentParser(description="Build the visual-only LOL-like runtime map skin assets.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--size", type=int, default=1280)
@@ -192,19 +194,21 @@ def main() -> int:
     parser.add_argument("--minimap-source", type=Path, default=DEFAULT_MINIMAP_SOURCE)
     parser.add_argument("--minimap-size", type=int, default=320)
     parser.add_argument("--wall-output", type=Path, default=DEFAULT_WALL_CANDIDATE)
+    parser.add_argument("--wall-runtime-output", type=Path, default=DEFAULT_WALL_RUNTIME_OUTPUT)
     parser.add_argument("--wall-source", type=Path, default=DEFAULT_WALL_SOURCE)
     parser.add_argument("--wall-front-output", type=Path, default=DEFAULT_WALL_FRONT_CANDIDATE)
+    parser.add_argument("--wall-front-runtime-output", type=Path, default=DEFAULT_WALL_FRONT_RUNTIME_OUTPUT)
     parser.add_argument("--wall-front-source", type=Path, default=DEFAULT_WALL_FRONT_SOURCE)
     parser.add_argument("--wall-size", type=int, default=1280)
     parser.add_argument(
         "--skip-minimap-candidate",
         action="store_true",
-        help="Only rebuild the enabled background_5v5 runtime asset.",
+        help="Skip the disabled minimap_5v5_bg candidate asset.",
     )
     parser.add_argument(
         "--skip-wall-candidates",
         action="store_true",
-        help="Skip disabled wall_5v5 and wall_5v5_front candidate asset generation.",
+        help="Skip wall_5v5 and wall_5v5_front candidate/runtime asset generation.",
     )
     args = parser.parse_args()
 
@@ -224,14 +228,22 @@ def main() -> int:
         )
         print(f"Wrote {args.minimap_output}")
     if not args.skip_wall_candidates:
+        wall_image = build_wall_candidate(args.wall_size, args.wall_source)
         args.wall_output.parent.mkdir(parents=True, exist_ok=True)
-        args.wall_output.write_bytes(png_bytes(build_wall_candidate(args.wall_size, args.wall_source)))
+        wall_bytes = png_bytes(wall_image)
+        args.wall_output.write_bytes(wall_bytes)
         print(f"Wrote {args.wall_output}")
+        args.wall_runtime_output.parent.mkdir(parents=True, exist_ok=True)
+        args.wall_runtime_output.write_bytes(wall_bytes)
+        print(f"Wrote {args.wall_runtime_output}")
+        wall_front_image = build_wall_front_candidate(args.wall_size, args.wall_front_source)
         args.wall_front_output.parent.mkdir(parents=True, exist_ok=True)
-        args.wall_front_output.write_bytes(
-            png_bytes(build_wall_front_candidate(args.wall_size, args.wall_front_source))
-        )
+        wall_front_bytes = png_bytes(wall_front_image)
+        args.wall_front_output.write_bytes(wall_front_bytes)
         print(f"Wrote {args.wall_front_output}")
+        args.wall_front_runtime_output.parent.mkdir(parents=True, exist_ok=True)
+        args.wall_front_runtime_output.write_bytes(wall_front_bytes)
+        print(f"Wrote {args.wall_front_runtime_output}")
     return 0
 
 

@@ -52,12 +52,18 @@ class VisualMapDetailAssetInventoryTests(unittest.TestCase):
 
             wall = next(item for item in manifest["surface_matrix"] if item["asset_candidate"] == "wall_5v5")
             self.assertTrue(wall["native_reference_found"])
+            self.assertTrue(wall["default_enabled"])
+            self.assertEqual("default-package QA pending", wall["runtime_qa_needed"])
             self.assertEqual("medium", wall["risk"])
 
-    def test_repository_runtime_package_still_background_only(self) -> None:
+    def test_repository_runtime_package_enables_wall_but_excludes_gameplay(self) -> None:
         table = json.loads(OVERRIDE_INFO.read_text(encoding="utf-8"))
         self.assertEqual(
-            {"asset/base/aseprite_resources/ingame/5v5/background_5v5"},
+            {
+                "asset/base/aseprite_resources/ingame/5v5/background_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front",
+            },
             set(table),
         )
         serialized = json.dumps(table, sort_keys=True)

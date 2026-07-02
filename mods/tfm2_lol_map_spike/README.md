@@ -6,15 +6,19 @@ It is not a gameplay map replacement, not a collision or pathing change, and not
 
 ## Active Visual Skin
 
-The package remaps exactly one runtime asset:
+The package remaps exactly three runtime visual assets:
 
 | Base asset | Probe asset |
 | --- | --- |
 | `asset/base/aseprite_resources/ingame/5v5/background_5v5` | `asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5` |
+| `asset/base/aseprite_resources/ingame/5v5/wall_5v5` | `asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5` |
+| `asset/base/aseprite_resources/ingame/5v5/wall_5v5_front` | `asset/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5_front` |
 
 The skin image is normalized from a project-local image-gen bitmap source into the native `1280x1280` background. It visually suggests a LOL-like terrain language while preserving the native Teamfight Manager 2 gameplay data.
 
-`minimap_5v5_bg` is not remapped in this package. It needs a separate visual-only QA pass before default enablement.
+The wall and front-wall layers are position-locked to the native wall alpha coverage. They are visual-only replacements and do not change collision, pathing, spawns, brush gameplay, objectives, or `map_setting`.
+
+`minimap_5v5_bg` is not remapped in this package. It has optional installed-copy QA, but default enablement still requires a separate decision and default-package QA pass.
 
 ## Smoke Test
 
@@ -28,7 +32,7 @@ The skin image is normalized from a project-local image-gen bitmap source into t
 
 - The game recognizes the mod metadata from `mod.mod_info`.
 - The game enters a match without asset loading errors.
-- The `background_5v5` skin is visible in the match map.
+- The `background_5v5`, `wall_5v5`, and `wall_5v5_front` visual skins are visible in the match map.
 - Native units, minion waves, towers, jungle camps, and AI pathing remain stable.
 
 ## Guardrails

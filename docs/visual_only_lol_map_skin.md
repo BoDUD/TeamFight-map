@@ -4,18 +4,22 @@ This package is a non-gameplay cosmetic map skin for Teamfight Manager 2. It use
 
 ## Scope
 
-The visual package updates only:
+The default visual package currently includes:
 
 ```text
 assets/visual/lol_skin/background_5v5_imagegen_source.png
 mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/background_5v5.png
+mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5.png
+mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5_front.png
 tools/build_runtime_spike_assets.py
 ```
 
-Active runtime override:
+Active runtime overrides:
 
 ```text
 asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
 ```
 
 The skin uses an image-gen bitmap source, then the build tool normalizes it into a deterministic native runtime PNG:
@@ -33,6 +37,20 @@ background_5v5.png
 size: 1280x1280
 sha256: 7c0c6dfca623436c8f0d267161ed4f135987e1bcdff39dfcb694ab3bb2b80c81
 ```
+
+Wall/front-wall runtime outputs:
+
+```text
+wall_5v5.png
+size: 1280x1280
+sha256: af0ff21fba1b8f51e111752ed96b6cc9a6b313bac64c2c33fab6edcebe5b2c8b
+
+wall_5v5_front.png
+size: 1280x1280
+sha256: 5d3e8a907e189f07ff220c0977f7303d05b30e2d9c0753de6a0eb2b51382399c
+```
+
+The wall and front-wall layers are locked to the native wall alpha coverage. They do not define new wall positions and do not change gameplay collision/pathing.
 
 ## Design Intent
 
@@ -79,8 +97,8 @@ map_editing_allowed: false
 Reason:
 
 ```text
-background_5v5 override has already been proven in live 5v5;
-minimap_5v5_bg still needs separate visual-only QA before default enablement.
+minimap_5v5_bg has optional installed-copy runtime QA;
+default minimap enablement still needs a separate decision and default-package QA.
 ```
 
 The repository now includes a disabled candidate recorded in:
@@ -113,11 +131,11 @@ QA confirmed:
 
 ```text
 background_5v5 override displays in live 5v5
-installed mod remains background-only
 mod.override_info does not contain map_setting
 mods/tfm2_lol_map_spike/setting/map_setting.map_setting does not exist
-minimap override is not installed
 heroes, minions, towers, UI, and original minimap remain readable
 ```
 
-The QA pass does not prove gameplay map editing and does not approve minimap, `map_setting`, collision, pathing, spawn, brush gameplay, objective, or AI-route edits.
+Wall/front-wall optional installed-copy QA has also passed, and the default-package enablement decision is recorded in `docs/visual_only_wall_terrain_default_enablement.md`. Default-package runtime QA for the wall-enabled package is still pending.
+
+These QA passes do not prove gameplay map editing and do not approve minimap default enablement, `map_setting`, collision, pathing, spawn, brush gameplay, objective, or AI-route edits.

@@ -87,6 +87,8 @@ class RuntimeQ2gProbeTests(unittest.TestCase):
             self.assertEqual(
                 [
                     "asset/base/aseprite_resources/ingame/5v5/background_5v5",
+                    "asset/base/aseprite_resources/ingame/5v5/wall_5v5",
+                    "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front",
                     "asset/base/setting/map_setting",
                 ],
                 sorted(overrides),

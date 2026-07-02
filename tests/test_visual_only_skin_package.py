@@ -15,6 +15,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MOD_ROOT = REPO_ROOT / "mods" / "tfm2_lol_map_spike"
 IMAGEGEN_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "background_5v5_imagegen_source.png"
 BACKGROUND = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "background_5v5.png"
+RUNTIME_WALL = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "wall_5v5.png"
+RUNTIME_WALL_FRONT = MOD_ROOT / "aseprite_resources" / "ingame" / "5v5" / "wall_5v5_front.png"
 OVERRIDE_INFO = MOD_ROOT / "mod.override_info"
 
 
@@ -56,11 +58,18 @@ class VisualOnlySkinPackageTests(unittest.TestCase):
                 }
             self.assertGreater(len(colors), 3)
 
-    def test_override_package_is_background_only_and_excludes_map_setting(self) -> None:
+    def test_override_package_is_visual_only_and_excludes_gameplay_data(self) -> None:
+        self.assertTrue(BACKGROUND.is_file())
+        self.assertTrue(RUNTIME_WALL.is_file())
+        self.assertTrue(RUNTIME_WALL_FRONT.is_file())
+        self.assertFalse((MOD_ROOT / "setting" / "map_setting.map_setting").exists())
+
         table = json.loads(OVERRIDE_INFO.read_text(encoding="utf-8"))
         self.assertEqual(
             {
                 "asset/base/aseprite_resources/ingame/5v5/background_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5",
+                "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front",
             },
             set(table),
         )
@@ -68,7 +77,6 @@ class VisualOnlySkinPackageTests(unittest.TestCase):
         self.assertNotIn("asset/base/setting/map_setting", serialized)
         self.assertNotIn("setting/map_setting.map_setting", serialized)
         self.assertNotIn("minimap_5v5_bg", serialized)
-        self.assertFalse((MOD_ROOT / "setting" / "map_setting.map_setting").exists())
 
     def test_route_status_still_blocks_gameplay_mutation(self) -> None:
         matrix = summarize_spike_status.build_status_matrix()

@@ -8,6 +8,7 @@ This document records a Route A minimap visual candidate. The candidate is not e
 Minimap candidate prepared, not enabled by default.
 minimap_5v5_bg override installed: false
 background_5v5 override remains enabled: true
+wall/front-wall default overrides remain enabled: true
 map_setting override installed: false
 gameplay data modified: false
 optional runtime QA: pass when temporarily staged in installed copy
@@ -55,11 +56,13 @@ The candidate uses a square, muted, LOL-like minimap visual language with a soft
 
 ## Runtime Package Boundary
 
-The default runtime package remains background-only:
+The default runtime package contains background and wall visual-only layers, but still does not contain minimap:
 
 ```text
 mods/tfm2_lol_map_spike/mod.override_info contains:
 asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
 ```
 
 The default runtime package does not contain:

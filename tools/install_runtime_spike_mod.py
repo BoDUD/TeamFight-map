@@ -13,6 +13,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MOD_ID = "tfm2_lol_map_spike"
 SOURCE_MOD = REPO_ROOT / "mods" / MOD_ID
 BASE_BACKGROUND_ASSET = "asset/base/aseprite_resources/ingame/5v5/background_5v5"
+BASE_WALL_ASSET = "asset/base/aseprite_resources/ingame/5v5/wall_5v5"
+BASE_WALL_FRONT_ASSET = "asset/base/aseprite_resources/ingame/5v5/wall_5v5_front"
+DEFAULT_VISUAL_ASSETS = (BASE_BACKGROUND_ASSET, BASE_WALL_ASSET, BASE_WALL_FRONT_ASSET)
 BACKGROUND_REMAP_RELATIVE_PATH = Path("aseprite_resources") / "ingame" / "5v5" / "background_5v5.png"
 MAP_SETTING_ASSET = "asset/base/setting/map_setting"
 MAP_SETTING_REMAP = f"asset/{MOD_ID}/setting/map_setting"
@@ -92,8 +95,8 @@ def load_override_table(path: Path) -> dict[str, Any]:
         table = json.load(handle)
     if MAP_SETTING_ASSET in table:
         raise SystemExit("Installed override already contains map_setting; run with --clean to reset before staging.")
-    if BASE_BACKGROUND_ASSET not in table:
-        raise SystemExit(f"Installed override is missing required background probe: {BASE_BACKGROUND_ASSET}")
+    if set(table) != set(DEFAULT_VISUAL_ASSETS):
+        raise SystemExit("Installed override must contain exactly the default visual-only background and wall overrides.")
     return table
 
 
@@ -105,12 +108,12 @@ def png_dimensions(path: Path) -> tuple[int, int]:
     return struct.unpack(">II", header[16:24])
 
 
-def ensure_background_only_override(installed_mod: Path) -> None:
+def ensure_default_visual_only_override(installed_mod: Path) -> None:
     override_path = installed_mod / "mod.override_info"
     with override_path.open("r", encoding="utf-8") as handle:
         overrides = json.load(handle)
-    if sorted(overrides) != [BASE_BACKGROUND_ASSET]:
-        raise SystemExit("Visual-only background staging requires exactly one background override.")
+    if set(overrides) != set(DEFAULT_VISUAL_ASSETS):
+        raise SystemExit("Visual-only background staging requires exactly the default background and wall overrides.")
 
 
 def stage_background_source(game_root: Path, installed_mod: Path, source: Path) -> Path:
@@ -122,7 +125,7 @@ def stage_background_source(game_root: Path, installed_mod: Path, source: Path) 
     width, height = png_dimensions(source)
     if (width, height) != (1280, 1280):
         raise SystemExit(f"background source must be 1280x1280, got {width}x{height}: {source}")
-    ensure_background_only_override(installed_mod)
+    ensure_default_visual_only_override(installed_mod)
 
     target = installed_mod / BACKGROUND_REMAP_RELATIVE_PATH
     if source == target.resolve() or paths_are_same_existing_file(source, target):

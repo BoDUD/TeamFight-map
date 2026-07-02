@@ -1,6 +1,6 @@
 # Optional Minimap Runtime QA
 
-This document records the optional runtime QA for the Route A minimap visual candidate. The candidate was staged only in the local installed game copy. The default repository package remains background-only.
+This document records the optional runtime QA for the Route A minimap visual candidate. The candidate was staged only in the local installed game copy. At the time of this QA, the default repository package remained background-only; later wall/front-wall default enablement does not change the minimap result.
 
 ## Result
 
@@ -17,7 +17,7 @@ This proves only that the optional cosmetic minimap candidate can display in the
 
 ## Staging Scope
 
-The starting installed package was clean `main` and background-only. For QA only, the installed copy was temporarily changed to include:
+The starting installed package for this QA was clean `main` and background-only. For QA only, the installed copy was temporarily changed to include:
 
 ```text
 asset/base/aseprite_resources/ingame/5v5/background_5v5
@@ -94,7 +94,7 @@ Supporting staging evidence:
 
 ## Post-QA Restore
 
-After the screenshots and summary were captured, the installed local mod was restored to background-only:
+After the screenshots and summary were captured, the installed local mod was restored to the then-default background-only state:
 
 ```text
 asset/base/aseprite_resources/ingame/5v5/background_5v5

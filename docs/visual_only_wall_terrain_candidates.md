@@ -1,23 +1,25 @@
 # Visual-Only Wall And Terrain Candidates
 
-This document records Route A wall and terrain visual candidates. The candidates are not enabled by default. Optional installed-copy runtime QA is recorded separately in `docs/visual_only_wall_terrain_runtime_qa.md`.
+This document records Route A wall and terrain visual candidates. The candidate PR prepared position-locked wall assets without enabling them. Optional installed-copy runtime QA is recorded separately in `docs/visual_only_wall_terrain_runtime_qa.md`, and the later default-package enablement decision is recorded in `docs/visual_only_wall_terrain_default_enablement.md`.
 
 ## Result
 
 ```text
-Wall / terrain visual candidates prepared, not enabled.
+Wall / terrain visual candidates prepared.
 
-wall_5v5 override installed: false
-wall_5v5_front override installed: false
+wall_5v5 candidate prepared: true
+wall_5v5_front candidate prepared: true
 background_5v5 override remains enabled: true
 minimap default override: false
 map_setting override installed: false
 gameplay data modified: false
 runtime QA performed in candidate PR: false
 optional installed-copy runtime QA: pass
+default wall/front-wall enablement: accepted after optional QA
+default-package runtime QA: pending
 ```
 
-This PR adds candidate assets only. The candidates are position-locked to the existing wall visual layer coverage so they do not introduce new wall locations. It does not change collision, pathing, spawns, brush gameplay, objective placement, AI routes, or `map_setting`. It does not approve wall overrides by default.
+The candidate PR added assets only. The candidates are position-locked to the existing wall visual layer coverage so they do not introduce new wall locations. It does not change collision, pathing, spawns, brush gameplay, objective placement, AI routes, or `map_setting`. A later decision promotes these candidates into the default visual-only package, but default-package runtime QA is still pending.
 
 ## Native Reference
 
@@ -126,24 +128,24 @@ copied League of Legends art, icons, logos, or texture fragments
 
 ## Runtime Package Boundary
 
-The default runtime package remains background-only:
+After the default-enable decision, the repository default runtime package contains these visual-only overrides:
 
 ```text
 mods/tfm2_lol_map_spike/mod.override_info contains:
 asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
 ```
 
 The default runtime package does not contain:
 
 ```text
-asset/base/aseprite_resources/ingame/5v5/wall_5v5
-asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
 asset/base/aseprite_resources/ingame/5v5/minimap_5v5_bg
 asset/base/setting/map_setting
 setting/map_setting.map_setting
 ```
 
-The wall candidates are intentionally not copied to:
+The default runtime package now includes deterministic copies of the candidate wall layers:
 
 ```text
 mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5.png
@@ -166,14 +168,13 @@ wall_5v5
 wall_5v5_front
 ```
 
-and verified live 5v5 readability across early in-game, midlane, river, jungle, and tower/base-adjacent views. Default minimap remained disabled, no `map_setting` staged file was present, and the installed copy was restored to background-only afterward. This still does not enable wall overrides by default.
+and verified live 5v5 readability across early in-game, midlane, river, jungle, and tower/base-adjacent views. Default minimap remained disabled, no `map_setting` staged file was present, and the installed copy was restored to background-only afterward. That optional QA supports the later default-enable decision, but it is not a substitute for default-package runtime QA.
 
 ## Still Forbidden
 
 This candidate PR does not approve:
 
 ```text
-default wall override enablement
 map_setting mutation
 packed4_0 mutation
 packed4_1 mutation

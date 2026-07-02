@@ -19,6 +19,8 @@ DEFAULT_OUTPUT = (
     / "background_5v5.png"
 )
 DEFAULT_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "background_5v5_imagegen_source.png"
+DEFAULT_MINIMAP_SOURCE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "minimap_5v5_bg_imagegen_source.png"
+DEFAULT_MINIMAP_CANDIDATE = REPO_ROOT / "assets" / "visual" / "lol_skin" / "minimap_5v5_bg_candidate.png"
 
 
 def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
@@ -93,18 +95,59 @@ def build_lol_like_background(size: int = 1280, source: Path = DEFAULT_SOURCE) -
     return tone_for_runtime_readability(image)
 
 
+def tone_for_minimap_readability(image: Image.Image) -> Image.Image:
+    rgba = image.convert("RGBA")
+    pixels = bytearray(rgba.tobytes())
+    for offset in range(0, len(pixels), 4):
+        r = pixels[offset]
+        g = pixels[offset + 1]
+        b = pixels[offset + 2]
+        gray = (r * 30 + g * 59 + b * 11) // 100
+        pixels[offset] = max(0, min(255, (r * 82 + gray * 18) // 100 - 4))
+        pixels[offset + 1] = max(0, min(255, (g * 82 + gray * 18) // 100 - 4))
+        pixels[offset + 2] = max(0, min(255, (b * 84 + gray * 16) // 100 - 4))
+        pixels[offset + 3] = 255
+    return Image.frombytes("RGBA", rgba.size, bytes(pixels))
+
+
+def build_lol_like_minimap_candidate(size: int = 320, source: Path = DEFAULT_MINIMAP_SOURCE) -> Image.Image:
+    if not source.is_file():
+        raise SystemExit(f"Missing minimap image-gen source asset: {source}")
+    with Image.open(source) as original:
+        image = original.convert("RGBA")
+        if image.size != (size, size):
+            image = image.resize((size, size), Image.Resampling.LANCZOS)
+    return tone_for_minimap_readability(image)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build the visual-only LOL-like runtime map skin background.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
     parser.add_argument("--size", type=int, default=1280)
+    parser.add_argument("--minimap-output", type=Path, default=DEFAULT_MINIMAP_CANDIDATE)
+    parser.add_argument("--minimap-source", type=Path, default=DEFAULT_MINIMAP_SOURCE)
+    parser.add_argument("--minimap-size", type=int, default=320)
+    parser.add_argument(
+        "--skip-minimap-candidate",
+        action="store_true",
+        help="Only rebuild the enabled background_5v5 runtime asset.",
+    )
     args = parser.parse_args()
 
     if args.size <= 0:
         raise SystemExit("--size must be positive.")
+    if args.minimap_size <= 0:
+        raise SystemExit("--minimap-size must be positive.")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_bytes(png_bytes(build_lol_like_background(args.size, args.source)))
     print(f"Wrote {args.output}")
+    if not args.skip_minimap_candidate:
+        args.minimap_output.parent.mkdir(parents=True, exist_ok=True)
+        args.minimap_output.write_bytes(
+            png_bytes(build_lol_like_minimap_candidate(args.minimap_size, args.minimap_source))
+        )
+        print(f"Wrote {args.minimap_output}")
     return 0
 
 

@@ -17,7 +17,8 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/runtime_node_anchor_probe_plan.md` records why background UV captures do not prove `map_setting` node/world transform and defines the next read-only gate.
 - `docs/runtime_node_anchor_api_discovery.md` records the PR #8 SDK/API audit and independent read-only DLL probe guardrails.
 - `docs/q2s_map_setting_route_decision.md` records the Q2 route decision: gameplay `map_setting` editing is blocked pending runtime anchor and semantic proof; the next route should be either visual-only deliverable or a separate runtime-anchor spike.
-- `docs/visual_only_lol_map_skin.md` records the Route A non-gameplay background skin scope and QA plan.
+- `docs/visual_only_lol_map_skin.md` records the Route A non-gameplay background skin scope and runtime QA result.
+- `docs/visual_only_runtime_qa.md` records the live 5v5 visual-only QA pass for the reduced-obstacle background skin.
 
 ## Build And Validate
 
@@ -146,6 +147,7 @@ Current visual package scope:
 
 ```text
 background_5v5: enabled visual-only LOL-like skin
+background runtime QA: pass for reduced-obstacle version
 minimap_5v5_bg: not enabled; candidate for later visual-only QA
 map_setting: forbidden
 ```

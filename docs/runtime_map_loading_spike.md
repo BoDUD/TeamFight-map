@@ -1375,7 +1375,7 @@ Question:
 Can Route A produce a user-visible package without touching gameplay data?
 ```
 
-Result: package prepared, runtime QA pending. `docs/visual_only_lol_map_skin.md` records the visual-only scope.
+Result: package prepared and reduced-obstacle runtime QA passed. `docs/visual_only_lol_map_skin.md` records the visual-only scope, and `docs/visual_only_runtime_qa.md` records the live 5v5 QA evidence.
 
 Active override remains exactly:
 
@@ -1412,11 +1412,61 @@ Conclusion:
 
 ```text
 Route A background-only visual skin package: prepared
-runtime QA: pending separate PR
+runtime QA: pass for reduced-obstacle background version
 gameplay map editing: still not allowed
 ```
 
-This gate prepares a cosmetic package only. It does not prove gameplay semantics, does not approve minimap override, does not approve a third runtime probe, and does not approve mutation of `map_setting`, regions, collision, pathing, spawns, or visual sync.
+This gate prepares and QA-checks a cosmetic background package only. It does not prove gameplay semantics, does not approve minimap override, does not approve a third runtime probe, and does not approve mutation of `map_setting`, regions, collision, pathing, spawns, or visual sync.
+
+## Route A Visual-Only Runtime QA
+
+Question:
+
+```text
+Can the reduced-obstacle background-only skin display correctly in live 5v5 without staging gameplay data?
+```
+
+Result on 2026-07-02: pass for visual-only background runtime display. `docs/visual_only_runtime_qa.md` records the QA evidence.
+
+Installed package checks:
+
+```text
+installed background_5v5 sha256: 7c0c6dfca623436c8f0d267161ed4f135987e1bcdff39dfcb694ab3bb2b80c81
+map_setting override installed: false
+mods\tfm2_lol_map_spike\setting\map_setting.map_setting exists: false
+minimap override installed: false
+forbidden override matches for minimap|map_setting|setting: 0
+```
+
+Runtime evidence summary:
+
+```text
+entered live 5v5: true
+background displayed correctly: true
+heroes, minions, towers, UI readable: true
+original minimap remained active: true
+loader log: not available / not captured
+```
+
+Repository-external evidence:
+
+```text
+D:\tfm2_q2a_evidence\visual_only_runtime_qa\visual_only_runtime_summary.json
+size: 4,851
+sha256: fb077c667ad56cbfbf196bad1bc4f9e64559bafbd18906245b151304ffeb7edd
+```
+
+Conclusion:
+
+```text
+Visual-only LOL-like Background Runtime QA Pass
+gameplay data modified: false
+map_setting override installed: false
+minimap override installed: false
+gameplay map editing: still blocked
+```
+
+This QA pass does not prove gameplay map editing, does not approve minimap override, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, or `map_setting` edits.
 
 ## Stop Conditions
 

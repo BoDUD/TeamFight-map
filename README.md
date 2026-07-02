@@ -21,6 +21,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/visual_only_runtime_qa.md` records the live 5v5 visual-only QA pass for the reduced-obstacle background skin.
 - `docs/visual_only_minimap_candidate.md` records the Route A minimap candidate asset, which is not enabled by default.
 - `docs/visual_only_minimap_runtime_qa.md` records optional installed-copy runtime QA for the minimap candidate.
+- `docs/visual_map_detail_asset_inventory.md` inventories map-detail visual override surfaces for future Route A work without enabling new overrides.
 
 ## Build And Validate
 
@@ -110,6 +111,14 @@ python .\tools\summarize_spike_status.py `
   --output "D:\tfm2_q2a_evidence\q2s_map_setting_route_decision\q2s_status_matrix.json"
 ```
 
+To reproduce the Route A map-detail visual surface inventory, keep the metadata output outside the repository:
+
+```powershell
+python .\tools\inventory_visual_override_surfaces.py `
+  --game-root "D:\steam\steamapps\common\Teamfight Manager2" `
+  --output-dir "D:\tfm2_q2a_evidence\visual_map_detail_asset_inventory"
+```
+
 The visual concept reference is stored at:
 
 ```text
@@ -151,6 +160,7 @@ Current visual package scope:
 background_5v5: enabled visual-only LOL-like skin
 background runtime QA: pass for reduced-obstacle version
 minimap_5v5_bg: candidate prepared and optional runtime QA passed; not enabled by default
+map-detail visual inventory: completed; no new detail overrides enabled
 map_setting: forbidden
 ```
 

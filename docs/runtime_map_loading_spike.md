@@ -1400,12 +1400,19 @@ sha256: 7c0c6dfca623436c8f0d267161ed4f135987e1bcdff39dfcb694ab3bb2b80c81
 Still not enabled:
 
 ```text
-minimap_5v5_bg
 map_setting
 collision/path/spawn
 brush gameplay
 objective placement
 AI route edits
+```
+
+Optional minimap candidate:
+
+```text
+minimap_5v5_bg candidate: prepared, not enabled
+runtime QA: not performed
+default override: false
 ```
 
 Conclusion:

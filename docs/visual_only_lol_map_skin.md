@@ -74,7 +74,7 @@ map_editing_allowed: false
 
 ## Minimap
 
-`minimap_5v5_bg` is not enabled in this PR.
+`minimap_5v5_bg` is not enabled by default.
 
 Reason:
 
@@ -83,7 +83,17 @@ background_5v5 override has already been proven in live 5v5;
 minimap_5v5_bg still needs separate visual-only QA before default enablement.
 ```
 
-A later visual PR may add and QA a minimap candidate. That PR must still keep `map_setting` and gameplay data out of the runtime package.
+The repository now includes a disabled candidate recorded in:
+
+```text
+docs/visual_only_minimap_candidate.md
+assets/visual/lol_skin/minimap_5v5_bg_imagegen_source.png
+assets/visual/lol_skin/minimap_5v5_bg_candidate.png
+```
+
+The candidate is intentionally not copied into `mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/`, and `mod.override_info` does not contain `minimap_5v5_bg`.
+
+A later visual PR may stage and QA the minimap candidate. That PR must still keep `map_setting` and gameplay data out of the runtime package.
 
 ## Runtime QA Result
 

@@ -19,6 +19,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/q2s_map_setting_route_decision.md` records the Q2 route decision: gameplay `map_setting` editing is blocked pending runtime anchor and semantic proof; the next route should be either visual-only deliverable or a separate runtime-anchor spike.
 - `docs/visual_only_lol_map_skin.md` records the Route A non-gameplay background skin scope and runtime QA result.
 - `docs/visual_only_runtime_qa.md` records the live 5v5 visual-only QA pass for the reduced-obstacle background skin.
+- `docs/visual_only_minimap_candidate.md` records the Route A minimap candidate asset, which is not enabled by default.
 
 ## Build And Validate
 
@@ -148,7 +149,7 @@ Current visual package scope:
 ```text
 background_5v5: enabled visual-only LOL-like skin
 background runtime QA: pass for reduced-obstacle version
-minimap_5v5_bg: not enabled; candidate for later visual-only QA
+minimap_5v5_bg: candidate prepared, not enabled; runtime QA still required
 map_setting: forbidden
 ```
 

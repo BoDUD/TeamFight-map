@@ -1,6 +1,6 @@
 ﻿# Visual-Only Wall Terrain Runtime QA
 
-This document records optional installed-copy runtime QA for the Route A wall and terrain visual candidates. A later decision promotes these candidates into the default visual-only package; that decision still requires a separate default-package runtime QA pass.
+This document records optional installed-copy runtime QA for the Route A wall and terrain visual candidates. Later PRs promote these candidates into the default visual-only package and record separate default-package runtime QA.
 
 ## Result
 
@@ -15,10 +15,10 @@ minimap default override installed: false
 gameplay data modified: false
 default runtime package changed by this QA PR: false
 later default wall/front-wall enablement: accepted
-default-package runtime QA: pending
+default-package runtime QA: pass in docs/visual_only_wall_terrain_default_runtime_qa.md
 ```
 
-This QA proves only that the `wall_5v5` and `wall_5v5_front` visual candidates can be temporarily staged in a local installed copy and displayed in live 5v5 with the current background skin. It does not by itself prove the default package has been QA-passed, does not prove gameplay map editing, does not approve collision/path/spawn/brush/objective/AI edits, and does not approve `map_setting` mutation.
+This QA proves only that the `wall_5v5` and `wall_5v5_front` visual candidates can be temporarily staged in a local installed copy and displayed in live 5v5 with the current background skin. It is separate from the later default-package QA, does not prove gameplay map editing, does not approve collision/path/spawn/brush/objective/AI edits, and does not approve `map_setting` mutation.
 
 ## Temporary Staging
 

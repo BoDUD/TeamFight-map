@@ -136,6 +136,6 @@ mods/tfm2_lol_map_spike/setting/map_setting.map_setting does not exist
 heroes, minions, towers, UI, and original minimap remain readable
 ```
 
-Wall/front-wall optional installed-copy QA has also passed, and the default-package enablement decision is recorded in `docs/visual_only_wall_terrain_default_enablement.md`. Default-package runtime QA for the wall-enabled package is still pending.
+Wall/front-wall optional installed-copy QA has also passed, the default-package enablement decision is recorded in `docs/visual_only_wall_terrain_default_enablement.md`, and live default-package QA is recorded in `docs/visual_only_wall_terrain_default_runtime_qa.md`.
 
 These QA passes do not prove gameplay map editing and do not approve minimap default enablement, `map_setting`, collision, pathing, spawn, brush gameplay, objective, or AI-route edits.

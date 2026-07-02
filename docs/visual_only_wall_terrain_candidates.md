@@ -16,10 +16,10 @@ gameplay data modified: false
 runtime QA performed in candidate PR: false
 optional installed-copy runtime QA: pass
 default wall/front-wall enablement: accepted after optional QA
-default-package runtime QA: pending
+default-package runtime QA: pass
 ```
 
-The candidate PR added assets only. The candidates are position-locked to the existing wall visual layer coverage so they do not introduce new wall locations. It does not change collision, pathing, spawns, brush gameplay, objective placement, AI routes, or `map_setting`. A later decision promotes these candidates into the default visual-only package, but default-package runtime QA is still pending.
+The candidate PR added assets only. The candidates are position-locked to the existing wall visual layer coverage so they do not introduce new wall locations. It does not change collision, pathing, spawns, brush gameplay, objective placement, AI routes, or `map_setting`. Later PRs promote these candidates into the default visual-only package and record default-package runtime QA.
 
 ## Native Reference
 

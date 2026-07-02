@@ -14,10 +14,10 @@ wall_5v5_front default override: true
 minimap_5v5_bg default override: false
 map_setting override installed: false
 gameplay data modified: false
-default-package runtime QA: pending
+default-package runtime QA: pass
 ```
 
-This PR promotes the previously prepared and optional-QA-passed wall/front-wall visual candidates into the default visual-only package. It does not claim the default package has completed runtime QA. A separate follow-up PR must record default-package runtime QA.
+This PR promotes the previously prepared and optional-QA-passed wall/front-wall visual candidates into the default visual-only package. The follow-up default-package runtime QA is recorded separately in `docs/visual_only_wall_terrain_default_runtime_qa.md`.
 
 ## Evidence Used For The Decision
 
@@ -74,15 +74,15 @@ objective placement data
 AI route data
 ```
 
-## Required Follow-Up
+## Completed Follow-Up
 
-The next PR must record default-package runtime QA:
+Default-package runtime QA has been recorded in:
 
 ```text
-[visual] record default wall terrain package runtime QA
+docs/visual_only_wall_terrain_default_runtime_qa.md
 ```
 
-That QA should install the repository default package without manual installed-copy staging, enter live 5v5, and verify:
+That QA installed the repository default package without manual installed-copy staging, entered live 5v5, and verified:
 
 ```text
 background_5v5 displays

@@ -1541,6 +1541,58 @@ gameplay map editing: still blocked
 
 This QA pass does not enable minimap override by default, does not prove gameplay map editing, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, or `map_setting` edits.
 
+## Route A Visual Detail Asset Inventory
+
+Question:
+
+```text
+Which existing visual resources can be investigated for future LOL-like cosmetic skin work without entering gameplay map editing?
+```
+
+Result on 2026-07-02: inventory completed, no new runtime override enabled. `docs/visual_map_detail_asset_inventory.md` records the inventory.
+
+Repository-external evidence:
+
+```text
+D:\tfm2_q2a_evidence\visual_map_detail_asset_inventory\visual_override_surface_inventory.json
+size: 445,480
+sha256: f8de752281550d1f18e6e6475e1793a305ef701b5ef9f47601fcf2e7c3efa03a
+```
+
+Inventory summary:
+
+```text
+total image candidates: 565
+native/extracted reference candidates: 45
+runtime/probe screenshots: 408
+unclassified image candidates: 112
+```
+
+Candidate visual surfaces:
+
+| Category | Candidate | Native reference | Default enabled | Risk | Next PR |
+| --- | --- | --- | --- | --- | --- |
+| Background | `background_5v5` | yes, `1280x1280` | yes | low | completed |
+| Terrain wall | `wall_5v5` | yes, `1280x1280` | no | medium | PR #34 |
+| Front wall | `wall_5v5_front` | yes, `1280x1280` | no | medium | PR #34 |
+| Bush visual | `bush_5v5` | yes, `1280x1280` | no | high | PR #35 |
+| Minimap | `minimap_5v5_bg` | yes, `320x320` | no | medium | PR #36 |
+| Tower / crystal / base | actor or atlas candidates | yes | no | high | PR #37 |
+| Jungle / neutral monsters | actor or atlas candidates | yes | no | high | PR #39 |
+
+Conclusion:
+
+```text
+visual_detail_inventory_result: completed
+default_runtime_package_changed: false
+map_setting_override_installed: false
+minimap_default_enabled: false
+gameplay_data_modified: false
+map_editing_allowed: false
+```
+
+This inventory does not replace walls, bushes, towers, crystals, jungle monsters, or minimap defaults. It only defines the next Route A investigation order. Gameplay map editing remains blocked.
+
 ## Stop Conditions
 
 - If the game does not recognize `tfm2_lol_map_spike`, fix metadata or install layout before touching assets.

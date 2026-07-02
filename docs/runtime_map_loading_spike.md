@@ -1649,7 +1649,8 @@ background_5v5 override remains enabled: true
 minimap default override: false
 map_setting override installed: false
 gameplay data modified: false
-runtime QA performed: false
+runtime QA performed in candidate PR: false
+optional installed-copy runtime QA: pass
 ```
 
 Conclusion:
@@ -1660,7 +1661,80 @@ default runtime package changed: false
 gameplay map editing: still blocked
 ```
 
-This gate only prepares candidate assets. It does not approve default wall overrides, collision/path/spawn edits, brush gameplay edits, objective placement, AI-route edits, or `map_setting` work. Runtime QA must be a separate installed-copy PR.
+This gate only prepares candidate assets. It does not approve default wall overrides, collision/path/spawn edits, brush gameplay edits, objective placement, AI-route edits, or `map_setting` work.
+
+## Route A Optional Wall Terrain Runtime QA
+
+Question:
+
+```text
+Can the optional wall_5v5 and wall_5v5_front candidates display correctly in live 5v5 when temporarily staged in the installed copy?
+```
+
+Result on 2026-07-02: pass for optional visual wall/front-wall runtime display. `docs/visual_only_wall_terrain_runtime_qa.md` records the QA evidence.
+
+Temporary installed-copy overrides during QA:
+
+```text
+asset/base/aseprite_resources/ingame/5v5/background_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5
+asset/base/aseprite_resources/ingame/5v5/wall_5v5_front
+```
+
+Installed asset checks during QA:
+
+```text
+background_5v5 sha256: 7c0c6dfca623436c8f0d267161ed4f135987e1bcdff39dfcb694ab3bb2b80c81
+wall_5v5 sha256: af0ff21fba1b8f51e111752ed96b6cc9a6b313bac64c2c33fab6edcebe5b2c8b
+wall_5v5_front sha256: 5d3e8a907e189f07ff220c0977f7303d05b30e2d9c0753de6a0eb2b51382399c
+map_setting override installed: false
+mods\tfm2_lol_map_spike\setting\map_setting.map_setting exists: false
+minimap default override installed: false
+```
+
+Runtime evidence summary:
+
+```text
+entered live 5v5: true
+background displayed: true
+wall_5v5 displayed: true
+wall_5v5_front displayed: true
+heroes, minions, towers, UI readable: true
+no obvious new walkable path visual: true
+no obvious new blocked path visual: true
+no obvious debug collision mask visual: true
+loader log: not available / not captured
+```
+
+Repository-external evidence:
+
+```text
+D:\tfm2_q2a_evidence\visual_only_wall_runtime_qa\wall_runtime_summary.json
+size: 4,065
+sha256: 4fa5bb32686586cc9d0dcce2de82428ac6ebf6bc08998cbdbc83220c9a032242
+```
+
+Post-QA restore:
+
+```text
+installed package restored to background-only: true
+wall_5v5.png exists in installed mod: false
+wall_5v5_front.png exists in installed mod: false
+map_setting.map_setting exists in installed mod: false
+forbidden override matches for wall|minimap|map_setting|setting: 0
+```
+
+Conclusion:
+
+```text
+Optional Wall Terrain Visual Runtime QA Pass
+default wall override enablement: false
+gameplay data modified: false
+map_setting override installed: false
+gameplay map editing: still blocked
+```
+
+This QA pass does not enable wall overrides by default, does not prove gameplay map editing, and does not approve collision, pathing, spawn, brush gameplay, objective, AI-route, minimap-default, or `map_setting` edits.
 
 ## Stop Conditions
 

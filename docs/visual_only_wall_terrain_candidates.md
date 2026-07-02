@@ -1,6 +1,6 @@
 # Visual-Only Wall And Terrain Candidates
 
-This document records Route A wall and terrain visual candidates. The candidates are not enabled by default and have not received runtime QA.
+This document records Route A wall and terrain visual candidates. The candidates are not enabled by default. Optional installed-copy runtime QA is recorded separately in `docs/visual_only_wall_terrain_runtime_qa.md`.
 
 ## Result
 
@@ -13,7 +13,8 @@ background_5v5 override remains enabled: true
 minimap default override: false
 map_setting override installed: false
 gameplay data modified: false
-runtime QA performed: false
+runtime QA performed in candidate PR: false
+optional installed-copy runtime QA: pass
 ```
 
 This PR adds candidate assets only. The candidates are position-locked to the existing wall visual layer coverage so they do not introduce new wall locations. It does not change collision, pathing, spawns, brush gameplay, objective placement, AI routes, or `map_setting`. It does not approve wall overrides by default.
@@ -151,13 +152,13 @@ mods/tfm2_lol_map_spike/aseprite_resources/ingame/5v5/wall_5v5_front.png
 
 ## Next Step
 
-If these candidates are accepted, the next PR should be a separate optional installed-copy runtime QA:
+Optional installed-copy runtime QA has passed for these candidates:
 
 ```text
-[visual] record optional wall terrain runtime QA
+Optional Wall Terrain Visual Runtime QA Pass
 ```
 
-That QA should temporarily stage only:
+That QA temporarily staged only:
 
 ```text
 background_5v5
@@ -165,7 +166,7 @@ wall_5v5
 wall_5v5_front
 ```
 
-and verify live 5v5 readability, no loader warning, no visual confusion around walkable/non-walkable regions, default minimap still disabled, and no `map_setting` staged file.
+and verified live 5v5 readability across early in-game, midlane, river, jungle, and tower/base-adjacent views. Default minimap remained disabled, no `map_setting` staged file was present, and the installed copy was restored to background-only afterward. This still does not enable wall overrides by default.
 
 ## Still Forbidden
 

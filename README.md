@@ -22,6 +22,7 @@ This repository stores the first design/specification layer as data plus validat
 - `docs/visual_only_minimap_candidate.md` records the Route A minimap candidate asset, which is not enabled by default.
 - `docs/visual_only_minimap_runtime_qa.md` records optional installed-copy runtime QA for the minimap candidate.
 - `docs/visual_map_detail_asset_inventory.md` inventories map-detail visual override surfaces for future Route A work without enabling new overrides.
+- `docs/visual_only_wall_terrain_candidates.md` records disabled wall/front-wall visual candidates for future Route A QA.
 
 ## Build And Validate
 
@@ -161,6 +162,7 @@ background_5v5: enabled visual-only LOL-like skin
 background runtime QA: pass for reduced-obstacle version
 minimap_5v5_bg: candidate prepared and optional runtime QA passed; not enabled by default
 map-detail visual inventory: completed; no new detail overrides enabled
+wall_5v5 / wall_5v5_front: candidates prepared; not enabled by default
 map_setting: forbidden
 ```
 

@@ -1593,6 +1593,75 @@ map_editing_allowed: false
 
 This inventory does not replace walls, bushes, towers, crystals, jungle monsters, or minimap defaults. It only defines the next Route A investigation order. Gameplay map editing remains blocked.
 
+## Route A Wall And Terrain Candidate Gate
+
+Question:
+
+```text
+Can Route A prepare wall_5v5 and wall_5v5_front visual candidates without enabling new runtime overrides?
+```
+
+Result on 2026-07-02: candidates prepared, not enabled by default. `docs/visual_only_wall_terrain_candidates.md` records the candidate assets.
+
+Candidate assets:
+
+```text
+assets/visual/lol_skin/wall_terrain_texture_reference.png
+size: 1254x1254
+sha256: 4d2f3a70db79a4059e6791d6066e33cc4bade8eb0bf51d7572d569b78ceffd94
+usage: material/style reference only, not a wall placement source
+```
+
+```text
+assets/visual/lol_skin/wall_5v5_position_locked_source.png
+size: 1280x1280
+sha256: f81921eea26f4b7bfea9b0ff2c6f1dcc13e6b76ed83b36f644645a321ee854ae
+native mask mismatch count: 0
+```
+
+```text
+assets/visual/lol_skin/wall_5v5_candidate.png
+size: 1280x1280
+sha256: af0ff21fba1b8f51e111752ed96b6cc9a6b313bac64c2c33fab6edcebe5b2c8b
+```
+
+```text
+assets/visual/lol_skin/wall_5v5_front_position_locked_source.png
+size: 1280x1280
+sha256: 7240c91e6f5664026ffe470648d313b4d71573d6500f794e26ec77a62bbf8161
+native mask mismatch count: 0
+```
+
+```text
+assets/visual/lol_skin/wall_5v5_front_candidate.png
+size: 1280x1280
+sha256: 5d3e8a907e189f07ff220c0977f7303d05b30e2d9c0753de6a0eb2b51382399c
+```
+
+The texture reference does not define wall positions. The committed position-locked sources preserve native `wall_5v5` and `wall_5v5_front` alpha coverage exactly, then apply original low-contrast stone styling within those masks.
+
+Default package status:
+
+```text
+wall_5v5 override installed: false
+wall_5v5_front override installed: false
+background_5v5 override remains enabled: true
+minimap default override: false
+map_setting override installed: false
+gameplay data modified: false
+runtime QA performed: false
+```
+
+Conclusion:
+
+```text
+Wall / terrain visual candidates prepared, not enabled.
+default runtime package changed: false
+gameplay map editing: still blocked
+```
+
+This gate only prepares candidate assets. It does not approve default wall overrides, collision/path/spawn edits, brush gameplay edits, objective placement, AI-route edits, or `map_setting` work. Runtime QA must be a separate installed-copy PR.
+
 ## Stop Conditions
 
 - If the game does not recognize `tfm2_lol_map_spike`, fix metadata or install layout before touching assets.
